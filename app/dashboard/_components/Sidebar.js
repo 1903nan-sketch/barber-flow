@@ -11,6 +11,7 @@ import {
   Scissors,
   Settings,
   Sparkles,
+  CreditCard,
   Users,
   UserRound,
 } from "lucide-react";
@@ -59,7 +60,7 @@ export default function Sidebar({ workspace }) {
         })}
       </nav>
 
-      <div className="sidebar-footer">
+      <div className="sidebar-footer">{workspace?.membership?.role==="owner"&&workspace?.tenant?.plans?.monthly_cents>0&&<a href="/dashboard#mensalidade"><CreditCard size={19}/><span>Pagar mensalidade</span></a>}
         <a href="/dashboard/configuracoes"><Settings size={19} /><span>Configurações</span></a>
         <button className="profile-card" style={{ width: "100%", background: "transparent", color: "inherit", borderLeft: 0, borderRight: 0, borderBottom: 0, textAlign: "left", cursor: "pointer" }} type="button" onClick={() => supabase?.auth.signOut()}>
           <span className="profile-avatar">AD</span>
