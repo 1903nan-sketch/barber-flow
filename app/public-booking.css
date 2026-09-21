@@ -8,3 +8,5 @@
 
 /* Selected booking time: green confirmation state */
 .premium-booking .slots button.selected,.booking-public .slots button.selected{background:linear-gradient(135deg,#1fbd68,#15934e)!important;border-color:#42db88!important;color:#fff!important;box-shadow:0 8px 22px rgba(31,189,104,.28)!important;transform:translateY(-1px)}.premium-booking .slots button.selected:before,.booking-public .slots button.selected:before{content:"✓ ";font-weight:900}.premium-booking .slots button:active{transform:scale(.98)}
+
+/* redeploy trigger 2026-09-21 */
