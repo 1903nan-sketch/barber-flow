@@ -7,8 +7,8 @@ export async function GET(req){
  const {data:{user}}=await sb.auth.getUser();if(!user)return NextResponse.redirect(new URL("/login",url.origin));
  const {data}=await sb.from("memberships").select("tenant_id").eq("user_id",user.id).eq("tenant_id",tenant).maybeSingle();if(!data)return NextResponse.redirect(new URL("/dashboard/configuracoes?instagram=erro",url.origin));
  const state=Buffer.from(JSON.stringify({tenant,uid:user.id,ts:Date.now()})).toString("base64url");
- const redirect=process.env.INSTAGRAM_REDIRECT_URI||url.origin+"/api/instagram/callback";
+ const appId=process.env.INSTAGRAM_APP_ID,redirect=process.env.INSTAGRAM_REDIRECT_URI||url.origin+"/api/instagram/callback";if(!appId)return NextResponse.redirect(new URL("/dashboard/configuracoes?instagram=config",url.origin));
  const auth=new URL("https://www.instagram.com/oauth/authorize");
- auth.searchParams.set("client_id",process.env.INSTAGRAM_APP_ID||"");auth.searchParams.set("redirect_uri",redirect);auth.searchParams.set("response_type","code");auth.searchParams.set("scope","instagram_business_basic");auth.searchParams.set("state",state);
+ auth.searchParams.set("client_id",appId);auth.searchParams.set("redirect_uri",redirect);auth.searchParams.set("response_type","code");auth.searchParams.set("scope","instagram_business_basic");auth.searchParams.set("state",state);
  const res=NextResponse.redirect(auth);res.cookies.set("ig_state",state,{httpOnly:true,secure:true,sameSite:"lax",maxAge:600,path:"/"});return res;
 }
