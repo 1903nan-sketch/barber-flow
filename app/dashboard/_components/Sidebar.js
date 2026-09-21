@@ -60,7 +60,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        <a href="#"><Settings size={19} /><span>Configurações</span></a>
+        <a href="/dashboard/configuracoes"><Settings size={19} /><span>Configurações</span></a>
         <button className="profile-card" style={{ width: "100%", background: "transparent", color: "inherit", borderLeft: 0, borderRight: 0, borderBottom: 0, textAlign: "left", cursor: "pointer" }} type="button" onClick={() => supabase?.auth.signOut()}>
           <span className="profile-avatar">AD</span>
           <div><strong>Administrador</strong><small>Plano Starter</small></div>
