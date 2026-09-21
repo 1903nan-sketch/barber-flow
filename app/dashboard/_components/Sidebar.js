@@ -26,6 +26,7 @@ const items = [
   { label: "Vendas", href: "/dashboard/vendas", icon: CircleDollarSign },
   { label: "Relatórios", href: "/dashboard/relatorios", icon: BarChart3 },
   { label: "Mensalidade", href: "/dashboard/mensalidade", icon: CreditCard, ownerOnly: true },
+  { label: "Site, Instagram e WhatsApp", href: "/dashboard/configuracoes", icon: Settings, ownerOnly: true },
 ];
 
 export default function Sidebar({ workspace }) {
@@ -49,7 +50,7 @@ export default function Sidebar({ workspace }) {
 
       <p className="nav-title">MENU PRINCIPAL</p>
       <nav>
-        {items.map(({ label, href, icon: Icon, soon }) => {
+        {items.filter(item => !item.ownerOnly || ["owner","manager"].includes(workspace?.membership?.role)).map(({ label, href, icon: Icon, soon }) => {
           const active = href === "/dashboard" ? pathname === href : pathname.startsWith(href);
           return (
             <a key={href} href={soon ? "#" : href} className={active ? "active" : ""}>
@@ -62,7 +63,7 @@ export default function Sidebar({ workspace }) {
       </nav>
 
       <div className="sidebar-footer">
-        <a href="/dashboard/configuracoes"><Settings size={19} /><span>Configurações</span></a>
+        <a href="/dashboard/configuracoes"><Settings size={19} /><span>Configurações do site</span></a>
         <button className="profile-card" style={{ width: "100%", background: "transparent", color: "inherit", borderLeft: 0, borderRight: 0, borderBottom: 0, textAlign: "left", cursor: "pointer" }} type="button" onClick={() => supabase?.auth.signOut()}>
           <span className="profile-avatar">AD</span>
           <div><strong>{workspace?.membership?.name||"Administrador"}</strong><small>Plano {workspace?.tenant?.plans?.name||"contratado"}</small></div>
