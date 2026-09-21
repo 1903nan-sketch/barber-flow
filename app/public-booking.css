@@ -20,3 +20,9 @@
 /* force production sync */
 
 /* reconnect deployment trigger */
+
+/* Public booking cover: render uploaded cover reliably on Safari/mobile */
+.premium-booking .premium-hero{position:relative;overflow:hidden;isolation:isolate}
+.premium-booking .premium-hero-cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:-2;display:block}
+.premium-booking .premium-hero.has-cover:after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,rgba(255,255,255,.98) 25%,rgba(255,255,255,.72) 58%,rgba(255,255,255,.12))}
+@media(max-width:760px){.premium-booking .premium-hero-cover{object-position:center}.premium-booking .premium-hero.has-cover:after{background:linear-gradient(180deg,rgba(255,255,255,.9) 0%,rgba(255,255,255,.64) 60%,rgba(255,255,255,.32) 100%)}}
