@@ -1,67 +1,7 @@
+"use client";
+import { useEffect,useState } from "react";
+import { Plus,Scissors } from "lucide-react";
 import { supabase } from "../../../lib/supabase";
-import Sidebar from "../_components/Sidebar";
-
-export const dynamic = "force-dynamic";
-
-async function getServices() {
-  if (!supabase) return [];
-
-  const { data: barbershop } = await supabase
-    .from("barbershops")
-    .select("id")
-    .eq("slug", "barbearia-modelo")
-    .single();
-
-  if (!barbershop) return [];
-
-  const { data } = await supabase
-    .from("services")
-    .select("*")
-    .eq("barbershop_id", barbershop.id)
-    .order("created_at", { ascending: false });
-
-  return data || [];
-}
-
-export default async function ServicesPage() {
-  const services = await getServices();
-
-  return (
-    <main className="dash">
-      <Sidebar />
-
-      <section className="content">
-        <header className="topbar">
-          <div>
-            <p className="eyebrow">Catálogo</p>
-            <h1>Serviços</h1>
-          </div>
-
-          <a className="primary" href="/dashboard/servicos/novo">
-            Novo serviço
-          </a>
-        </header>
-
-        <section className="box">
-          <div className="box-head">
-            <h2>Serviços cadastrados</h2>
-            <span>{services.length} registros</span>
-          </div>
-
-          <div className="appointments">
-            {services.map((service) => (
-              <div className="appointment" key={service.id}>
-                <strong>R$ {Number(service.price).toFixed(2)}</strong>
-                <div>
-                  <b>{service.name}</b>
-                  <p>{service.duration_minutes} minutos</p>
-                </div>
-                <span className="pill">{service.is_active ? "ativo" : "inativo"}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      </section>
-    </main>
-  );
-}
+import ModuleShell from "../_components/ModuleShell";
+function ServicesContent({workspace}){const [items,setItems]=useState([]),[loading,setLoading]=useState(true);useEffect(()=>{supabase.from("services").select("*").eq("tenant_id",workspace.tenant.id).order("name").then(({data})=>{setItems(data||[]);setLoading(false)})},[workspace.tenant.id]);return <section className="box"><div className="module-toolbar"><div><h2>Catálogo de serviços</h2><p>{items.length} serviços cadastrados</p></div></div>{loading?<p className="empty">Carregando...</p>:items.length===0?<div className="empty-state"><Scissors/><strong>Nenhum serviço cadastrado</strong></div>:<div className="data-list">{items.map(x=><article key={x.id}><span className="service-icon"><Scissors size={17}/></span><div><strong>{x.name}</strong><small>{x.duration} minutos · comissão {(x.commission_bps/100).toFixed(0)}%</small></div><strong>R$ {(x.price_cents/100).toFixed(2).replace(".",",")}</strong><span className={`pill ${x.active?"confirmed":""}`}>{x.active?"ativo":"inativo"}</span></article>)}</div>}</section>}
+export default function ServicesPage(){return <ModuleShell title="Serviços" eyebrow="Catálogo" action={<a className="primary" href="/dashboard/servicos/novo"><Plus size={18}/> Novo serviço</a>}>{workspace=><ServicesContent workspace={workspace}/>}</ModuleShell>}
