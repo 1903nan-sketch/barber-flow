@@ -377,3 +377,72 @@ h1 {
 .form input::placeholder {
   color: #888;
 }
+
+.sidebar nav a[href] {
+  display: block;
+}
+
+.stat {
+  display: block;
+  text-decoration: none;
+  color: white;
+}
+
+.box-head a {
+  color: white;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.pill {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.14);
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 13px;
+}
+
+.empty {
+  color: #aaa;
+  margin: 0;
+}
+
+.form {
+  max-width: 620px;
+  display: grid;
+  gap: 18px;
+}
+
+.form label {
+  display: grid;
+  gap: 8px;
+  color: #d4d4d4;
+  font-weight: 700;
+}
+
+.form input,
+.form select,
+.form textarea {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.08);
+  color: white;
+  padding: 14px 16px;
+  border-radius: 14px;
+  outline: none;
+}
+
+.form textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.form input::placeholder,
+.form textarea::placeholder {
+  color: #888;
+}
+
+.form option {
+  color: black;
+}

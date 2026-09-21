@@ -1,15 +1,11 @@
-export const dynamic = "force-dynamic";
-
 import { supabase } from "../../lib/supabase";
+import Sidebar from "./_components/Sidebar";
+
+export const dynamic = "force-dynamic";
 
 async function getData() {
   if (!supabase) {
-    return {
-      barbershop: null,
-      barbers: [],
-      clients: [],
-      services: [],
-    };
+    return { barbershop: null, barbers: [], clients: [], services: [], appointments: [] };
   }
 
   const { data: barbershop } = await supabase
@@ -19,18 +15,19 @@ async function getData() {
     .single();
 
   if (!barbershop) {
-    return {
-      barbershop: null,
-      barbers: [],
-      clients: [],
-      services: [],
-    };
+    return { barbershop: null, barbers: [], clients: [], services: [], appointments: [] };
   }
 
-  const [barbersResult, clientsResult, servicesResult] = await Promise.all([
+  const [barbersResult, clientsResult, servicesResult, appointmentsResult] = await Promise.all([
     supabase.from("barbers").select("*").eq("barbershop_id", barbershop.id),
     supabase.from("clients").select("*").eq("barbershop_id", barbershop.id),
     supabase.from("services").select("*").eq("barbershop_id", barbershop.id),
+    supabase
+      .from("appointments")
+      .select("*, clients(name), barbers(name), services(name)")
+      .eq("barbershop_id", barbershop.id)
+      .order("scheduled_at", { ascending: true })
+      .limit(5),
   ]);
 
   return {
@@ -38,27 +35,16 @@ async function getData() {
     barbers: barbersResult.data || [],
     clients: clientsResult.data || [],
     services: servicesResult.data || [],
+    appointments: appointmentsResult.data || [],
   };
 }
 
 export default async function DashboardPage() {
-  const { barbershop, barbers, clients, services } = await getData();
+  const { barbershop, barbers, clients, services, appointments } = await getData();
 
   return (
     <main className="dash">
-      <aside className="sidebar">
-        <div className="brand">Barber Flow</div>
-        <nav>
-          <a className="active">Dashboard</a>
-          <a>Agenda</a>
-          <a>Clientes</a>
-          <a>Barbeiros</a>
-          <a>Serviços</a>
-          <a>Vendas</a>
-          <a>Relatórios</a>
-          <a>Configurações</a>
-        </nav>
-      </aside>
+      <Sidebar />
 
       <section className="content">
         <header className="topbar">
@@ -66,27 +52,30 @@ export default async function DashboardPage() {
             <p className="eyebrow">Painel administrativo</p>
             <h1>{barbershop?.name || "Barbearia Modelo"}</h1>
           </div>
-          <button className="primary">Novo agendamento</button>
+
+          <a className="primary" href="/dashboard/agenda/novo">
+            Novo agendamento
+          </a>
         </header>
 
         <section className="stats">
-          <div className="stat">
+          <a className="stat" href="/dashboard/clientes">
             <span>Clientes cadastrados</span>
             <strong>{clients.length}</strong>
-            <small>Dados vindos do Supabase</small>
-          </div>
+            <small>Banco real</small>
+          </a>
 
-          <div className="stat">
+          <a className="stat" href="/dashboard/barbeiros">
             <span>Barbeiros ativos</span>
             <strong>{barbers.length}</strong>
             <small>Equipe cadastrada</small>
-          </div>
+          </a>
 
-          <div className="stat">
+          <a className="stat" href="/dashboard/servicos">
             <span>Serviços</span>
             <strong>{services.length}</strong>
             <small>Catálogo da barbearia</small>
-          </div>
+          </a>
 
           <div className="stat">
             <span>Plano</span>
@@ -98,19 +87,27 @@ export default async function DashboardPage() {
         <section className="dash-grid">
           <div className="box large">
             <div className="box-head">
-              <h2>Clientes</h2>
-              <span>Banco de dados real</span>
+              <h2>Próximos agendamentos</h2>
+              <a href="/dashboard/agenda">Ver agenda</a>
             </div>
 
             <div className="appointments">
-              {clients.map((client) => (
-                <div className="appointment" key={client.id}>
-                  <strong>Cliente</strong>
+              {appointments.length === 0 && (
+                <p className="empty">Nenhum agendamento cadastrado ainda.</p>
+              )}
+
+              {appointments.map((item) => (
+                <div className="appointment" key={item.id}>
+                  <strong>
+                    {new Date(item.scheduled_at).toLocaleDateString("pt-BR")}
+                  </strong>
                   <div>
-                    <b>{client.name}</b>
-                    <p>{client.phone || "Sem telefone"} · {client.email || "Sem e-mail"}</p>
+                    <b>{item.clients?.name || "Cliente"}</b>
+                    <p>
+                      {item.services?.name || "Serviço"} · {item.barbers?.name || "Barbeiro"}
+                    </p>
                   </div>
-                  <button>Ver</button>
+                  <span className="pill">{item.status}</span>
                 </div>
               ))}
             </div>
@@ -119,6 +116,7 @@ export default async function DashboardPage() {
           <div className="box">
             <div className="box-head">
               <h2>Serviços</h2>
+              <a href="/dashboard/servicos">Editar</a>
             </div>
 
             <div className="status-list">

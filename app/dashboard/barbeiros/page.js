@@ -3,7 +3,7 @@ import Sidebar from "../_components/Sidebar";
 
 export const dynamic = "force-dynamic";
 
-async function getClients() {
+async function getBarbers() {
   if (!supabase) return [];
 
   const { data: barbershop } = await supabase
@@ -15,7 +15,7 @@ async function getClients() {
   if (!barbershop) return [];
 
   const { data } = await supabase
-    .from("clients")
+    .from("barbers")
     .select("*")
     .eq("barbershop_id", barbershop.id)
     .order("created_at", { ascending: false });
@@ -23,8 +23,8 @@ async function getClients() {
   return data || [];
 }
 
-export default async function ClientsPage() {
-  const clients = await getClients();
+export default async function BarbersPage() {
+  const barbers = await getBarbers();
 
   return (
     <main className="dash">
@@ -33,30 +33,30 @@ export default async function ClientsPage() {
       <section className="content">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Cadastro</p>
-            <h1>Clientes</h1>
+            <p className="eyebrow">Equipe</p>
+            <h1>Barbeiros</h1>
           </div>
 
-          <a className="primary" href="/dashboard/clientes/novo">
-            Novo cliente
+          <a className="primary" href="/dashboard/barbeiros/novo">
+            Novo barbeiro
           </a>
         </header>
 
         <section className="box">
           <div className="box-head">
-            <h2>Clientes cadastrados</h2>
-            <span>{clients.length} registros</span>
+            <h2>Barbeiros cadastrados</h2>
+            <span>{barbers.length} registros</span>
           </div>
 
           <div className="appointments">
-            {clients.map((client) => (
-              <div className="appointment" key={client.id}>
-                <strong>Cliente</strong>
+            {barbers.map((barber) => (
+              <div className="appointment" key={barber.id}>
+                <strong>{barber.commission_percent || 0}%</strong>
                 <div>
-                  <b>{client.name}</b>
-                  <p>{client.phone || "Sem telefone"} · {client.email || "Sem e-mail"}</p>
+                  <b>{barber.name}</b>
+                  <p>{barber.phone || "Sem telefone"} · {barber.email || "Sem e-mail"}</p>
                 </div>
-                <span className="pill">ativo</span>
+                <span className="pill">{barber.is_active ? "ativo" : "inativo"}</span>
               </div>
             ))}
           </div>

@@ -4,13 +4,13 @@ import Sidebar from "../../_components/Sidebar";
 
 export const dynamic = "force-dynamic";
 
-async function createClient(formData) {
+async function createBarber(formData) {
   "use server";
 
   const name = formData.get("name");
   const phone = formData.get("phone");
   const email = formData.get("email");
-  const notes = formData.get("notes");
+  const commission_percent = Number(formData.get("commission_percent") || 0);
 
   const { data: barbershop } = await supabase
     .from("barbershops")
@@ -20,18 +20,19 @@ async function createClient(formData) {
 
   if (!barbershop) throw new Error("Barbearia não encontrada");
 
-  await supabase.from("clients").insert({
+  await supabase.from("barbers").insert({
     barbershop_id: barbershop.id,
     name,
     phone,
     email,
-    notes,
+    commission_percent,
+    is_active: true,
   });
 
-  redirect("/dashboard/clientes");
+  redirect("/dashboard/barbeiros");
 }
 
-export default function NewClientPage() {
+export default function NewBarberPage() {
   return (
     <main className="dash">
       <Sidebar />
@@ -39,17 +40,17 @@ export default function NewClientPage() {
       <section className="content">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Cadastro</p>
-            <h1>Novo cliente</h1>
+            <p className="eyebrow">Equipe</p>
+            <h1>Novo barbeiro</h1>
           </div>
         </header>
 
-        <form action={createClient} className="box form">
-          <label>Nome<input name="name" required placeholder="Nome do cliente" /></label>
+        <form action={createBarber} className="box form">
+          <label>Nome<input name="name" required placeholder="Nome do barbeiro" /></label>
           <label>Telefone<input name="phone" placeholder="(11) 99999-9999" /></label>
-          <label>E-mail<input name="email" type="email" placeholder="cliente@email.com" /></label>
-          <label>Observações<textarea name="notes" placeholder="Preferências, histórico ou observações" /></label>
-          <button className="primary" type="submit">Salvar cliente</button>
+          <label>E-mail<input name="email" type="email" placeholder="barbeiro@email.com" /></label>
+          <label>Comissão %<input name="commission_percent" type="number" placeholder="40" /></label>
+          <button className="primary" type="submit">Salvar barbeiro</button>
         </form>
       </section>
     </main>
