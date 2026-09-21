@@ -160,3 +160,17 @@ html:has(.admin-layout),body:has(.admin-layout){background:#05090e!important}
  .dashboard-shell .stat{min-height:138px!important;border-radius:17px!important}
  .dashboard-shell .box{border-radius:17px!important}
 }
+
+
+/* Agenda structured submenu */
+.agenda-subnav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 18px;padding:8px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(15,16,22,.72);backdrop-filter:blur(18px)}
+.agenda-subnav button{min-height:48px;border:0;border-radius:13px;background:transparent;color:#9d9daa;display:flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-weight:700;cursor:pointer;transition:.2s ease}
+.agenda-subnav button:hover{background:rgba(255,255,255,.05);color:#fff}
+.agenda-subnav button.active{background:linear-gradient(135deg,#7c3aed,#9b5cff);color:#fff;box-shadow:0 8px 24px rgba(124,58,237,.24)}
+.agenda-panel{min-height:230px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:24px}
+.agenda-panel-head{display:flex;align-items:flex-start;gap:14px}
+.agenda-panel-head>svg{width:28px;height:28px;color:#9b5cff;margin-top:3px}
+.agenda-panel-head h2{margin:0 0 6px}
+.agenda-panel-head p{margin:0;color:#999aa5}
+.agenda-action-link{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+@media(max-width:680px){.agenda-subnav{grid-template-columns:repeat(2,1fr);gap:7px;padding:7px}.agenda-subnav button{min-height:44px;font-size:13px}.agenda-panel{min-height:190px}}
