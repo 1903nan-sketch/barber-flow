@@ -26,7 +26,7 @@ const items = [
   { label: "Relatórios", href: "/dashboard/relatorios", icon: BarChart3, soon: true },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ workspace }) {
   const pathname = usePathname();
 
   return (
@@ -63,7 +63,7 @@ export default function Sidebar() {
         <a href="/dashboard/configuracoes"><Settings size={19} /><span>Configurações</span></a>
         <button className="profile-card" style={{ width: "100%", background: "transparent", color: "inherit", borderLeft: 0, borderRight: 0, borderBottom: 0, textAlign: "left", cursor: "pointer" }} type="button" onClick={() => supabase?.auth.signOut()}>
           <span className="profile-avatar">AD</span>
-          <div><strong>Administrador</strong><small>Plano Starter</small></div>
+          <div><strong>{workspace?.membership?.name||"Administrador"}</strong><small>Plano {workspace?.tenant?.plans?.name||"contratado"}</small></div>
           <LogOut size={18} />
         </button>
         <div className="upgrade-card">
