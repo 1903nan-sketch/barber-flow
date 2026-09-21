@@ -49,7 +49,7 @@ export default function Sidebar({ workspace }) {
 
       <p className="nav-title">MENU PRINCIPAL</p>
       <nav>
-        {items.filter(item=>!item.ownerOnly||["owner","admin"].includes(workspace?.membership?.role)).map(({ label, href, icon: Icon, soon }) => {
+        {items.map(({ label, href, icon: Icon, soon }) => {
           const active = href === "/dashboard" ? pathname === href : pathname.startsWith(href);
           return (
             <a key={href} href={soon ? "#" : href} className={active ? "active" : ""}>
