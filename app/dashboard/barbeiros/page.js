@@ -1,67 +1,8 @@
+"use client";
+import { useEffect,useState } from "react";
+import { Plus,UserRound } from "lucide-react";
 import { supabase } from "../../../lib/supabase";
-import Sidebar from "../_components/Sidebar";
-
-export const dynamic = "force-dynamic";
-
-async function getBarbers() {
-  if (!supabase) return [];
-
-  const { data: barbershop } = await supabase
-    .from("barbershops")
-    .select("id")
-    .eq("slug", "barbearia-modelo")
-    .single();
-
-  if (!barbershop) return [];
-
-  const { data } = await supabase
-    .from("barbers")
-    .select("*")
-    .eq("barbershop_id", barbershop.id)
-    .order("created_at", { ascending: false });
-
-  return data || [];
-}
-
-export default async function BarbersPage() {
-  const barbers = await getBarbers();
-
-  return (
-    <main className="dash">
-      <Sidebar />
-
-      <section className="content">
-        <header className="topbar">
-          <div>
-            <p className="eyebrow">Equipe</p>
-            <h1>Barbeiros</h1>
-          </div>
-
-          <a className="primary" href="/dashboard/barbeiros/novo">
-            Novo barbeiro
-          </a>
-        </header>
-
-        <section className="box">
-          <div className="box-head">
-            <h2>Barbeiros cadastrados</h2>
-            <span>{barbers.length} registros</span>
-          </div>
-
-          <div className="appointments">
-            {barbers.map((barber) => (
-              <div className="appointment" key={barber.id}>
-                <strong>{barber.commission_percent || 0}%</strong>
-                <div>
-                  <b>{barber.name}</b>
-                  <p>{barber.phone || "Sem telefone"} · {barber.email || "Sem e-mail"}</p>
-                </div>
-                <span className="pill">{barber.is_active ? "ativo" : "inativo"}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      </section>
-    </main>
-  );
-}
+import ModuleShell from "../_components/ModuleShell";
+const roles={owner:"Proprietário",manager:"Gerente",reception:"Recepção",barber:"Barbeiro"};
+function TeamContent({workspace}){const [items,setItems]=useState([]),[loading,setLoading]=useState(true);useEffect(()=>{supabase.from("memberships").select("*").eq("tenant_id",workspace.tenant.id).order("name").then(({data})=>{setItems(data||[]);setLoading(false)})},[workspace.tenant.id]);return <section className="box"><div className="module-toolbar"><div><h2>Equipe e acessos</h2><p>{items.length} funcionários vinculados</p></div></div>{loading?<p className="empty">Carregando...</p>:<div className="data-list">{items.map(x=><article key={x.user_id}><span className="client-avatar"><UserRound size={16}/></span><div><strong>{x.name}</strong><small>{roles[x.role]||x.role} · {x.permissions?.length||0} permissões</small></div><span className={`pill ${x.active?"confirmed":""}`}>{x.active?"ativo":"inativo"}</span></article>)}</div>}</section>}
+export default function TeamPage(){return <ModuleShell title="Funcionários" eyebrow="Equipe" action={<a className="primary" href="/dashboard/barbeiros/novo"><Plus size={18}/> Novo funcionário</a>}>{workspace=><TeamContent workspace={workspace}/>}</ModuleShell>}
