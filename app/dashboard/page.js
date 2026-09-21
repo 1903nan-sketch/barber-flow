@@ -1,18 +1,47 @@
-const stats = [
-  { label: "Faturamento hoje", value: "R$ 1.240", detail: "+18% vs ontem" },
-  { label: "Agendamentos", value: "32", detail: "8 pendentes" },
-  { label: "Clientes", value: "486", detail: "12 novos no mês" },
-  { label: "Barbeiros ativos", value: "6", detail: "2 com agenda cheia" },
-];
+import { supabase } from "../../lib/supabase";
 
-const appointments = [
-  { time: "09:00", client: "Lucas Martins", service: "Corte degradê", barber: "Rafael" },
-  { time: "10:30", client: "Pedro Silva", service: "Cabelo + barba", barber: "André" },
-  { time: "13:00", client: "João Victor", service: "Barba completa", barber: "Diego" },
-  { time: "15:30", client: "Matheus Lima", service: "Corte social", barber: "Rafael" },
-];
+async function getData() {
+  if (!supabase) {
+    return {
+      barbershop: null,
+      barbers: [],
+      clients: [],
+      services: [],
+    };
+  }
 
-export default function DashboardPage() {
+  const { data: barbershop } = await supabase
+    .from("barbershops")
+    .select("*")
+    .eq("slug", "barbearia-modelo")
+    .single();
+
+  if (!barbershop) {
+    return {
+      barbershop: null,
+      barbers: [],
+      clients: [],
+      services: [],
+    };
+  }
+
+  const [barbersResult, clientsResult, servicesResult] = await Promise.all([
+    supabase.from("barbers").select("*").eq("barbershop_id", barbershop.id),
+    supabase.from("clients").select("*").eq("barbershop_id", barbershop.id),
+    supabase.from("services").select("*").eq("barbershop_id", barbershop.id),
+  ]);
+
+  return {
+    barbershop,
+    barbers: barbersResult.data || [],
+    clients: clientsResult.data || [],
+    services: servicesResult.data || [],
+  };
+}
+
+export default async function DashboardPage() {
+  const { barbershop, barbers, clients, services } = await getData();
+
   return (
     <main className="dash">
       <aside className="sidebar">
@@ -33,35 +62,51 @@ export default function DashboardPage() {
         <header className="topbar">
           <div>
             <p className="eyebrow">Painel administrativo</p>
-            <h1>Visão geral da barbearia</h1>
+            <h1>{barbershop?.name || "Barbearia Modelo"}</h1>
           </div>
           <button className="primary">Novo agendamento</button>
         </header>
 
         <section className="stats">
-          {stats.map((item) => (
-            <div className="stat" key={item.label}>
-              <span>{item.label}</span>
-              <strong>{item.value}</strong>
-              <small>{item.detail}</small>
-            </div>
-          ))}
+          <div className="stat">
+            <span>Clientes cadastrados</span>
+            <strong>{clients.length}</strong>
+            <small>Dados vindos do Supabase</small>
+          </div>
+
+          <div className="stat">
+            <span>Barbeiros ativos</span>
+            <strong>{barbers.length}</strong>
+            <small>Equipe cadastrada</small>
+          </div>
+
+          <div className="stat">
+            <span>Serviços</span>
+            <strong>{services.length}</strong>
+            <small>Catálogo da barbearia</small>
+          </div>
+
+          <div className="stat">
+            <span>Plano</span>
+            <strong>{barbershop?.plan || "starter"}</strong>
+            <small>Status: {barbershop?.is_active ? "ativo" : "bloqueado"}</small>
+          </div>
         </section>
 
         <section className="dash-grid">
           <div className="box large">
             <div className="box-head">
-              <h2>Agenda de hoje</h2>
-              <span>Atualizado agora</span>
+              <h2>Clientes</h2>
+              <span>Banco de dados real</span>
             </div>
 
             <div className="appointments">
-              {appointments.map((item) => (
-                <div className="appointment" key={item.time}>
-                  <strong>{item.time}</strong>
+              {clients.map((client) => (
+                <div className="appointment" key={client.id}>
+                  <strong>Cliente</strong>
                   <div>
-                    <b>{item.client}</b>
-                    <p>{item.service} · {item.barber}</p>
+                    <b>{client.name}</b>
+                    <p>{client.phone || "Sem telefone"} · {client.email || "Sem e-mail"}</p>
                   </div>
                   <button>Ver</button>
                 </div>
@@ -71,14 +116,16 @@ export default function DashboardPage() {
 
           <div className="box">
             <div className="box-head">
-              <h2>Status</h2>
+              <h2>Serviços</h2>
             </div>
 
             <div className="status-list">
-              <div><span>Fila de espera</span><strong>4</strong></div>
-              <div><span>Comandas abertas</span><strong>9</strong></div>
-              <div><span>Pagamentos Pix</span><strong>18</strong></div>
-              <div><span>Cancelamentos</span><strong>2</strong></div>
+              {services.map((service) => (
+                <div key={service.id}>
+                  <span>{service.name}</span>
+                  <strong>R$ {Number(service.price).toFixed(2)}</strong>
+                </div>
+              ))}
             </div>
           </div>
         </section>
