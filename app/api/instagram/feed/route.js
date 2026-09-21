@@ -1,0 +1,4 @@
+import {NextResponse} from "next/server";import {createClient} from "@supabase/supabase-js";
+export async function GET(req){const u=new URL(req.url),slug=u.searchParams.get("slug");if(!slug)return NextResponse.json({items:[]});
+ const admin=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY);const {data:t}=await admin.from("tenants").select("instagram_access_token,instagram_username").eq("slug",slug).maybeSingle();if(!t?.instagram_access_token)return NextResponse.json({items:[],username:t?.instagram_username||""});
+ const r=await fetch("https://graph.instagram.com/me/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp&limit=6&access_token="+encodeURIComponent(t.instagram_access_token),{next:{revalidate:900}});const j=await r.json();if(!r.ok)return NextResponse.json({items:[],username:t.instagram_username||""});return NextResponse.json({items:(j.data||[]).slice(0,6),username:t.instagram_username||""});}
