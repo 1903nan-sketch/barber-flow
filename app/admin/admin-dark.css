@@ -1,0 +1,23 @@
+/* Isolated final theme for /admin. Imported by the admin page after root styles. */
+.admin-layout{background:#05090e!important;color:#f6f8fb!important}
+.admin-content{background:#05090e!important;color:#f6f8fb!important}
+.admin-content>header{background:transparent!important}.admin-content>header h1,.admin-content h1,.admin-content h2,.admin-content h3,.admin-content strong{color:#f6f8fb!important}
+.admin-content>header p,.admin-content p,.admin-content small{color:#8491a2!important}.admin-content .eyebrow{color:#9a73ff!important}
+.admin-content .box,.admin-content .admin-register-head,.admin-content .admin-register-section,.admin-content .report-lock{background:#0d151e!important;color:#f6f8fb!important;border:1px solid #2b3b4d!important;box-shadow:0 18px 50px rgba(0,0,0,.28)!important}
+.admin-content input,.admin-content select,.admin-content textarea{background:#080f16!important;color:#fff!important;border:1px solid #36495d!important;-webkit-text-fill-color:#fff!important}
+.admin-content input::placeholder,.admin-content textarea::placeholder{color:#596677!important;-webkit-text-fill-color:#596677!important}
+.admin-content label{color:#aeb8c6!important}.admin-content .admin-badge{background:#19112b!important;color:#bda8ff!important;border-color:#4b3477!important}
+.admin-content .admin-stats article,.admin-content .data-list>article{background:#0d151e!important;color:#fff!important;border-color:#2b3b4d!important}
+.admin-content .secondary-action,.admin-content .paid-action{background:#111c27!important;color:#eef2f7!important;border-color:#3a4c60!important}
+.admin-content .primary{background:linear-gradient(135deg,#6638e8,#8650f5)!important;color:#fff!important}
+.admin-content .form-alert.error{background:#2a1116!important;color:#ff9ca7!important;border-color:#5a2730!important}
+@media(max-width:760px){
+ .admin-layout{display:block!important;background:#05090e!important;padding-bottom:90px!important}
+ .admin-content{padding:20px 14px 14px!important;background:#05090e!important;min-height:100vh!important}
+ .admin-sidebar{position:fixed!important;z-index:999!important;top:auto!important;bottom:0!important;left:0!important;right:0!important;width:100%!important;height:80px!important;min-height:0!important;padding:7px 8px calc(7px + env(safe-area-inset-bottom))!important;background:rgba(6,11,17,.98)!important;border:0!important;border-top:1px solid #263545!important}
+ .admin-sidebar .brand-wrap,.admin-sidebar .admin-logout{display:none!important}
+ .admin-sidebar nav{display:flex!important;height:100%!important;overflow-x:auto!important;gap:3px!important}
+ .admin-sidebar nav button{display:flex!important;flex:1 0 70px!important;min-width:70px!important;height:58px!important;min-height:58px!important;padding:4px!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:3px!important;font-size:9px!important;border-radius:12px!important}
+ .admin-sidebar nav button.active{background:#251744!important;color:#fff!important;border-color:#51377f!important}
+ .admin-content .admin-register-head,.admin-content .admin-register-section,.admin-content .box{border-radius:18px!important}
+}
