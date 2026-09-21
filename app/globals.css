@@ -44,3 +44,24 @@
 .ruptix-hero-brand span{font-size:18px;font-weight:700;opacity:.55}
 .ruptix-hero-brand strong{font-size:clamp(38px,7vw,76px);line-height:.9;font-weight:950;letter-spacing:.08em}
 @media(max-width:600px){.ruptix-hero-brand{margin-bottom:14px;padding:12px 8px}.ruptix-hero-brand span{font-size:13px}.ruptix-hero-brand strong{font-size:42px}}
+
+/* Premium mobile login — Ruptix */
+@media(max-width:780px){
+.auth-page{min-height:100dvh;background:radial-gradient(circle at 50% -10%,rgba(117,87,232,.24),transparent 34%),linear-gradient(160deg,#08090d 0%,#0d0f16 55%,#090a0e 100%);color:#fff}
+.auth-panel{min-height:100dvh;padding:34px 22px;display:flex;align-items:center;justify-content:center}
+.auth-card{max-width:430px;padding:30px 22px 24px;border:1px solid rgba(255,255,255,.09);border-radius:28px;background:rgba(17,19,27,.78);box-shadow:0 30px 80px rgba(0,0,0,.42);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+.mobile-auth-logo{display:flex;justify-content:center;margin:0 0 32px;color:#fff;font-size:25px;letter-spacing:-.04em}
+.mobile-auth-logo svg{width:30px;height:30px;color:#9c82ff;filter:drop-shadow(0 0 14px rgba(156,130,255,.45))}
+.auth-welcome{display:block;text-align:center;color:#9f89ff;font-size:9px;letter-spacing:.28em}
+.auth-card h2{text-align:center;color:#fff;font-size:30px;margin:10px 0 7px}
+.auth-card>p{text-align:center;color:#858b9a;margin-bottom:28px}
+.auth-card label{color:#aeb3c0;font-size:11px}
+.auth-card input{height:54px;color:#fff;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:15px}
+.auth-card input::placeholder{color:#666d7c}
+.auth-card input:focus{border-color:#8468f0;box-shadow:0 0 0 3px rgba(132,104,240,.13)}
+.password-field button{top:10px;color:#8e94a2}
+.auth-submit{height:54px;margin-top:5px;border-radius:15px;background:linear-gradient(135deg,#876cf2,#6747d7);box-shadow:0 14px 35px rgba(103,71,215,.28)}
+.auth-links{justify-content:center;gap:28px;margin-top:21px}
+.auth-links button{color:#a994ff}
+.auth-card:after{content:"BY RUPITIX";display:block;text-align:center;margin-top:34px;color:#656a78;font-size:9px;font-weight:850;letter-spacing:.34em}
+}
