@@ -22,8 +22,8 @@ const items = [
   { label: "Clientes", href: "/dashboard/clientes", icon: Users },
   { label: "Barbeiros", href: "/dashboard/barbeiros", icon: UserRound },
   { label: "Serviços", href: "/dashboard/servicos", icon: Scissors },
-  { label: "Vendas", href: "/dashboard/vendas", icon: CircleDollarSign, soon: true },
-  { label: "Relatórios", href: "/dashboard/relatorios", icon: BarChart3, soon: true },
+  { label: "Vendas", href: "/dashboard/vendas", icon: CircleDollarSign },
+  { label: "Relatórios", href: "/dashboard/relatorios", icon: BarChart3 },
 ];
 
 export default function Sidebar({ workspace }) {
