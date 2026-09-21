@@ -1,4 +1,5 @@
 "use client";
+import "./admin-dark.css";
 import {useEffect,useState} from "react";
 import {Building2,CircleDollarSign,ExternalLink,FileText,KeyRound,LockKeyhole,LogOut,Plus,Scissors,ShieldCheck,Users} from "lucide-react";
 import {useRouter} from "next/navigation";import {supabase} from "../../lib/supabase";
