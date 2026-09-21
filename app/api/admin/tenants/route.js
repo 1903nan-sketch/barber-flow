@@ -15,7 +15,7 @@ export async function POST(request){
   if(createError)return NextResponse.json({error:createError.message.includes("already")?"Este e-mail já possui uma conta. Use outro e-mail.":createError.message},{status:400});
   const {data:tenantId,error}=await admin.rpc("admin_provision_tenant",{p_admin:user.id,p_owner:created.user.id,p:{name:body.name,slug:body.slug,phone:body.phone||"",plan_id:body.plan_id,owner_name:body.owner_name}});
   if(error){await admin.auth.admin.deleteUser(created.user.id);return NextResponse.json({error:error.message},{status:400})}
-  await admin.from("tenants").update({owner_document:body.owner_document||"",manager_name:body.manager_name||"",manager_document:body.manager_document||"",grace_days:Math.max(0,Number(body.grace_days||0)),billing_due_date:body.billing_due_date||null}).eq("id",tenantId);
+  await admin.from("tenants").update({owner_document:body.owner_document||"",manager_name:body.manager_name||"",manager_document:body.manager_document||"",grace_days:0,billing_due_date:body.billing_due_date||null,commitment_months:body.commitment_mode==="flex"?0:12,no_commitment_surcharge_pct:body.commitment_mode==="flex"?15:0,discount_pct:Math.min(100,Math.max(0,Number(body.discount_pct||0))),discount_months:Math.min(60,Math.max(0,Number(body.discount_months||0))),discount_started_at:Number(body.discount_pct||0)>0?(body.billing_due_date||new Date().toISOString().slice(0,10)):null}).eq("id",tenantId);
   return NextResponse.json({id:tenantId,slug:body.slug});
  }catch(error){return NextResponse.json({error:error.message||"Não foi possível criar a barbearia."},{status:500})}
 }
