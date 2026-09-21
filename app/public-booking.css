@@ -16,3 +16,5 @@
 @media(max-width:650px){.confirmation-page .premium-nav{padding:16px 20px!important}.confirm-nav-status{font-size:7px}.confirmation-page .booking-confirm{margin:24px auto!important;padding:28px 20px!important;border-radius:24px!important}.confirm-check{width:66px;height:66px;border-radius:20px}.confirmation-page .confirm-grid{grid-template-columns:1fr!important}.confirmation-page .confirm-grid p{padding:15px!important}.confirm-actions{grid-template-columns:1fr!important}.confirmation-page .booking-confirm h1{font-size:38px!important}.confirm-subtitle{font-size:10px!important}}
 
 /* trigger deploy: confirmation dark redesign */
+
+/* force production sync */
