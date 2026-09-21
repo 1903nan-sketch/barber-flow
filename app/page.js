@@ -33,6 +33,10 @@ export default function HomePage() {
           Acessar painel
         </Link>
       </div>
+      <div style={{position:"fixed",bottom:"24px",left:"40px",display:"flex",alignItems:"center",gap:"10px",color:"#8d8d98",fontSize:"12px",letterSpacing:".08em"}}>
+        <span style={{width:"28px",height:"1px",background:"#6f55ff",display:"inline-block"}} />
+        DESENVOLVIDO POR <strong style={{color:"white",letterSpacing:".18em"}}>RUPTIX</strong>
+      </div>
     </main>
   );
 }
