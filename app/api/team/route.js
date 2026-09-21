@@ -15,7 +15,7 @@ export async function POST(request){
   const loginEmail=`${username}.${tenant.replace(/-/g,"").slice(0,10)}@staff.barberflow.app`;
   const {data:created,error:createError}=await admin.auth.admin.createUser({email:loginEmail,password,email_confirm:true,user_metadata:{name:body.name,staff_username:"@"+username}});
   if(createError)return NextResponse.json({error:createError.message.includes("already")?"Este usuário já está em uso nesta barbearia.":createError.message},{status:400});
-  const {error}=await admin.rpc("save_staff_member",{p_actor:user.id,p_tenant:tenant,p_user:created.user.id,p_name:body.name,p_role:body.role,p_permissions:body.permissions||[]});
+  const {error}=await admin.rpc("save_staff_member",{p_actor:user.id,p_tenant:tenant,p_user:created.user.id,p_name:body.name,p_role:body.role,p_permissions:body.permissions||[],p_username:username,p_login_email:loginEmail});
   if(error){await admin.auth.admin.deleteUser(created.user.id);return NextResponse.json({error:error.message},{status:400})}
   return NextResponse.json({username:"@"+username});
  }catch(error){return NextResponse.json({error:error.message||"Não foi possível criar o funcionário."},{status:500})}
