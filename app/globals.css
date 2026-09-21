@@ -119,3 +119,44 @@ html:has(.admin-layout),body:has(.admin-layout){background:#05090e!important}
  body:has(.admin-layout) .admin-content h1,body:has(.admin-layout) .admin-content h2,body:has(.admin-layout) .admin-content strong{color:#f6f8fb!important}
  body:has(.admin-layout) .admin-content input,body:has(.admin-layout) .admin-content select,body:has(.admin-layout) .admin-content textarea{background:#080f16!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-color:#36495d!important}
 }
+
+
+/* Barber Flow — dark glass dashboard refinement */
+.dashboard-shell{--bg:#070b11;--surface:#0d131c;--text:#f5f7fb;--muted:#8d96a8;--line:#222c3a;--purple:#805cff;--purple-soft:#24194a;--nav:#080c12;background:#070b11;color:#f5f7fb}
+.dashboard-shell .sidebar{background:linear-gradient(180deg,#090d14,#070a10);border-right:1px solid #1d2632}
+.dashboard-shell .content{max-width:none;background:radial-gradient(circle at 78% -5%,rgba(128,92,255,.13),transparent 31%),#070b11!important;padding:30px 34px 50px}
+.dashboard-shell .topbar{border-bottom:1px solid #1c2632;padding-bottom:20px}
+.dashboard-shell .topbar h1{color:#f8f9fc;font-size:29px}
+.dashboard-shell .topbar-copy,.dashboard-shell .eyebrow{color:#8993a5}
+.dashboard-shell .primary{background:linear-gradient(135deg,#8d6cff,#6f48e8);box-shadow:0 10px 28px rgba(119,78,238,.25)}
+.dashboard-shell .workspace-card{background:#101722;border-color:#273343}
+.dashboard-shell .sidebar nav a:hover,.dashboard-shell .sidebar nav a.active{background:linear-gradient(90deg,rgba(128,92,255,.25),rgba(128,92,255,.08));color:#fff}
+.dashboard-shell .sidebar nav a.active{box-shadow:inset 2px 0 #9a7cff}
+.dashboard-shell .profile-card{border-color:#202a36}
+.dashboard-shell .dash-welcome h1{font-size:38px}
+.dashboard-shell .stat,.dashboard-shell .box{background:linear-gradient(145deg,rgba(17,25,35,.96),rgba(10,16,24,.98))!important;border:1px solid #253141!important;box-shadow:0 14px 35px rgba(0,0,0,.22)!important;color:#f5f7fb!important}
+.dashboard-shell .stat{border-radius:19px!important;padding:20px!important;min-height:145px}
+.dashboard-shell .stat>span{color:#929caf!important}
+.dashboard-shell .stat>strong{font-size:25px;color:#fff!important}
+.dashboard-shell .box{border-radius:20px!important}
+.dashboard-shell .box h2,.dashboard-shell .box strong{color:#f4f6fa}
+.dashboard-shell .box p,.dashboard-shell .box small{color:#8792a5}
+.dashboard-shell .data-list article{border-color:#222d3b}
+.dashboard-shell .data-list article:hover{background:#111a25}
+.dashboard-shell .pill{background:#102d25;color:#55dda4;border:1px solid #194738}
+.dashboard-shell .service-icon{background:#20164b;color:#a786ff}
+.dashboard-shell .quick-actions>a{background:#0a1119!important;border-color:#263443!important}
+.dashboard-shell .quick-actions>a:hover{border-color:#7356dc!important;background:#111824!important}
+.dashboard-shell .upgrade-card{background:linear-gradient(135deg,rgba(121,83,241,.24),rgba(77,52,155,.09));border-color:rgba(144,112,255,.35)}
+.dashboard-shell .sell-hero{background:radial-gradient(circle at 90% 15%,rgba(255,255,255,.13),transparent 27%),linear-gradient(120deg,#31109f,#7046e9)!important}
+.dashboard-shell .checkout-modal{background:#0e151f;color:#f5f7fb;border:1px solid #2a3748}
+.dashboard-shell .checkout-modal input,.dashboard-shell .checkout-modal select,.dashboard-shell .checkout-modal textarea{background:#091019;color:#fff;border-color:#304052}
+@media(max-width:650px){
+ .dashboard-shell .content{padding:18px 14px 92px!important}
+ .dashboard-shell .topbar{padding-bottom:15px;margin-bottom:20px}
+ .dashboard-shell .topbar h1{font-size:24px}
+ .dashboard-shell .dash-welcome h1{font-size:32px}
+ .dashboard-shell .stats{gap:11px!important}
+ .dashboard-shell .stat{min-height:138px!important;border-radius:17px!important}
+ .dashboard-shell .box{border-radius:17px!important}
+}
