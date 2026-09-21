@@ -1,7 +1,13 @@
 import Link from "next/link";
+import {headers} from "next/headers";
+import {redirect} from "next/navigation";
 import {ArrowUpRight,Scissors,Sparkles} from "lucide-react";
 
-export default function HomePage(){return <main className="ruptix-hub rh-v2">
+export default async function HomePage(){
+ const host=(await headers()).get("host")?.split(":")[0]?.toLowerCase();
+ if(host==="barberflow.3ruptix.com") redirect("/login");
+
+ return <main className="ruptix-hub rh-v2">
  <nav className="rh2-nav"><Link href="/" className="rh2-logo">RUPTIX<span>®</span></Link><div><a href="#produtos">PRODUTOS</a><a href="#sobre">SOBRE</a></div><a href="#produtos" className="rh2-client">PRODUTOS <ArrowUpRight/></a></nav>
  <section className="rh2-hero"><div className="rh2-grid"/><div className="rh2-copy"><span className="rh2-label"><i/> SOFTWARE STUDIO · SÃO PAULO</span><h1>Construímos<br/>software que<br/><em>move negócios.</em></h1><p>Produtos digitais criados para resolver operações reais, automatizar processos e transformar empresas.</p></div><div className="rh2-side"><span>RUPTIX / 2026</span><b>BUILD<br/>BETTER<br/>SYSTEMS.</b><Sparkles/></div></section>
  <section className="rh2-products" id="produtos"><div className="rh2-title"><span>01 / PRODUTOS</span><h2>Produtos<br/>Ruptix.</h2></div>
@@ -10,4 +16,5 @@ export default function HomePage(){return <main className="ruptix-hub rh-v2">
  <section className="rh2-manifesto" id="sobre"><span>02 / RUPTIX</span><p>Não fazemos software para <i>parecer moderno.</i><br/>Fazemos software para <strong>funcionar melhor.</strong></p><div><b>PRODUTO</b><b>DESIGN</b><b>TECNOLOGIA</b></div></section>
  <section className="rh2-end"><div><span>RUPTIX®</span><h2>O próximo<br/>grande produto<br/>começa aqui.</h2></div><a href="mailto:contato@3ruptix.com">FALAR COM A RUPTIX <ArrowUpRight/></a></section>
  <footer className="rh2-footer"><b>RUPTIX®</b><span>SOFTWARE STUDIO</span><small>© 2026</small></footer>
- </main>}
+ </main>
+}
