@@ -1,117 +1,26 @@
-import { supabase } from "../../../../lib/supabase";
-import { redirect } from "next/navigation";
-import Sidebar from "../../_components/Sidebar";
+"use client";
+import {useEffect,useState} from "react";
+import {useRouter} from "next/navigation";
+import {CalendarPlus} from "lucide-react";
+import {supabase} from "../../../../lib/supabase";
+import ModuleShell from "../../_components/ModuleShell";
 
-export const dynamic = "force-dynamic";
-
-async function getFormData() {
-  if (!supabase) return { clients: [], barbers: [], services: [] };
-
-  const { data: barbershop } = await supabase
-    .from("barbershops")
-    .select("id")
-    .eq("slug", "barbearia-modelo")
-    .single();
-
-  if (!barbershop) return { clients: [], barbers: [], services: [] };
-
-  const [clientsResult, barbersResult, servicesResult] = await Promise.all([
-    supabase.from("clients").select("*").eq("barbershop_id", barbershop.id).order("name"),
-    supabase.from("barbers").select("*").eq("barbershop_id", barbershop.id).order("name"),
-    supabase.from("services").select("*").eq("barbershop_id", barbershop.id).order("name"),
-  ]);
-
-  return {
-    clients: clientsResult.data || [],
-    barbers: barbersResult.data || [],
-    services: servicesResult.data || [],
-  };
+function NewAppointment({workspace}){
+ const router=useRouter(),t=workspace.tenant.id;
+ const [clients,setClients]=useState([]),[barbers,setBarbers]=useState([]),[services,setServices]=useState([]),[units,setUnits]=useState([]),[busy,setBusy]=useState(false),[error,setError]=useState("");
+ useEffect(()=>{Promise.all([
+  supabase.from("clients").select("id,name").eq("tenant_id",t).order("name"),
+  supabase.from("barbers").select("id,name").eq("tenant_id",t).eq("active",true).order("name"),
+  supabase.from("services").select("id,name,price_cents").eq("tenant_id",t).eq("active",true).order("name"),
+  supabase.from("units").select("id,name").eq("tenant_id",t).eq("active",true).order("name")
+ ]).then(([c,b,s,u])=>{setClients(c.data||[]);setBarbers(b.data||[]);setServices(s.data||[]);setUnits(u.data||[])})},[t]);
+ async function submit(e){e.preventDefault();setBusy(true);setError("");const f=new FormData(e.currentTarget),local=f.get("scheduled_at");const st=new Date(local).toISOString();const {error}=await supabase.rpc("book_appointment",{t,u:f.get("unit_id"),b:f.get("barber_id"),c:f.get("client_id"),s:f.get("service_id"),st,existing_id:null});setBusy(false);if(error)return setError(error.message);router.push("/dashboard/agenda");router.refresh()}
+ return <form className="box form" onSubmit={submit}><div className="form-grid">
+  <label>Cliente<select name="client_id" required defaultValue=""><option value="">Selecione</option>{clients.map(x=><option value={x.id} key={x.id}>{x.name}</option>)}</select></label>
+  <label>Barbeiro<select name="barber_id" required defaultValue=""><option value="">Selecione</option>{barbers.map(x=><option value={x.id} key={x.id}>{x.name}</option>)}</select></label>
+  <label>Serviço<select name="service_id" required defaultValue=""><option value="">Selecione</option>{services.map(x=><option value={x.id} key={x.id}>{x.name} - {(x.price_cents/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</option>)}</select></label>
+  <label>Unidade<select name="unit_id" required defaultValue=""><option value="">Selecione</option>{units.map(x=><option value={x.id} key={x.id}>{x.name}</option>)}</select></label>
+  <label>Data e horário<input name="scheduled_at" type="datetime-local" required/></label>
+ </div>{error&&<div className="form-alert error">{error}</div>}<button className="primary form-submit" disabled={busy}><CalendarPlus size={17}/>{busy?"Salvando...":"Salvar agendamento"}</button></form>
 }
-
-async function createAppointment(formData) {
-  "use server";
-
-  const client_id = formData.get("client_id");
-  const barber_id = formData.get("barber_id");
-  const service_id = formData.get("service_id");
-  const scheduled_at = formData.get("scheduled_at");
-  const notes = formData.get("notes");
-
-  const { data: barbershop } = await supabase
-    .from("barbershops")
-    .select("id")
-    .eq("slug", "barbearia-modelo")
-    .single();
-
-  if (!barbershop) throw new Error("Barbearia não encontrada");
-
-  await supabase.from("appointments").insert({
-    barbershop_id: barbershop.id,
-    client_id,
-    barber_id,
-    service_id,
-    scheduled_at,
-    status: "scheduled",
-    notes,
-  });
-
-  redirect("/dashboard/agenda");
-}
-
-export default async function NewAppointmentPage() {
-  const { clients, barbers, services } = await getFormData();
-
-  return (
-    <main className="dash">
-      <Sidebar />
-
-      <section className="content">
-        <header className="topbar">
-          <div>
-            <p className="eyebrow">Agenda</p>
-            <h1>Novo agendamento</h1>
-          </div>
-        </header>
-
-        <form action={createAppointment} className="box form">
-          <label>
-            Cliente
-            <select name="client_id" required>
-              <option value="">Selecione</option>
-              {clients.map((client) => (
-                <option value={client.id} key={client.id}>{client.name}</option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            Barbeiro
-            <select name="barber_id" required>
-              <option value="">Selecione</option>
-              {barbers.map((barber) => (
-                <option value={barber.id} key={barber.id}>{barber.name}</option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            Serviço
-            <select name="service_id" required>
-              <option value="">Selecione</option>
-              {services.map((service) => (
-                <option value={service.id} key={service.id}>
-                  {service.name} - R$ {Number(service.price).toFixed(2)}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>Data e horário<input name="scheduled_at" type="datetime-local" required /></label>
-          <label>Observações<textarea name="notes" placeholder="Observações do agendamento" /></label>
-
-          <button className="primary" type="submit">Salvar agendamento</button>
-        </form>
-      </section>
-    </main>
-  );
-}
+export default function NewAppointmentPage(){return <ModuleShell title="Novo agendamento" eyebrow="Agenda">{workspace=><NewAppointment workspace={workspace}/>}</ModuleShell>}
