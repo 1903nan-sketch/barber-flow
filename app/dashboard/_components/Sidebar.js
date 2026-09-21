@@ -25,6 +25,7 @@ const items = [
   { label: "Serviços", href: "/dashboard/servicos", icon: Scissors },
   { label: "Vendas", href: "/dashboard/vendas", icon: CircleDollarSign },
   { label: "Relatórios", href: "/dashboard/relatorios", icon: BarChart3 },
+  { label: "Mensalidade", href: "/dashboard/mensalidade", icon: CreditCard, ownerOnly: true },
 ];
 
 export default function Sidebar({ workspace }) {
@@ -48,7 +49,7 @@ export default function Sidebar({ workspace }) {
 
       <p className="nav-title">MENU PRINCIPAL</p>
       <nav>
-        {items.map(({ label, href, icon: Icon, soon }) => {
+        {items.filter(item=>!item.ownerOnly||workspace?.membership?.role==="owner").map(({ label, href, icon: Icon, soon }) => {
           const active = href === "/dashboard" ? pathname === href : pathname.startsWith(href);
           return (
             <a key={href} href={soon ? "#" : href} className={active ? "active" : ""}>
@@ -60,7 +61,7 @@ export default function Sidebar({ workspace }) {
         })}
       </nav>
 
-      <div className="sidebar-footer">{workspace?.membership?.role==="owner"&&workspace?.tenant?.plans?.monthly_cents>0&&<a href="/dashboard#mensalidade"><CreditCard size={19}/><span>Pagar mensalidade</span></a>}
+      <div className="sidebar-footer">
         <a href="/dashboard/configuracoes"><Settings size={19} /><span>Configurações</span></a>
         <button className="profile-card" style={{ width: "100%", background: "transparent", color: "inherit", borderLeft: 0, borderRight: 0, borderBottom: 0, textAlign: "left", cursor: "pointer" }} type="button" onClick={() => supabase?.auth.signOut()}>
           <span className="profile-avatar">AD</span>
