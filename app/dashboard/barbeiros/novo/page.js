@@ -1,58 +1,8 @@
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Save } from "lucide-react";
 import { supabase } from "../../../../lib/supabase";
-import { redirect } from "next/navigation";
-import Sidebar from "../../_components/Sidebar";
-
-export const dynamic = "force-dynamic";
-
-async function createBarber(formData) {
-  "use server";
-
-  const name = formData.get("name");
-  const phone = formData.get("phone");
-  const email = formData.get("email");
-  const commission_percent = Number(formData.get("commission_percent") || 0);
-
-  const { data: barbershop } = await supabase
-    .from("barbershops")
-    .select("id")
-    .eq("slug", "barbearia-modelo")
-    .single();
-
-  if (!barbershop) throw new Error("Barbearia não encontrada");
-
-  await supabase.from("barbers").insert({
-    barbershop_id: barbershop.id,
-    name,
-    phone,
-    email,
-    commission_percent,
-    is_active: true,
-  });
-
-  redirect("/dashboard/barbeiros");
-}
-
-export default function NewBarberPage() {
-  return (
-    <main className="dash">
-      <Sidebar />
-
-      <section className="content">
-        <header className="topbar">
-          <div>
-            <p className="eyebrow">Equipe</p>
-            <h1>Novo barbeiro</h1>
-          </div>
-        </header>
-
-        <form action={createBarber} className="box form">
-          <label>Nome<input name="name" required placeholder="Nome do barbeiro" /></label>
-          <label>Telefone<input name="phone" placeholder="(11) 99999-9999" /></label>
-          <label>E-mail<input name="email" type="email" placeholder="barbeiro@email.com" /></label>
-          <label>Comissão %<input name="commission_percent" type="number" placeholder="40" /></label>
-          <button className="primary" type="submit">Salvar barbeiro</button>
-        </form>
-      </section>
-    </main>
-  );
-}
+import ModuleShell from "../../_components/ModuleShell";
+const permissions=[['agenda','Agenda'],['booking','Agendamentos'],['clients','Clientes'],['services','Serviços'],['team','Equipe'],['settings','Configurações'],['audit','Auditoria']];
+export default function NewMember(){const router=useRouter(),[busy,setBusy]=useState(false),[error,setError]=useState("");return <ModuleShell title="Novo funcionário" eyebrow="Equipe">{({tenant})=><form className="box form" onSubmit={async e=>{e.preventDefault();setBusy(true);setError("");const f=new FormData(e.currentTarget),p={name:f.get("name"),email:f.get("email"),role:f.get("role"),permissions:f.getAll("permissions"),active:true};const {error}=await supabase.rpc("save_record",{t:tenant.id,k:"member",p});setBusy(false);if(error)return setError(error.message);router.push("/dashboard/barbeiros")}}><div className="form-grid"><label>Nome<input name="name" required placeholder="Nome do funcionário"/></label><label>E-mail da conta<input name="email" type="email" required placeholder="funcionario@email.com"/></label><label>Função<select name="role" required defaultValue="barber"><option value="barber">Barbeiro</option><option value="reception">Recepção</option><option value="manager">Gerente</option></select></label></div><fieldset className="permissions"><legend>Permissões</legend>{permissions.map(([value,label])=><label key={value}><input type="checkbox" name="permissions" value={value} defaultChecked={['agenda','booking','clients'].includes(value)}/>{label}</label>)}</fieldset><p className="form-hint">O funcionário precisa criar a conta na tela de login antes de ser vinculado.</p>{error&&<div className="form-alert error">{error}</div>}<button className="primary form-submit" disabled={busy}><Save size={17}/>{busy?"Salvando...":"Adicionar funcionário"}</button></form>}</ModuleShell>}
