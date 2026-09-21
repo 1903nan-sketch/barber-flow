@@ -38,3 +38,9 @@
 .dashboard-privacy{display:flex;justify-content:flex-end;margin:0 0 10px}
 .dashboard-privacy button{display:inline-flex;align-items:center;gap:7px;border:1px solid #e1e5ee;background:#fff;border-radius:12px;padding:9px 12px;font-weight:700;cursor:pointer}
 @media(max-width:600px){.sales-filters select{width:100%}.dashboard-privacy{justify-content:stretch}.dashboard-privacy button{width:100%;justify-content:center}}
+
+/* Ruptix signature on dashboard overview */
+.ruptix-hero-brand{width:100%;display:flex;align-items:baseline;justify-content:center;gap:12px;margin:4px 0 22px;padding:18px 12px;letter-spacing:.18em;text-transform:uppercase}
+.ruptix-hero-brand span{font-size:18px;font-weight:700;opacity:.55}
+.ruptix-hero-brand strong{font-size:clamp(38px,7vw,76px);line-height:.9;font-weight:950;letter-spacing:.08em}
+@media(max-width:600px){.ruptix-hero-brand{margin-bottom:14px;padding:12px 8px}.ruptix-hero-brand span{font-size:13px}.ruptix-hero-brand strong{font-size:42px}}
