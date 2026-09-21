@@ -1,55 +1,7 @@
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Save } from "lucide-react";
 import { supabase } from "../../../../lib/supabase";
-import { redirect } from "next/navigation";
-import Sidebar from "../../_components/Sidebar";
-
-export const dynamic = "force-dynamic";
-
-async function createService(formData) {
-  "use server";
-
-  const name = formData.get("name");
-  const price = Number(formData.get("price") || 0);
-  const duration_minutes = Number(formData.get("duration_minutes") || 30);
-
-  const { data: barbershop } = await supabase
-    .from("barbershops")
-    .select("id")
-    .eq("slug", "barbearia-modelo")
-    .single();
-
-  if (!barbershop) throw new Error("Barbearia não encontrada");
-
-  await supabase.from("services").insert({
-    barbershop_id: barbershop.id,
-    name,
-    price,
-    duration_minutes,
-    is_active: true,
-  });
-
-  redirect("/dashboard/servicos");
-}
-
-export default function NewServicePage() {
-  return (
-    <main className="dash">
-      <Sidebar />
-
-      <section className="content">
-        <header className="topbar">
-          <div>
-            <p className="eyebrow">Catálogo</p>
-            <h1>Novo serviço</h1>
-          </div>
-        </header>
-
-        <form action={createService} className="box form">
-          <label>Nome do serviço<input name="name" required placeholder="Corte degradê" /></label>
-          <label>Preço<input name="price" type="number" step="0.01" required placeholder="45" /></label>
-          <label>Duração em minutos<input name="duration_minutes" type="number" required placeholder="40" /></label>
-          <button className="primary" type="submit">Salvar serviço</button>
-        </form>
-      </section>
-    </main>
-  );
-}
+import ModuleShell from "../../_components/ModuleShell";
+export default function NewService(){const router=useRouter(),[busy,setBusy]=useState(false),[error,setError]=useState("");return <ModuleShell title="Novo serviço" eyebrow="Catálogo">{({tenant})=><form className="box form" onSubmit={async e=>{e.preventDefault();setBusy(true);setError("");const f=new FormData(e.currentTarget),p={name:f.get("name"),description:f.get("description"),duration:Number(f.get("duration")),price_cents:Math.round(Number(f.get("price"))*100),commission_bps:Math.round(Number(f.get("commission"))*100),active:true};const {error}=await supabase.rpc("save_record",{t:tenant.id,k:"service",p});setBusy(false);if(error)return setError(error.message);router.push("/dashboard/servicos")}}><div className="form-grid"><label>Nome<input name="name" required placeholder="Corte degradê"/></label><label>Preço (R$)<input name="price" type="number" min="0" step="0.01" required placeholder="45,00"/></label><label>Duração (minutos)<input name="duration" type="number" min="5" max="480" required defaultValue="40"/></label><label>Comissão (%)<input name="commission" type="number" min="0" max="100" defaultValue="0"/></label></div><label>Descrição<textarea name="description" placeholder="Descrição exibida no agendamento"/></label>{error&&<div className="form-alert error">{error}</div>}<button className="primary form-submit" disabled={busy}><Save size={17}/>{busy?"Salvando...":"Salvar serviço"}</button></form>}</ModuleShell>}
