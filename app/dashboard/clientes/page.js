@@ -45,7 +45,7 @@ export default async function ClientsPage() {
             <p className="eyebrow">Cadastro</p>
             <h1>Clientes</h1>
           </div>
-          <button className="primary">Novo cliente</button>
+          <a className="primary" href="/dashboard/clientes/novo">Novo cliente</a>
         </header>
 
         <section className="box">

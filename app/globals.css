@@ -350,3 +350,30 @@ h1 {
     flex-direction: column;
   }
 }
+
+.form {
+  max-width: 560px;
+  display: grid;
+  gap: 18px;
+}
+
+.form label {
+  display: grid;
+  gap: 8px;
+  color: #d4d4d4;
+  font-weight: 700;
+}
+
+.form input {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.08);
+  color: white;
+  padding: 14px 16px;
+  border-radius: 14px;
+  outline: none;
+}
+
+.form input::placeholder {
+  color: #888;
+}
