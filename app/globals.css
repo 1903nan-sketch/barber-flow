@@ -31,3 +31,10 @@
 .quick-sale-modal .service-results button{width:100%}
 .quick-sale-modal .sale-cart,.quick-sale-modal .sale-total{position:relative;z-index:1}
 @media(max-width:600px){.quick-sale-modal .service-results{max-height:180px}}
+
+/* Sales filters and dashboard privacy */
+.sales-filters{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 18px}
+.sales-filters select{min-width:160px;padding:11px 13px;border:1px solid #e1e5ee;border-radius:12px;background:#fff}
+.dashboard-privacy{display:flex;justify-content:flex-end;margin:0 0 10px}
+.dashboard-privacy button{display:inline-flex;align-items:center;gap:7px;border:1px solid #e1e5ee;background:#fff;border-radius:12px;padding:9px 12px;font-weight:700;cursor:pointer}
+@media(max-width:600px){.sales-filters select{width:100%}.dashboard-privacy{justify-content:stretch}.dashboard-privacy button{width:100%;justify-content:center}}
