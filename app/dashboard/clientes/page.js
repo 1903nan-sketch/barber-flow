@@ -1,67 +1,7 @@
+"use client";
+import { useEffect,useState } from "react";
+import { Plus,Search,Users } from "lucide-react";
 import { supabase } from "../../../lib/supabase";
-import Sidebar from "../_components/Sidebar";
-
-export const dynamic = "force-dynamic";
-
-async function getClients() {
-  if (!supabase) return [];
-
-  const { data: barbershop } = await supabase
-    .from("barbershops")
-    .select("id")
-    .eq("slug", "barbearia-modelo")
-    .single();
-
-  if (!barbershop) return [];
-
-  const { data } = await supabase
-    .from("clients")
-    .select("*")
-    .eq("barbershop_id", barbershop.id)
-    .order("created_at", { ascending: false });
-
-  return data || [];
-}
-
-export default async function ClientsPage() {
-  const clients = await getClients();
-
-  return (
-    <main className="dash">
-      <Sidebar />
-
-      <section className="content">
-        <header className="topbar">
-          <div>
-            <p className="eyebrow">Cadastro</p>
-            <h1>Clientes</h1>
-          </div>
-
-          <a className="primary" href="/dashboard/clientes/novo">
-            Novo cliente
-          </a>
-        </header>
-
-        <section className="box">
-          <div className="box-head">
-            <h2>Clientes cadastrados</h2>
-            <span>{clients.length} registros</span>
-          </div>
-
-          <div className="appointments">
-            {clients.map((client) => (
-              <div className="appointment" key={client.id}>
-                <strong>Cliente</strong>
-                <div>
-                  <b>{client.name}</b>
-                  <p>{client.phone || "Sem telefone"} · {client.email || "Sem e-mail"}</p>
-                </div>
-                <span className="pill">ativo</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      </section>
-    </main>
-  );
-}
+import ModuleShell from "../_components/ModuleShell";
+function ClientsContent({workspace}){const [items,setItems]=useState([]),[query,setQuery]=useState(""),[loading,setLoading]=useState(true);useEffect(()=>{supabase.from("clients").select("*").eq("tenant_id",workspace.tenant.id).order("created_at",{ascending:false}).then(({data})=>{setItems(data||[]);setLoading(false)})},[workspace.tenant.id]);const filtered=items.filter(x=>x.name.toLowerCase().includes(query.toLowerCase())||x.phone?.includes(query));return <section className="box"><div className="module-toolbar"><div><h2>Base de clientes</h2><p>{items.length} pessoas cadastradas</p></div><label className="search-field"><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar cliente"/></label></div>{loading?<p className="empty">Carregando...</p>:filtered.length===0?<div className="empty-state"><Users/><strong>Nenhum cliente encontrado</strong><p>Cadastre o primeiro cliente da barbearia.</p></div>:<div className="data-list">{filtered.map(x=><article key={x.id}><span className="client-avatar">{x.name[0]}</span><div><strong>{x.name}</strong><small>{x.phone||x.whatsapp||"Sem telefone"} · {x.email||"Sem e-mail"}</small></div><span className="pill confirmed">ativo</span></article>)}</div>}</section>}
+export default function ClientsPage(){return <ModuleShell title="Clientes" eyebrow="Relacionamento" action={<a className="primary" href="/dashboard/clientes/novo"><Plus size={18}/> Novo cliente</a>}>{workspace=><ClientsContent workspace={workspace}/>}</ModuleShell>}
