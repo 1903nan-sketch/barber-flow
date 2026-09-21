@@ -1,13 +1,13 @@
-export default function LoginPage() {
-  return (
-    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#050505", color: "white", fontFamily: "Arial" }}>
-      <div style={{ width: "100%", maxWidth: 400, background: "#151515", padding: 30, borderRadius: 20 }}>
-        <h1>Entrar</h1>
-        <p>Acesso administrativo do Barber Flow.</p>
-        <input placeholder="E-mail" style={{ width: "100%", padding: 14, marginBottom: 12, borderRadius: 10 }} />
-        <input placeholder="Senha" type="password" style={{ width: "100%", padding: 14, marginBottom: 12, borderRadius: 10 }} />
-        <button style={{ width: "100%", padding: 14, borderRadius: 10, fontWeight: "bold" }}>Entrar</button>
-      </div>
-    </main>
-  );
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowRight,Eye,EyeOff,Scissors } from "lucide-react";
+import { supabase } from "../../lib/supabase";
+export default function LoginPage(){
+ const router=useRouter(); const [mode,setMode]=useState("login"); const [show,setShow]=useState(false); const [loading,setLoading]=useState(false); const [message,setMessage]=useState(""); const [error,setError]=useState("");
+ async function submit(event){event.preventDefault();setLoading(true);setError("");setMessage("");const form=new FormData(event.currentTarget),email=form.get("email"),password=form.get("password");if(!supabase){setError("Conexão com o banco não configurada.");setLoading(false);return}
+  if(mode==="reset"){const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:`${location.origin}/login`});setLoading(false);return error?setError(error.message):setMessage("Enviamos o link de recuperação para seu e-mail.")}
+  const result=mode==="signup"?await supabase.auth.signUp({email,password}):await supabase.auth.signInWithPassword({email,password});setLoading(false);if(result.error)return setError(result.error.message==="Invalid login credentials"?"E-mail ou senha incorretos.":result.error.message);if(mode==="signup"&&!result.data.session)return setMessage("Conta criada. Confirme o e-mail para entrar.");router.push("/dashboard");router.refresh();
+ }
+ return <main className="auth-page"><section className="auth-brand"><div className="auth-logo"><Scissors/> Barber Flow</div><div><span className="auth-kicker">GESTÃO QUE TRANSFORMA</span><h1>Mais controle.<br/>Mais clientes.<br/><em>Mais crescimento.</em></h1><p>Administre sua barbearia de qualquer lugar, com tudo o que você precisa em um só sistema.</p></div><small>© 2026 Barber Flow</small></section><section className="auth-panel"><form className="auth-card" onSubmit={submit}><div className="mobile-auth-logo"><Scissors/> Barber Flow</div><span className="auth-welcome">BEM-VINDO</span><h2>{mode==="login"?"Acesse sua conta":mode==="signup"?"Crie sua conta":"Recupere sua senha"}</h2><p>{mode==="reset"?"Digite seu e-mail para receber o link.":"Entre com seus dados para continuar."}</p><label>E-mail<input name="email" type="email" autoComplete="email" placeholder="voce@email.com" required/></label>{mode!=="reset"&&<label>Senha<div className="password-field"><input name="password" type={show?"text":"password"} minLength="6" autoComplete={mode==="login"?"current-password":"new-password"} placeholder="Sua senha" required/><button type="button" onClick={()=>setShow(!show)}>{show?<EyeOff size={18}/>:<Eye size={18}/>}</button></div></label>}{error&&<div className="form-alert error">{error}</div>}{message&&<div className="form-alert success">{message}</div>}<button className="auth-submit" disabled={loading}>{loading?"Aguarde...":mode==="login"?"Entrar":mode==="signup"?"Criar conta":"Enviar link"}<ArrowRight size={18}/></button><div className="auth-links">{mode==="login"&&<button type="button" onClick={()=>setMode("reset")}>Esqueci minha senha</button>}<button type="button" onClick={()=>setMode(mode==="signup"?"login":"signup")}>{mode==="signup"?"Já tenho uma conta":"Criar uma conta"}</button></div></form></section></main>
 }
