@@ -3,6 +3,7 @@ import {headers} from "next/headers";
 import {redirect} from "next/navigation";
 import {createClient} from "@supabase/supabase-js";
 import {ArrowUpRight,Scissors,Sparkles} from "lucide-react";
+import {createClient} from "@supabase/supabase-js";
 import RuptixLogo from "./_components/RuptixLogo";
 
 async function getActiveUsers(){
@@ -13,7 +14,21 @@ async function getActiveUsers(){
  return error?0:(count||0);
 }
 
+async function getActiveUsers(){
+ const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+ if(!url||!key)return 0;
+ try{
+  const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
+  const {data:tenants,error:tenantError}=await admin.from("tenants").select("id").eq("status","active");
+  if(tenantError||!tenants?.length)return 0;
+  const {data:memberships,error}=await admin.from("memberships").select("user_id").eq("active",true).in("tenant_id",tenants.map(t=>t.id));
+  if(error)return 0;
+  return new Set((memberships||[]).map(m=>m.user_id).filter(Boolean)).size;
+ }catch{return 0}
+}
+
 export default async function HomePage(){
+ const activeUsers=await getActiveUsers();
  const host=(await headers()).get("host")?.split(":")[0]?.toLowerCase();
  if(host==="barberflow.3ruptix.com") redirect("/login");
  const activeUsers=await getActiveUsers();
