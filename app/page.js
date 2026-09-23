@@ -1,15 +1,25 @@
 import Link from "next/link";
 import {headers} from "next/headers";
 import {redirect} from "next/navigation";
+import {createClient} from "@supabase/supabase-js";
 import {ArrowUpRight,Scissors,Sparkles} from "lucide-react";
 import RuptixLogo from "./_components/RuptixLogo";
+
+async function getActiveUsers(){
+ const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+ if(!url||!key)return 0;
+ const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
+ const {count,error}=await admin.from("memberships").select("user_id,tenants!inner(status)",{count:"exact",head:true}).eq("active",true).eq("tenants.status","active");
+ return error?0:(count||0);
+}
 
 export default async function HomePage(){
  const host=(await headers()).get("host")?.split(":")[0]?.toLowerCase();
  if(host==="barberflow.3ruptix.com") redirect("/login");
+ const activeUsers=await getActiveUsers();
 
  return <main className="ruptix-hub rh-v2">
- <nav className="rh2-nav"><Link href="/" className="rh2-logo"><RuptixLogo/></Link><div><a href="#produtos">PRODUTOS</a><a href="#sobre">SOBRE</a></div><a href="#produtos" className="rh2-client">PRODUTOS <ArrowUpRight/></a></nav>
+ <nav className="rh2-nav"><Link href="/" className="rh2-logo"><RuptixLogo/></Link><div><a href="#produtos">PRODUTOS</a><a href="#sobre">SOBRE</a></div><span className="rh2-nav-right"><span className="rh2-system-status"><i/> ONLINE <b>USERS: {activeUsers}</b></span><a href="#produtos" className="rh2-client">PRODUTOS <ArrowUpRight/></a></span></nav>
  <section className="rh2-hero"><div className="rh2-grid"/><div className="rh2-copy"><span className="rh2-label"><i/> SOFTWARE STUDIO · SÃO PAULO</span><h1>Construímos<br/>software que<br/><em>move negócios.</em></h1><p>Produtos digitais criados para resolver operações reais, automatizar processos e transformar empresas.</p></div><div className="rh2-side"><span>RUPTIX / 2026</span><b>BUILD<br/>BETTER<br/>SYSTEMS.</b><Sparkles/></div></section>
  <section className="rh2-products" id="produtos"><div className="rh2-title"><span>01 / ECOSSISTEMA</span><h2>Linhas<br/>Ruptix.</h2><p>Os softwares da Ruptix são organizados por linhas de negócio, preparados para crescer conforme novos sistemas entram no ecossistema.</p></div>
  <div className="rh2-line">
