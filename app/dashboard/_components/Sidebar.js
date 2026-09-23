@@ -63,7 +63,7 @@ export default function Sidebar({ workspace }) {
 
       <div className="sidebar-footer">
         <a href="/dashboard/configuracoes"><Settings size={19} /><span>Configurações do site</span></a>
-        <button className="profile-card" style={{ width: "100%", background: "transparent", color: "inherit", borderLeft: 0, borderRight: 0, borderBottom: 0, textAlign: "left", cursor: "pointer" }} type="button" onClick={() => supabase?.auth.signOut()}>
+        <button className="profile-card" style={{ width: "100%", background: "transparent", color: "inherit", borderLeft: 0, borderRight: 0, borderBottom: 0, textAlign: "left", cursor: "pointer" }} type="button" onClick={async () => {await supabase?.auth.signOut();window.location.href="/login"}}>
           <span className="profile-avatar">AD</span>
           <div><strong>{workspace?.membership?.name||"Administrador"}</strong><small>Plano {workspace?.tenant?.plans?.name||"contratado"}</small></div>
           <LogOut size={18} />
