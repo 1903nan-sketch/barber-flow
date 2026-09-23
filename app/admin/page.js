@@ -1,4 +1,5 @@
 "use client";
+import {tenantFields} from "../../lib/tenant-fields";
 import "./admin-dark.css";
 import {useEffect,useState} from "react";
 import {Building2,CircleDollarSign,ExternalLink,FileText,KeyRound,LockKeyhole,LogOut,Plus,Scissors,ShieldCheck,Users} from "lucide-react";
@@ -7,7 +8,7 @@ const money=v=>(Number(v||0)/100).toLocaleString("pt-BR",{style:"currency",curre
 export default function AdminPage(){
  const router=useRouter();const [loading,setLoading]=useState(true),[role,setRole]=useState(""),[plans,setPlans]=useState([]),[tenants,setTenants]=useState([]),[view,setView]=useState("register"),[error,setError]=useState(""),[report,setReport]=useState(null),[reportPass,setReportPass]=useState(""),[accesses,setAccesses]=useState([]),[accessLoading,setAccessLoading]=useState(false);
  const full=role==="full";
- async function reload(){await supabase.rpc("sync_tenant_billing_status",{p_tenant:null});const [p,t]=await Promise.all([supabase.from("plans").select("*").order("monthly_cents"),supabase.from("tenants").select("*,plans(name,monthly_cents)").order("created_at",{ascending:false})]);setPlans(p.data||[]);setTenants(t.data||[])}
+ async function reload(){await supabase.rpc("sync_tenant_billing_status",{p_tenant:null});const [p,t]=await Promise.all([supabase.from("plans").select("*").order("monthly_cents"),supabase.from("tenants").select(`${tenantFields},plans(name,monthly_cents)`).order("created_at",{ascending:false})]);setPlans(p.data||[]);setTenants(t.data||[])}
  useEffect(()=>{(async()=>{const {data:{user}}=await supabase.auth.getUser();if(!user){router.replace("/login");return}const {data}=await supabase.from("platform_admins").select("access_role").eq("user_id",user.id).maybeSingle();setRole(data?.access_role||"");if(data){await reload();if(data.access_role==="operations")setView("tenants")}setLoading(false)})()},[router]);
  async function token(){return (await supabase.auth.getSession()).data.session?.access_token}
  async function saveTenant(e){e.preventDefault();setError("");const f=new FormData(e.currentTarget),payload=Object.fromEntries(f);payload.slug=String(payload.slug||payload.name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");const res=await fetch("/api/admin/tenants",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+await token()},body:JSON.stringify(payload)}),j=await res.json();if(!res.ok)return setError(j.error);e.currentTarget.reset();await reload();setView("tenants")}
