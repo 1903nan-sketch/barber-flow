@@ -6,7 +6,8 @@ const digits=value=>String(value||"").replace(/\D/g,"");
 const whatsappNumber=value=>{
   const phone=digits(value);
   if(phone.length===10||phone.length===11)return "55"+phone;
-  return phone;
+  if((phone.length===12||phone.length===13)&&phone.startsWith("55"))return phone;
+  return "";
 };
 const text=value=>String(value||"").trim().replace(/\s+/g," ");
 const fmt=(value,timezone,options)=>new Date(value).toLocaleString("pt-BR",{timeZone:timezone||"America/Sao_Paulo",...options});
@@ -155,7 +156,7 @@ export async function POST(request){
     const tenant=tenantResult.data,client=clientResult.data,barber=barberResult.data,service=serviceResult.data,unit=unitResult.data;
     if(!unit?.active)return NextResponse.json({error:"A unidade deste atendimento não está ativa."},{status:400});
     const phone=whatsappNumber(client?.phone);
-    if(!phone)return NextResponse.json({error:"Este cliente não possui WhatsApp cadastrado."},{status:400});
+    if(!phone)return NextResponse.json({error:"O cliente "+text(client?.name||"selecionado")+" está com um número de WhatsApp inválido. Corrija o telefone no cadastro antes de enviar a proposta."},{status:400});
     if(!(await evolutionConfigured()))return NextResponse.json({error:"O WhatsApp da barbearia não está conectado."},{status:503});
 
     if(!(await proposedSlotAvailable(admin,appointment,unit,startsAt))){
