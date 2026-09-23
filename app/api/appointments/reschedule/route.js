@@ -62,6 +62,56 @@ async function proposedSlotAvailable(admin,appointment,unit,startsAt){
   return !(exceptions||[]).length&&!(conflicts||[]).length;
 }
 
+export async function GET(request){
+  try{
+    const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const publishable=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    const serviceKey=process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const token=request.headers.get("authorization")?.replace(/^Bearer\s+/i,"");
+    if(!url||!publishable||!serviceKey)return NextResponse.json({error:"Configuração do servidor incompleta."},{status:500});
+    if(!token)return NextResponse.json({error:"Sessão inválida."},{status:401});
+
+    const userClient=createClient(url,publishable,{
+      global:{headers:{Authorization:"Bearer "+token}},
+      auth:{persistSession:false,autoRefreshToken:false}
+    });
+    const {data:{user},error:userError}=await userClient.auth.getUser(token);
+    if(userError||!user)return NextResponse.json({error:"Sessão expirada."},{status:401});
+
+    const params=new URL(request.url).searchParams;
+    const tenantId=String(params.get("tenant_id")||"");
+    const appointmentId=String(params.get("appointment_id")||"");
+    const date=String(params.get("date")||"");
+    if(!tenantId||!appointmentId||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date)){
+      return NextResponse.json({error:"Informe uma data válida."},{status:400});
+    }
+
+    const admin=createClient(url,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}});
+    const {data:appointment,error:appointmentError}=await admin.from("appointments")
+      .select("id,tenant_id,status,barber_id,unit_id")
+      .eq("tenant_id",tenantId).eq("id",appointmentId).maybeSingle();
+    if(appointmentError||!appointment)return NextResponse.json({error:"Agendamento não encontrado."},{status:404});
+    if(!["scheduled","present"].includes(appointment.status))return NextResponse.json({error:"Este atendimento não pode ser reagendado."},{status:400});
+    if(!(await canManageAgenda(admin,tenantId,user.id,appointment.barber_id)))return NextResponse.json({error:"Sem permissão para reagendar este atendimento."},{status:403});
+
+    const {data:unit}=await admin.from("units").select("timezone").eq("tenant_id",tenantId).eq("id",appointment.unit_id).maybeSingle();
+    const {data:rows,error:slotError}=await admin.rpc("server_reschedule_slots",{
+      p_tenant:tenantId,
+      p_appointment:appointmentId,
+      p_date:date
+    });
+    if(slotError)throw slotError;
+    const timezone=unit?.timezone||"America/Sao_Paulo";
+    const slots=(rows||[]).map(row=>({
+      starts_at:row.starts_at,
+      label:fmt(row.starts_at,timezone,{hour:"2-digit",minute:"2-digit"})
+    }));
+    return NextResponse.json({ok:true,date,timezone,slots});
+  }catch(error){
+    return NextResponse.json({error:error.message||"Não foi possível consultar os horários."},{status:500});
+  }
+}
+
 export async function POST(request){
   try{
     const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -109,7 +159,7 @@ export async function POST(request){
     if(!(await evolutionConfigured()))return NextResponse.json({error:"O WhatsApp da barbearia não está conectado."},{status:503});
 
     if(!(await proposedSlotAvailable(admin,appointment,unit,startsAt))){
-      return NextResponse.json({error:"Esse horário não está disponível para este profissional."},{status:409});
+      return NextResponse.json({error:"Esse horário acabou de ficar indisponível. Escolha outro horário livre."},{status:409});
     }
 
     const timezone=unit.timezone||"America/Sao_Paulo";
