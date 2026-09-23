@@ -42,8 +42,8 @@ export default function Sidebar({ workspace }) {
       </div>
 
       <div className="workspace-card">
-        <span className="workspace-avatar">BM</span>
-        <div><strong>Barbearia Modelo</strong><small>Unidade principal</small></div>
+        <span className="workspace-avatar">{String(workspace?.tenant?.name||"BF").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase()}</span>
+        <div><strong>{workspace?.tenant?.name||"Barber Flow"}</strong><small>{workspace?.membership?.role==="owner"?"Proprietário":workspace?.membership?.role||"Equipe"}</small></div>
         <ChevronRight size={17} />
       </div>
 
