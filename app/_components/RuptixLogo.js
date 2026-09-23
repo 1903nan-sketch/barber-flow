@@ -1,1 +1,11 @@
-export default function RuptixLogo({className=""}){return <span className={"ruptix-logo "+className} aria-label="Ruptix"><svg viewBox="0 0 90 76" aria-hidden="true"><path d="M45 3 6 70h15L45 29l12 20H39l-8 13h34l5 8h15L52 13 45 3Zm9 34 8 13h-8l-8-13h8Z" fill="currentColor"/></svg><span>RUPTIX</span></span>}
+export default function RuptixLogo({className=""}) {
+  return (
+    <span className={"ruptix-logo "+className} aria-label="Ruptix">
+      <span className="ruptix-official-mark" aria-hidden="true">
+        <i className="ruptix-cut ruptix-cut-a" />
+        <i className="ruptix-cut ruptix-cut-b" />
+      </span>
+      <span className="ruptix-wordmark">RUPTIX</span>
+    </span>
+  );
+}
