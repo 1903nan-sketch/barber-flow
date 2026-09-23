@@ -201,3 +201,28 @@ html:has(.admin-layout),body:has(.admin-layout){background:#05090e!important}
 .workspace-menu .workspace-avatar.mini{width:30px;height:30px;border-radius:8px;font-size:10px}
 .workspace-menu>button b{font-size:8px;color:#a995ff;background:rgba(139,112,244,.14);padding:4px 6px;border-radius:999px}
 .workspace-menu>button.workspace-other-account{display:block;margin-top:6px;border-top:1px solid #272c37;border-radius:0;padding:11px 8px 5px;color:#9fa7b8;font-size:10px}
+
+
+/* Mac-like interactive plan cards */
+.rp-plan-grid{perspective:1200px}
+.rp-plan-grid article{
+  --rx:0deg;--ry:0deg;--lift:0px;--scale:1;--mx:50%;--my:50%;
+  overflow:hidden;
+  transform:perspective(1000px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(var(--lift)) scale(var(--scale));
+  transform-style:preserve-3d;
+  transition:transform .18s ease,border-color .2s ease,box-shadow .2s ease,background .2s ease;
+  will-change:transform;
+}
+.rp-plan-grid article.featured{--lift:-8px}
+.rp-plan-grid article:hover{--lift:-12px;--scale:1.018;border-color:rgba(148,122,255,.7);box-shadow:0 28px 70px rgba(0,0,0,.42),0 0 0 1px rgba(148,122,255,.08)}
+.rp-plan-grid article::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:radial-gradient(420px circle at var(--mx) var(--my),rgba(148,122,255,.16),transparent 42%);
+  transition:opacity .2s ease;
+}
+.rp-plan-grid article:hover::before{opacity:1}
+.rp-plan-grid article>*{position:relative;z-index:1}
+@media (hover:none),(max-width:800px){
+ .rp-plan-grid article,.rp-plan-grid article.featured,.rp-plan-grid article:hover{--rx:0deg;--ry:0deg;--lift:0px;--scale:1;transform:none}
+ .rp-plan-grid article::before{display:none}
+}
