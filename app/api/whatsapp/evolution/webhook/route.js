@@ -1,6 +1,6 @@
 import {timingSafeEqual} from "node:crypto";
 import {NextResponse} from "next/server";
-import {normalizeEvolutionState,sendEvolutionText,tenantIdFromEvolutionInstance} from "../../../../../lib/evolution";
+import {getEvolutionWebhookSecret,normalizeEvolutionState,sendEvolutionText,tenantIdFromEvolutionInstance} from "../../../../../lib/evolution";
 import {whatsappAdmin} from "../../../../../lib/whatsapp-server";
 
 const DEFAULT_TZ="America/Sao_Paulo";
@@ -10,8 +10,8 @@ const money=v=>(Number(v||0)/100).toLocaleString("pt-BR",{style:"currency",curre
 const fmtTime=(v,tz=DEFAULT_TZ)=>new Date(v).toLocaleTimeString("pt-BR",{timeZone:tz||DEFAULT_TZ,hour:"2-digit",minute:"2-digit"});
 const fmtDate=(v,tz=DEFAULT_TZ)=>new Date(v).toLocaleDateString("pt-BR",{timeZone:tz||DEFAULT_TZ,day:"2-digit",month:"2-digit",year:"numeric"});
 
-function safeSecret(req){
-  const expected=String(process.env.EVOLUTION_WEBHOOK_SECRET||"");
+async function safeSecret(req){
+  const expected=String(await getEvolutionWebhookSecret()||"");
   const got=String(new URL(req.url).searchParams.get("secret")||req.headers.get("x-barberflow-webhook")||"");
   if(!expected||!got||expected.length!==got.length)return false;
   return timingSafeEqual(Buffer.from(expected),Buffer.from(got));
@@ -88,7 +88,7 @@ async function availableSlots(db,slug,unit,service,barbers,date){
   }).slice(0,12);
 }
 export async function POST(req){
-  if(!safeSecret(req))return NextResponse.json({error:"Webhook não autorizado."},{status:401});
+  if(!(await safeSecret(req)))return NextResponse.json({error:"Webhook não autorizado."},{status:401});
   let body;try{body=await req.json()}catch{return NextResponse.json({error:"JSON inválido."},{status:400})}
   const db=whatsappAdmin(),event=eventName(body),instance=String(body?.instance||body?.instanceName||body?.data?.instance||"");
   if(!instance)return NextResponse.json({ok:true,ignored:"missing_instance"});
