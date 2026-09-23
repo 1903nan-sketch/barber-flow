@@ -295,3 +295,10 @@
   .agenda-time-block{min-height:68px}
   .agenda-meta-grid .agenda-phone{width:100%;justify-content:flex-start}
 }
+
+
+/* Agenda checkout label: legacy mobile pseudo-label must not duplicate the real button text */
+@media(max-width:650px){
+  .agenda-card-actions .checkout-btn{font-size:9px!important}
+  .agenda-card-actions .checkout-btn:after{content:none!important;display:none!important}
+}
