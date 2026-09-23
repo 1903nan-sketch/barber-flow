@@ -1,6 +1,6 @@
 import {createClient} from "@supabase/supabase-js";
 import {NextResponse} from "next/server";
-import {evolutionConfigured,evolutionInstanceName,sendEvolutionPoll,sendEvolutionText} from "../../../../lib/evolution";
+import {evolutionConfigured,evolutionInstanceName,sendEvolutionButtons,sendEvolutionText} from "../../../../lib/evolution";
 
 const digits=value=>String(value||"").replace(/\D/g,"");
 const whatsappNumber=value=>{
@@ -155,17 +155,19 @@ export async function POST(request){
     try{
       await sendEvolutionText(evolutionInstanceName(tenantId),phone,message);
       try{
-        await sendEvolutionPoll(evolutionInstanceName(tenantId),phone,"Confirmar reagendamento",[
-          "Confirmar novo horário",
-          "Manter horário atual",
-          "Falar com atendente"
-        ]);
+        await sendEvolutionButtons(
+          evolutionInstanceName(tenantId),
+          phone,
+          "Confirmar reagendamento",
+          "Toque em uma opção abaixo:",
+          ["Confirmar novo horário","Manter horário atual","Falar com atendente"]
+        );
       }catch{
         await sendEvolutionText(evolutionInstanceName(tenantId),phone,"Responda *CONFIRMAR* para aceitar o novo horário ou *MANTER* para ficar com o horário atual.");
       }
       await admin.from("whatsapp_bot_logs").insert([
         {tenant_id:tenantId,phone,direction:"out",message},
-        {tenant_id:tenantId,phone,direction:"out",message:"[OPÇÕES] Confirmar novo horário | Manter horário atual | Falar com atendente"}
+        {tenant_id:tenantId,phone,direction:"out",message:"[BOTÕES] Confirmar novo horário | Manter horário atual | Falar com atendente"}
       ]);
       return NextResponse.json({ok:true,notified:true,pending:true,new_date:newDate,new_time:newTime});
     }catch(sendError){
