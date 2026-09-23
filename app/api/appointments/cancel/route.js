@@ -1,6 +1,6 @@
 import {createClient} from "@supabase/supabase-js";
 import {NextResponse} from "next/server";
-import {evolutionConfigured,evolutionInstanceName,sendEvolutionText} from "../../../../lib/evolution";
+import {evolutionConfigured,evolutionInstanceName,resolveEvolutionNumber,sendEvolutionText} from "../../../../lib/evolution";
 
 const digits=value=>String(value||"").replace(/\D/g,"");
 const whatsappNumber=value=>{
@@ -65,9 +65,18 @@ export async function POST(request){
     ]);
 
     const tenant=tenantResult.data,client=clientResult.data,barber=barberResult.data,service=serviceResult.data,unit=unitResult.data;
-    const phone=whatsappNumber(client?.phone);
-    if(!phone)return NextResponse.json({ok:true,notified:false,notification_reason:"invalid_phone"});
+    const storedPhone=whatsappNumber(client?.phone);
+    if(!storedPhone)return NextResponse.json({ok:true,notified:false,notification_reason:"invalid_phone"});
     if(!(await evolutionConfigured()))return NextResponse.json({ok:true,notified:false,notification_reason:"whatsapp_not_configured"});
+    const instance=evolutionInstanceName(tenantId);
+    let phone="";
+    try{
+      phone=await resolveEvolutionNumber(instance,storedPhone);
+    }catch(numberError){
+      console.error("WhatsApp cancellation number validation failed",numberError);
+      return NextResponse.json({ok:true,notified:false,notification_reason:"validation_failed"});
+    }
+    if(!phone)return NextResponse.json({ok:true,notified:false,notification_reason:"number_not_found"});
 
     const when=formatAppointment(appointment.starts_at,unit?.timezone);
     const message=[
@@ -86,7 +95,7 @@ export async function POST(request){
     ].join("\n");
 
     try{
-      await sendEvolutionText(evolutionInstanceName(tenantId),phone,message);
+      await sendEvolutionText(instance,phone,message);
       await admin.from("whatsapp_bot_logs").insert({
         tenant_id:tenantId,
         phone,
