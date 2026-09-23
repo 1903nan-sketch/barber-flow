@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {evolutionConfigured,evolutionConnectionState,normalizeEvolutionState} from "../../../../../lib/evolution";
+import {connectEvolutionInstance,evolutionConfigured,evolutionConnectionState,evolutionInstanceName,evolutionPhone,extractEvolutionQr,normalizeEvolutionState} from "../../../../../lib/evolution";
 import {requireWhatsappSettingsAccess} from "../../../../../lib/whatsapp-server";
 
 export async function GET(req){
@@ -8,29 +8,33 @@ export async function GET(req){
   if(auth.error)return NextResponse.json({error:auth.error},{status:auth.status});
   if(!evolutionConfigured())return NextResponse.json({configured:false,status:"not_configured"});
 
-  const {data:integration,error}=await auth.admin.from("whatsapp_integrations").select("*").eq("tenant_id",tenant).maybeSingle();
-  if(error)return NextResponse.json({error:"Não foi possível consultar a integração."},{status:500});
-  if(!integration)return NextResponse.json({configured:true,status:"disconnected",connected:false});
-
-  let state=integration.status;
+  const instance=evolutionInstanceName(tenant);
+  let remote,state="disconnected",qrcode="",phone="";
   try{
-    const remote=await evolutionConnectionState(integration.instance_name);
+    remote=await evolutionConnectionState(instance);
     state=normalizeEvolutionState(remote);
-    await auth.admin.from("whatsapp_integrations").update({
-      status:state,
-      connected_at:state==="connected"?(integration.connected_at||new Date().toISOString()):integration.connected_at,
-      updated_at:new Date().toISOString(),
-      metadata:state==="connected"?{}:integration.metadata
-    }).eq("tenant_id",tenant);
+    phone=evolutionPhone(remote);
   }catch{
-    if(state==="creating")state="connecting";
+    return NextResponse.json({configured:true,status:"disconnected",connected:false,phone:"",qrcode:"",instance});
   }
+
+  if(state!=="connected"){
+    try{
+      const connection=await connectEvolutionInstance(instance);
+      qrcode=extractEvolutionQr(connection);
+      phone=phone||evolutionPhone(connection);
+      const connectionState=normalizeEvolutionState(connection);
+      if(connectionState==="connected")state="connected";
+      else if(qrcode)state="connecting";
+    }catch{}
+  }
+
   return NextResponse.json({
     configured:true,
     status:state,
     connected:state==="connected",
-    phone:integration.display_phone||"",
-    qrcode:state==="connecting"?(integration.metadata?.qr_base64||""):"",
-    instance:integration.instance_name
+    phone,
+    qrcode:state==="connecting"?qrcode:"",
+    instance
   });
 }
