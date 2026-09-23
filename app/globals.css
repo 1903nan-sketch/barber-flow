@@ -226,3 +226,19 @@ html:has(.admin-layout),body:has(.admin-layout){background:#05090e!important}
  .rp-plan-grid article,.rp-plan-grid article.featured,.rp-plan-grid article:hover{--rx:0deg;--ry:0deg;--lift:0px;--scale:1;transform:none}
  .rp-plan-grid article::before{display:none}
 }
+
+
+/* Ruptix product-line architecture */
+.rh2-title>p{max-width:300px;margin-top:28px;color:#777b85;font-size:11px;line-height:1.7}
+.rh2-line{grid-column:2}
+.rh2-line-head{display:grid;grid-template-columns:1fr minmax(220px,320px);align-items:end;gap:35px;margin:0 0 22px;padding:0 0 24px;border-bottom:1px solid #292a2f}
+.rh2-line-head span{font-size:8px;font-weight:850;letter-spacing:.18em;color:#7c6acb}
+.rh2-line-head h3{margin:8px 0 0;font-size:40px;line-height:.9;letter-spacing:-.045em}
+.rh2-line-head p{margin:0;color:#777b85;font-size:11px;line-height:1.65}
+.rh2-line .rh2-next{grid-column:auto}
+@media(max-width:800px){
+ .rh2-title>p{max-width:none}
+ .rh2-line{grid-column:auto}
+ .rh2-line-head{grid-template-columns:1fr;gap:14px;margin-top:10px}
+ .rh2-line-head h3{font-size:34px}
+}
