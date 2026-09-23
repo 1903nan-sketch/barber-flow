@@ -6,7 +6,8 @@ const digits=value=>String(value||"").replace(/\D/g,"");
 const whatsappNumber=value=>{
   const phone=digits(value);
   if(phone.length===10||phone.length===11)return "55"+phone;
-  return phone;
+  if((phone.length===12||phone.length===13)&&phone.startsWith("55"))return phone;
+  return "";
 };
 
 function formatAppointment(startsAt,timezone){
@@ -65,7 +66,7 @@ export async function POST(request){
 
     const tenant=tenantResult.data,client=clientResult.data,barber=barberResult.data,service=serviceResult.data,unit=unitResult.data;
     const phone=whatsappNumber(client?.phone);
-    if(!phone)return NextResponse.json({ok:true,notified:false,notification_reason:"missing_phone"});
+    if(!phone)return NextResponse.json({ok:true,notified:false,notification_reason:"invalid_phone"});
     if(!(await evolutionConfigured()))return NextResponse.json({ok:true,notified:false,notification_reason:"whatsapp_not_configured"});
 
     const when=formatAppointment(appointment.starts_at,unit?.timezone);
