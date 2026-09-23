@@ -6,7 +6,16 @@ import {whatsappAdmin} from "../../../../../lib/whatsapp-server";
 const DEFAULT_TZ="America/Sao_Paulo";
 const digits=v=>String(v||"").replace(/\D/g,"");
 const clean=v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+const textLabel=v=>String(v||"").trim().replace(/\s+/g," ");
+const brandLabel=v=>{const s=textLabel(v);return s&&s===s.toLowerCase()?s.charAt(0).toUpperCase()+s.slice(1):s};
 const money=v=>(Number(v||0)/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const formatPhone=v=>{
+  let d=digits(v);
+  if(d.startsWith("55")&&(d.length===12||d.length===13))d=d.slice(2);
+  if(d.length===11)return "("+d.slice(0,2)+") "+d.slice(2,7)+"-"+d.slice(7);
+  if(d.length===10)return "("+d.slice(0,2)+") "+d.slice(2,6)+"-"+d.slice(6);
+  return d;
+};
 const fmtTime=(v,tz=DEFAULT_TZ)=>new Date(v).toLocaleTimeString("pt-BR",{timeZone:tz||DEFAULT_TZ,hour:"2-digit",minute:"2-digit"});
 const fmtDate=(v,tz=DEFAULT_TZ)=>new Date(v).toLocaleDateString("pt-BR",{timeZone:tz||DEFAULT_TZ,day:"2-digit",month:"2-digit",year:"numeric"});
 
@@ -53,15 +62,27 @@ function parseDateText(text,tz=DEFAULT_TZ,{allowPast=false}={}){
   const y=m[3]?Number(m[3].length===2?"20"+m[3]:m[3]):now.getFullYear(),mo=Number(m[2]),day=Number(m[1]);
   const d=new Date(Date.UTC(y,mo-1,day));
   if(d.getUTCFullYear()!==y||d.getUTCMonth()!==mo-1||d.getUTCDate()!==day)return "";
-  const out=y+"-"+String(mo).padStart(2,"0")+"-"+String(day).padStart(2,"0");
+  let out=y+"-"+String(mo).padStart(2,"0")+"-"+String(day).padStart(2,"0");
+  if(!allowPast&&!m[3]&&out<localDate(0,tz)){
+    y+=1;
+    out=y+"-"+String(mo).padStart(2,"0")+"-"+String(day).padStart(2,"0");
+  }
   return allowPast||out>=localDate(0,tz)?out:"";
 }
 function parseRequestedDate(text,tz=DEFAULT_TZ){return parseDateText(text,tz,{allowPast:false})}
 function pick(items,text,label=x=>x.name){
-  const n=Number(String(text).trim());
+  const raw=String(text).trim(),n=Number(raw);
   if(Number.isInteger(n)&&n>=1&&n<=items.length)return items[n-1];
+  const numbers=raw.match(/\b\d+\b/g);
+  if(numbers?.length===1){
+    const option=Number(numbers[0]);
+    if(Number.isInteger(option)&&option>=1&&option<=items.length)return items[option-1];
+  }
   const t=clean(text);
-  return items.find(x=>clean(label(x))===t)||items.find(x=>clean(label(x)).includes(t)&&t.length>=3);
+  if(!t)return null;
+  return items.find(x=>clean(label(x))===t)||
+    items.find(x=>{const name=clean(label(x));return name.length>=3&&t.includes(name)})||
+    items.find(x=>{const name=clean(label(x));return t.length>=3&&name.includes(t)});
 }
 function phoneKeys(value){
   const d=digits(value),out=new Set();
@@ -102,12 +123,12 @@ function statusLabel(value){
 }
 function serviceOptions(services){
   return services.map((x,i)=>
-    "*"+(i+1)+" — "+x.name+"*\n"+
-    "   "+money(x.price_cents)+" · "+x.duration+" min"
+    "*"+(i+1)+" — "+textLabel(x.name)+"*\n"+
+    money(x.price_cents)+" · "+x.duration+" min"
   ).join("\n\n");
 }
 function professionalOptions(barbers){
-  return barbers.map((x,i)=>"*"+(i+1)+" — "+x.name+"*").join("\n")+"\n*0 — Qualquer profissional disponível*";
+  return barbers.map((x,i)=>"*"+(i+1)+" — "+textLabel(x.name)+"*").join("\n")+"\n*0 — Qualquer profissional disponível*";
 }
 async function saveSession(db,tenant,phone,state,data){
   await db.from("whatsapp_booking_sessions").upsert({
@@ -127,12 +148,15 @@ async function availableSlots(db,slug,unit,service,barbers,date){
       p_slug:slug,p_unit:unit,p_barber:b.id,p_services:[service],p_date:date
     });
     if(error)return [];
-    return (data||[]).map(x=>({starts_at:x?.starts_at||x?.start_at||x,barber_id:b.id,barber_name:b.name}));
+    return (data||[]).map(x=>({starts_at:x?.starts_at||x?.start_at||x,barber_id:b.id,barber_name:textLabel(b.name)}));
   }));
-  const seen=new Set();
+  const seen=new Set(),anyProfessional=barbers.length>1;
   return rows.flat().filter(x=>x.starts_at).sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at)).filter(x=>{
-    const k=x.starts_at+"|"+x.barber_id;if(seen.has(k))return false;seen.add(k);return true;
-  }).slice(0,12);
+    const k=anyProfessional?x.starts_at:x.starts_at+"|"+x.barber_id;
+    if(seen.has(k))return false;
+    seen.add(k);
+    return true;
+  }).slice(0,40);
 }
 async function findEmployee(db,tenantId,phone){
   const [{data:members},{data:professionals}]=await Promise.all([
@@ -195,7 +219,7 @@ async function employeeAppointments(db,tenantId,barberId,date,tz){
     serviceIds.length?db.from("services").select("id,name").eq("tenant_id",tenantId).in("id",serviceIds):Promise.resolve({data:[]})
   ]);
   const clients=new Map((clientsResult.data||[]).map(x=>[x.id,x.name])),services=new Map((servicesResult.data||[]).map(x=>[x.id,x.name]));
-  return rows.map(x=>({...x,client_name:clients.get(x.client_id)||"Cliente",service_name:services.get(x.service_id)||"Atendimento"}));
+  return rows.map(x=>({...x,client_name:textLabel(clients.get(x.client_id)||"Cliente"),service_name:textLabel(services.get(x.service_id)||"Atendimento")}));
 }
 function employeeAgendaText(rows,date,tz){
   const label=new Date(date+"T12:00:00Z").toLocaleDateString("pt-BR",{timeZone:"UTC",day:"2-digit",month:"2-digit",year:"numeric"});
@@ -226,6 +250,7 @@ export async function POST(req){
     .select("id,name,slug,address,whatsapp,status")
     .eq("id",tenantId).maybeSingle();
   if(!tenant)return NextResponse.json({ok:true,ignored:"unknown_tenant"});
+  const shopName=brandLabel(tenant.name)||"barbearia";
 
   if(event==="QRCODE_UPDATED")return NextResponse.json({ok:true,status:"connecting"});
   if(event==="CONNECTION_UPDATE")return NextResponse.json({ok:true,status:normalizeEvolutionState(payloadData(body))});
@@ -278,12 +303,13 @@ export async function POST(req){
 
   const wantsCancelOrReschedule=/\b(cancelar|cancelamento|desmarcar|remarcar|remarcacao)\b/.test(t);
   const wantsHuman=wantsCancelOrReschedule||/\b(atendente|humano|pessoa|recepcao|falar com alguem)\b/.test(t);
-  const reset=/^(oi|ola|menu|inicio|comecar|recomecar)$/.test(t);
+  const asksAvailability=/\b(horario|horarios|agenda|disponibilidade|disponivel|disponiveis|vaga|vagas)\b/.test(t);
+  const reset=/^(oi|ola|menu|inicio|comecar|recomecar|bom dia|boa tarde|boa noite)$/.test(t);
   const resume=/^(bot|robo|voltar ao bot|voltar|menu)$/.test(t);
 
   if(wantsHuman){
     state="human";await saveSession(db,tenantId,phone,state,d);
-    const contact=digits(tenant?.whatsapp);
+    const contact=formatPhone(tenant?.whatsapp);
     const reason=wantsCancelOrReschedule?"Para alterar ou cancelar um horário, nossa equipe continua com você por aqui.":"Nossa equipe continua o atendimento com você a partir daqui.";
     await reply(db,tenantId,instance,phone,"👤 *Atendimento humano*\n\n"+reason+(contact?"\n\n📲 "+contact:"")+"\n\n_Para voltar ao agendamento automático, envie *MENU*._");
     return NextResponse.json({ok:true,handoff:true});
@@ -301,7 +327,7 @@ export async function POST(req){
   }
   if(/\b(site|link|agenda online|agendamento online)\b/.test(t)){
     await saveSession(db,tenantId,phone,state,d);
-    await reply(db,tenantId,instance,phone,"📲 *Prefere agendar pelo site?*\n\n"+origin+"/agendar/"+tenant.slug+"\n\n_O link abre direto na agenda da "+tenant.name+"._");
+    await reply(db,tenantId,instance,phone,"📲 *Prefere agendar pelo site?*\n\n"+origin+"/agendar/"+tenant.slug+"\n\n_O link abre direto na agenda da "+shopName+"._");
     return NextResponse.json({ok:true});
   }
 
@@ -319,7 +345,7 @@ export async function POST(req){
     if(units.length>1){
       state="unit";await saveSession(db,tenantId,phone,state,d);
       await reply(db,tenantId,instance,phone,
-        "👋 *Olá! Bem-vindo à "+tenant.name+".*\n"+
+        "👋 *Olá! Bem-vindo à "+shopName+".*\n"+
         "Vou te ajudar a reservar seu horário.\n\n"+
         "📍 *Escolha a unidade*\n\n"+
         units.map((x,i)=>"*"+(i+1)+" — "+x.name+"*").join("\n")+
@@ -328,7 +354,7 @@ export async function POST(req){
     }else{
       d.unit=units[0];state="service";await saveSession(db,tenantId,phone,state,d);
       await reply(db,tenantId,instance,phone,
-        "👋 *Olá! Bem-vindo à "+tenant.name+".*\n"+
+        "👋 *Olá! Bem-vindo à "+shopName+".*\n"+
         "Vou te ajudar a reservar seu horário.\n\n"+
         "✂️ *Qual serviço você deseja?*\n\n"+
         serviceOptions(services)+
@@ -342,7 +368,11 @@ export async function POST(req){
     const unit=pick(d.units||[],text);
     if(!unit){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"*Não encontrei essa unidade.*\n\nEnvie o número de uma das opções mostradas acima.");
+      await reply(db,tenantId,instance,phone,
+        "Não consegui identificar a unidade.\n\n📍 *Escolha uma opção*\n\n"+
+        (d.units||[]).map((x,i)=>"*"+(i+1)+" — "+textLabel(x.name)+"*").join("\n")+
+        "\n\n_Envie o número da opção._"
+      );
       return NextResponse.json({ok:true});
     }
     d.unit=unit;state="service";await saveSession(db,tenantId,phone,state,d);
@@ -354,7 +384,12 @@ export async function POST(req){
     const service=pick(d.services||[],text);
     if(!service){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"*Não encontrei esse serviço.*\n\nEscolha uma das opções da lista ou envie o nome do serviço.");
+      const intro=asksAvailability?"Para consultar os horários, primeiro preciso saber qual serviço você quer.":"Não consegui identificar o serviço na sua mensagem.";
+      await reply(db,tenantId,instance,phone,
+        intro+"\n\n✂️ *Escolha um serviço*\n\n"+
+        serviceOptions(d.services||[])+
+        "\n\n_Envie o número ou escreva o nome do serviço._"
+      );
       return NextResponse.json({ok:true});
     }
     const [{data:bu},{data:bs}]=await Promise.all([
@@ -378,11 +413,16 @@ export async function POST(req){
   }
 
   if(state==="barber"){
-    const any=/^(0|qualquer|qualquer um|sem preferencia|primeiro disponivel|qualquer profissional disponivel)$/.test(t);
+    const any=/^0$/.test(String(text).trim())||/\b(qualquer|sem preferencia|primeiro disponivel)\b/.test(t);
     const barber=any?null:pick(d.barbers||[],text);
     if(!any&&!barber){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"*Não encontrei esse profissional.*\n\nEnvie o número da opção ou *0* para qualquer profissional disponível.");
+      const intro=asksAvailability?"Antes de mostrar os horários, escolha o profissional.":"Não consegui identificar o profissional.";
+      await reply(db,tenantId,instance,phone,
+        intro+"\n\n👤 *Escolha uma opção*\n\n"+
+        professionalOptions(d.barbers||[])+
+        "\n\n_Envie o número da opção._"
+      );
       return NextResponse.json({ok:true});
     }
     d={...d,barber,barberAny:any};state="date";await saveSession(db,tenantId,phone,state,d);
@@ -442,8 +482,8 @@ export async function POST(req){
     d={...d,customerName:name};state="confirm";await saveSession(db,tenantId,phone,state,d);
     await reply(db,tenantId,instance,phone,
       "✅ *Revise antes de confirmar*\n\n"+
-      "*"+d.service.name+"*\n"+
-      d.slot.barber_name+" · "+d.unit.name+"\n"+
+      "*"+textLabel(d.service.name)+"*\n"+
+      textLabel(d.slot.barber_name)+" · "+textLabel(d.unit.name)+"\n"+
       fmtDate(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+" às "+fmtTime(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+"\n"+
       "*"+money(d.service.price_cents)+"*\n\n"+
       "Está tudo certo?\n"+
@@ -453,19 +493,21 @@ export async function POST(req){
   }
 
   if(state==="confirm"){
-    if(/^(nao|n|voltar)$/.test(t)){
+    const confirmNo=/^(nao|n)\b/.test(t)||/\b(voltar|desistir)\b/.test(t);
+    const confirmYes=/^(sim|s|ok|beleza)\b/.test(t)||/\b(confirmo|confirmar|pode confirmar)\b/.test(t);
+    if(confirmNo){
       d={last_message_id:d.last_message_id};state="start";await saveSession(db,tenantId,phone,state,d);
       await reply(db,tenantId,instance,phone,"Sem problema. Nenhum agendamento foi criado.\n\n_Envie *MENU* quando quiser começar de novo._");
       return NextResponse.json({ok:true,state});
     }
-    if(!/^(sim|s|confirmo|confirmar|pode|pode confirmar|ok|beleza)$/.test(t)){
+    if(!confirmYes){
       await saveSession(db,tenantId,phone,state,d);
       await reply(db,tenantId,instance,phone,"Responda *SIM* para confirmar ou *NÃO* para voltar.");
       return NextResponse.json({ok:true});
     }
     const {data:confirmation,error}=await db.rpc("public_book_multi",{
       p_slug:tenant.slug,p_unit:d.unit.id,p_barber:d.slot.barber_id,p_services:[d.service.id],
-      p_starts_at:d.slot.starts_at,p_name:d.customerName,p_phone:phone,p_email:""
+      p_starts_at:d.slot.starts_at,p_name:textLabel(d.customerName),p_phone:phone,p_email:""
     });
     if(error){
       state="date";d={...d,slots:[],slot:null};await saveSession(db,tenantId,phone,state,d);
@@ -475,11 +517,11 @@ export async function POST(req){
     await saveSession(db,tenantId,phone,"start",{last_message_id:d.last_message_id});
     await reply(db,tenantId,instance,phone,
       "🎉 *Seu horário está confirmado*\n\n"+
-      "*"+d.service.name+"* com "+d.slot.barber_name+"\n"+
+      "*"+textLabel(d.service.name)+"* com "+textLabel(d.slot.barber_name)+"\n"+
       fmtDate(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+" · "+fmtTime(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+"\n"+
-      d.unit.name+"\n"+
+      textLabel(d.unit.name)+"\n"+
       "*"+money(d.service.price_cents)+"*\n\n"+
-      "Até breve, "+d.customerName+"."
+      "Até breve, "+textLabel(d.customerName)+"."
     );
     return NextResponse.json({ok:true,booking:true,confirmation});
   }
