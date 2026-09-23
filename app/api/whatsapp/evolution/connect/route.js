@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {connectEvolutionInstance,createEvolutionInstance,evolutionConfigured,evolutionInstanceName,extractEvolutionQr,normalizeEvolutionState,setEvolutionWebhook} from "../../../../../lib/evolution";
+import {connectEvolutionInstance,createEvolutionInstance,evolutionConfigured,evolutionInstanceName,extractEvolutionQr,getEvolutionWebhookSecret,normalizeEvolutionState,setEvolutionWebhook} from "../../../../../lib/evolution";
 import {requireWhatsappSettingsAccess} from "../../../../../lib/whatsapp-server";
 
 export async function POST(req){
@@ -7,11 +7,11 @@ export async function POST(req){
   const tenant=payload?.tenant;
   const auth=await requireWhatsappSettingsAccess(req,tenant);
   if(auth.error)return NextResponse.json({error:auth.error},{status:auth.status});
-  if(!evolutionConfigured())return NextResponse.json({error:"A Evolution API ainda não foi configurada no servidor.",configured:false},{status:503});
+  if(!(await evolutionConfigured()))return NextResponse.json({error:"A Evolution API ainda não foi configurada no servidor.",configured:false},{status:503});
 
   const instance=evolutionInstanceName(tenant);
   const webhook=new URL("/api/whatsapp/evolution/webhook",req.url);
-  webhook.searchParams.set("secret",process.env.EVOLUTION_WEBHOOK_SECRET);
+  webhook.searchParams.set("secret",await getEvolutionWebhookSecret());
 
   try{
     await createEvolutionInstance(instance);
