@@ -6,7 +6,7 @@ export async function GET(req){
   const tenant=new URL(req.url).searchParams.get("tenant");
   const auth=await requireWhatsappSettingsAccess(req,tenant);
   if(auth.error)return NextResponse.json({error:auth.error},{status:auth.status});
-  if(!evolutionConfigured())return NextResponse.json({configured:false,status:"not_configured"});
+  if(!(await evolutionConfigured()))return NextResponse.json({configured:false,status:"not_configured"});
 
   const instance=evolutionInstanceName(tenant);
   let remote,state="disconnected",qrcode="",phone="";
