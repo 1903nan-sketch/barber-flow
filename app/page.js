@@ -3,15 +3,6 @@ import {headers} from "next/headers";
 import {redirect} from "next/navigation";
 import {createClient} from "@supabase/supabase-js";
 import {ArrowUpRight,Scissors,Sparkles} from "lucide-react";
-import {createClient} from "@supabase/supabase-js";
-
-async function getActiveUsers(){
- const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;
- if(!url||!key)return 0;
- const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
- const {count,error}=await admin.from("memberships").select("user_id,tenants!inner(status)",{count:"exact",head:true}).eq("active",true).eq("tenants.status","active");
- return error?0:(count||0);
-}
 
 async function getActiveUsers(){
  const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -30,7 +21,6 @@ export default async function HomePage(){
  const activeUsers=await getActiveUsers();
  const host=(await headers()).get("host")?.split(":")[0]?.toLowerCase();
  if(host==="barberflow.3ruptix.com") redirect("/login");
- const activeUsers=await getActiveUsers();
 
  return <main className="ruptix-hub rh-v2">
  <nav className="rh2-nav"><Link href="/" className="rh2-logo">RUPTIX<span>®</span></Link><div><a href="#produtos">PRODUTOS</a><a href="#sobre">SOBRE</a></div><span className="rh2-nav-right"><span className="rh2-system-status"><i/> ONLINE <b>USERS: {activeUsers}</b></span><a href="#produtos" className="rh2-client">PRODUTOS <ArrowUpRight/></a></span></nav>
