@@ -7,7 +7,7 @@ export async function POST(req){
   const tenant=payload?.tenant;
   const auth=await requireWhatsappSettingsAccess(req,tenant);
   if(auth.error)return NextResponse.json({error:auth.error},{status:auth.status});
-  if(!evolutionConfigured())return NextResponse.json({ok:true,status:"disconnected"});
+  if(!(await evolutionConfigured()))return NextResponse.json({ok:true,status:"disconnected"});
 
   const instance=evolutionInstanceName(tenant);
   try{await logoutEvolutionInstance(instance)}catch{}
