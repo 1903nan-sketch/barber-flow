@@ -317,3 +317,99 @@
   font-size:10px!important;
   line-height:1.55;
 }
+
+
+/* Reschedule availability picker */
+.reschedule-modal{max-width:620px!important}
+.reschedule-current{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin:10px 0 14px;
+  padding:12px 14px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+  background:rgba(255,255,255,.035);
+}
+.reschedule-current small{
+  color:#7f8a9c;
+  font-size:8px;
+  font-weight:850;
+  letter-spacing:.12em;
+}
+.reschedule-current strong{
+  color:#dfe4ed;
+  font-size:11px;
+  font-weight:800;
+}
+.reschedule-slots-wrap{
+  margin-top:14px;
+  padding:14px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  background:rgba(8,13,20,.42);
+}
+.reschedule-slots-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:11px;
+}
+.reschedule-slots-head strong{font-size:11px;color:#e4e8ef}
+.reschedule-slots-head small{font-size:8px;color:#818c9f}
+.reschedule-slots{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+  max-height:210px;
+  overflow:auto;
+  padding-right:3px;
+}
+.reschedule-slots button{
+  min-height:42px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.035);
+  color:#b8c0cd;
+  font-size:10px;
+  font-weight:800;
+  cursor:pointer;
+  transition:.16s ease;
+}
+.reschedule-slots button:hover{
+  transform:translateY(-1px);
+  border-color:rgba(139,108,255,.35);
+  background:rgba(125,88,235,.10);
+  color:#fff;
+}
+.reschedule-slots button.selected{
+  border-color:rgba(170,145,255,.62);
+  background:linear-gradient(135deg,rgba(139,104,255,.94),rgba(104,72,226,.94));
+  color:#fff;
+  box-shadow:0 7px 20px rgba(103,71,219,.25);
+}
+.reschedule-loading,.reschedule-empty{
+  min-height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px;
+  border-radius:10px;
+  background:rgba(255,255,255,.025);
+  color:#8490a2;
+  font-size:9px;
+  text-align:center;
+}
+.reschedule-modal .checkout-confirm:disabled{
+  opacity:.42;
+  cursor:not-allowed;
+  box-shadow:none!important;
+}
+
+@media(max-width:650px){
+  .reschedule-modal{max-height:88vh;overflow:auto}
+  .reschedule-current{align-items:flex-start;flex-direction:column;gap:5px}
+  .reschedule-slots{grid-template-columns:repeat(3,minmax(0,1fr));max-height:190px}
+}
