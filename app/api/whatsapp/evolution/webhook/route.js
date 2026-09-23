@@ -397,22 +397,28 @@ export async function POST(req){
     d={last_message_id:d.last_message_id,units,services};
     if(units.length>1){
       state="unit";await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,
+      const unitFallback=
         "👋 *Olá! Bem-vindo à "+shopName+".*\n"+
         "Vou te ajudar a reservar seu horário.\n\n"+
         "📍 *Escolha a unidade*\n\n"+
         units.map((x,i)=>"*"+(i+1)+" — "+x.name+"*").join("\n")+
-        "\n\n_Responda apenas com o número da opção._"
-      );
+        "\n\n_Envie o número ou nome da unidade._";
+      const unitChoices=units.slice(0,10).map(x=>textLabel(x.name));
+      if(units.length>10)unitChoices.push("Mais opções");
+      unitChoices.push("Falar com atendente");
+      await replyChoice(db,tenantId,instance,phone,"📍 Escolha a unidade",unitChoices,unitFallback);
     }else{
       d.unit=units[0];state="service";await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,
+      const serviceFallback=
         "👋 *Olá! Bem-vindo à "+shopName+".*\n"+
         "Vou te ajudar a reservar seu horário.\n\n"+
         "✂️ *Qual serviço você deseja?*\n\n"+
         serviceOptions(services)+
-        "\n\n_Envie o número ou o nome do serviço._"
-      );
+        "\n\n_Envie o número ou o nome do serviço._";
+      const serviceChoices=services.slice(0,10).map(x=>textLabel(x.name)+" · "+money(x.price_cents)+" · "+x.duration+" min");
+      if(services.length>10)serviceChoices.push("Mais opções");
+      serviceChoices.push("Falar com atendente");
+      await replyChoice(db,tenantId,instance,phone,"✂️ Qual serviço você deseja?",serviceChoices,serviceFallback);
     }
     return NextResponse.json({ok:true,state});
   }
@@ -421,15 +427,24 @@ export async function POST(req){
     const unit=pick(d.units||[],text);
     if(!unit){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,
+      const unitFallback=
         "Não consegui identificar a unidade.\n\n📍 *Escolha uma opção*\n\n"+
         (d.units||[]).map((x,i)=>"*"+(i+1)+" — "+textLabel(x.name)+"*").join("\n")+
-        "\n\n_Envie o número da opção._"
-      );
+        "\n\n_Envie o número ou nome da unidade._";
+      const unitChoices=(d.units||[]).slice(0,10).map(x=>textLabel(x.name));
+      if((d.units||[]).length>10)unitChoices.push("Mais opções");
+      unitChoices.push("Falar com atendente");
+      await replyChoice(db,tenantId,instance,phone,"📍 Escolha a unidade",unitChoices,unitFallback);
       return NextResponse.json({ok:true});
     }
     d.unit=unit;state="service";await saveSession(db,tenantId,phone,state,d);
-    await reply(db,tenantId,instance,phone,"✂️ *Qual serviço você deseja?*\n\n"+serviceOptions(d.services||[])+"\n\n_Envie o número ou o nome do serviço._");
+    const serviceChoices=(d.services||[]).slice(0,10).map(x=>textLabel(x.name)+" · "+money(x.price_cents)+" · "+x.duration+" min");
+    if((d.services||[]).length>10)serviceChoices.push("Mais opções");
+    serviceChoices.push("Falar com atendente");
+    await replyChoice(
+      db,tenantId,instance,phone,"✂️ Qual serviço você deseja?",serviceChoices,
+      "✂️ *Qual serviço você deseja?*\n\n"+serviceOptions(d.services||[])+"\n\n_Envie o número ou o nome do serviço._"
+    );
     return NextResponse.json({ok:true,state});
   }
 
@@ -438,10 +453,14 @@ export async function POST(req){
     if(!service){
       await saveSession(db,tenantId,phone,state,d);
       const intro=asksAvailability?"Para consultar os horários, primeiro preciso saber qual serviço você quer.":"Não consegui identificar o serviço na sua mensagem.";
-      await reply(db,tenantId,instance,phone,
-        intro+"\n\n✂️ *Escolha um serviço*\n\n"+
-        serviceOptions(d.services||[])+
-        "\n\n_Envie o número ou escreva o nome do serviço._"
+      const serviceChoices=(d.services||[]).slice(0,10).map(x=>textLabel(x.name)+" · "+money(x.price_cents)+" · "+x.duration+" min");
+      if((d.services||[]).length>10)serviceChoices.push("Mais opções");
+      serviceChoices.push("Falar com atendente");
+      await replyChoice(
+        db,tenantId,instance,phone,
+        asksAvailability?"✂️ Escolha um serviço para ver os horários":"✂️ Escolha um serviço",
+        serviceChoices,
+        intro+"\n\n✂️ *Escolha um serviço*\n\n"+serviceOptions(d.services||[])+"\n\n_Envie o número ou escreva o nome do serviço._"
       );
       return NextResponse.json({ok:true});
     }
@@ -457,10 +476,12 @@ export async function POST(req){
       return NextResponse.json({ok:true});
     }
     d={...d,service,barbers};state="barber";await saveSession(db,tenantId,phone,state,d);
-    await reply(db,tenantId,instance,phone,
-      "👤 *Com quem você quer agendar?*\n\n"+
-      professionalOptions(barbers)+
-      "\n\n_Envie o número da opção._"
+    const barberChoices=["Qualquer profissional disponível",...barbers.slice(0,9).map(x=>textLabel(x.name))];
+    if(barbers.length>9)barberChoices.push("Mais opções");
+    barberChoices.push("Falar com atendente");
+    await replyChoice(
+      db,tenantId,instance,phone,"👤 Com quem você quer agendar?",barberChoices,
+      "👤 *Com quem você quer agendar?*\n\n"+professionalOptions(barbers)+"\n\n_Envie o número ou nome do profissional._"
     );
     return NextResponse.json({ok:true,state});
   }
@@ -471,15 +492,21 @@ export async function POST(req){
     if(!any&&!barber){
       await saveSession(db,tenantId,phone,state,d);
       const intro=asksAvailability?"Antes de mostrar os horários, escolha o profissional.":"Não consegui identificar o profissional.";
-      await reply(db,tenantId,instance,phone,
-        intro+"\n\n👤 *Escolha uma opção*\n\n"+
-        professionalOptions(d.barbers||[])+
-        "\n\n_Envie o número da opção._"
+      const barberChoices=["Qualquer profissional disponível",...(d.barbers||[]).slice(0,9).map(x=>textLabel(x.name))];
+      if((d.barbers||[]).length>9)barberChoices.push("Mais opções");
+      barberChoices.push("Falar com atendente");
+      await replyChoice(
+        db,tenantId,instance,phone,"👤 Escolha o profissional",barberChoices,
+        intro+"\n\n👤 *Escolha uma opção*\n\n"+professionalOptions(d.barbers||[])+"\n\n_Envie o número ou nome do profissional._"
       );
       return NextResponse.json({ok:true});
     }
     d={...d,barber,barberAny:any};state="date";await saveSession(db,tenantId,phone,state,d);
-    await reply(db,tenantId,instance,phone,"📅 *Escolha a data*\n\nVocê pode responder:\n*HOJE*\n*AMANHÃ*\nou uma data como *25/09*.");
+    const dateChoices=[...dateChoiceOptions(d.unit?.timezone||DEFAULT_TZ),"Falar com atendente"];
+    await replyChoice(
+      db,tenantId,instance,phone,"📅 Escolha a data",dateChoices,
+      "📅 *Escolha a data*\n\nEnvie *HOJE*, *AMANHÃ* ou uma data como *25/09*."
+    );
     return NextResponse.json({ok:true,state});
   }
 
@@ -487,18 +514,29 @@ export async function POST(req){
     const date=parseRequestedDate(text,d.unit?.timezone||DEFAULT_TZ);
     if(!date){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"*Não entendi essa data.*\n\nEnvie *HOJE*, *AMANHÃ* ou use o formato *DD/MM*.");
+      await replyChoice(
+        db,tenantId,instance,phone,"📅 Escolha a data",
+        [...dateChoiceOptions(d.unit?.timezone||DEFAULT_TZ),"Falar com atendente"],
+        "*Não entendi essa data.*\n\nEnvie *HOJE*, *AMANHÃ* ou use o formato *DD/MM*."
+      );
       return NextResponse.json({ok:true});
     }
     const barbers=d.barberAny?(d.barbers||[]):[d.barber].filter(Boolean);
     const slots=await availableSlots(db,tenant.slug,d.unit.id,d.service.id,barbers,date);
     if(!slots.length){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"⏰ *Essa data está sem horários*\n\nEscolha outro dia e eu verifico a agenda para você.\n\n_Envie *AMANHÃ* ou uma nova data no formato *DD/MM*._");
+      await replyChoice(
+        db,tenantId,instance,phone,"⏰ Sem horários nesse dia. Escolha outra data",
+        [...dateChoiceOptions(d.unit?.timezone||DEFAULT_TZ),"Falar com atendente"],
+        "⏰ *Essa data está sem horários*\n\nEscolha outro dia e eu verifico a agenda para você.\n\n_Envie *AMANHÃ* ou uma nova data no formato *DD/MM*._"
+      );
       return NextResponse.json({ok:true});
     }
-    d={...d,date,slots};state="slot";await saveSession(db,tenantId,phone,state,d);
-    await reply(db,tenantId,instance,phone,
+    d={...d,date,slots,slotPage:0};state="slot";await saveSession(db,tenantId,phone,state,d);
+    await replyChoice(
+      db,tenantId,instance,phone,
+      "⏰ Horários disponíveis · "+date.split("-").reverse().join("/"),
+      slotChoiceOptions(d),
       "⏰ *Horários disponíveis · "+date.split("-").reverse().join("/")+"*\n\n"+
       slots.map((x,i)=>"*"+(i+1)+" — "+fmtTime(x.starts_at,d.unit?.timezone||DEFAULT_TZ)+"*"+(d.barberAny?" · "+x.barber_name:"")).join("\n")+
       "\n\n_Envie o número do horário que prefere._"
@@ -507,6 +545,29 @@ export async function POST(req){
   }
 
   if(state==="slot"){
+    if(/\bmais horarios\b/.test(t)){
+      const maxPage=Math.max(0,Math.ceil((d.slots||[]).length/9)-1);
+      d={...d,slotPage:Math.min(maxPage,Number(d.slotPage||0)+1)};
+      await saveSession(db,tenantId,phone,state,d);
+      await replyChoice(
+        db,tenantId,instance,phone,
+        "⏰ Mais horários · "+String(d.date||"").split("-").reverse().join("/"),
+        slotChoiceOptions(d),
+        "Envie o horário que prefere ou *MENU* para recomeçar."
+      );
+      return NextResponse.json({ok:true,state,page:d.slotPage});
+    }
+    if(/\bhorarios anteriores\b/.test(t)){
+      d={...d,slotPage:Math.max(0,Number(d.slotPage||0)-1)};
+      await saveSession(db,tenantId,phone,state,d);
+      await replyChoice(
+        db,tenantId,instance,phone,
+        "⏰ Horários anteriores · "+String(d.date||"").split("-").reverse().join("/"),
+        slotChoiceOptions(d),
+        "Envie o horário que prefere ou *MENU* para recomeçar."
+      );
+      return NextResponse.json({ok:true,state,page:d.slotPage});
+    }
     let slot=pick(d.slots||[],text,x=>fmtTime(x.starts_at,d.unit?.timezone||DEFAULT_TZ));
     if(!slot){
       const hm=t.match(/\b(\d{1,2})(?::|h)(\d{2})?\b/);
@@ -517,7 +578,12 @@ export async function POST(req){
     }
     if(!slot){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"*Esse horário não está mais disponível.*\n\nEscolha um dos horários da lista acima.");
+      await replyChoice(
+        db,tenantId,instance,phone,
+        "⏰ Escolha um dos horários disponíveis",
+        slotChoiceOptions(d),
+        "*Esse horário não está mais disponível.*\n\nEscolha um dos horários disponíveis."
+      );
       return NextResponse.json({ok:true});
     }
     d={...d,slot};state="name";await saveSession(db,tenantId,phone,state,d);
@@ -533,13 +599,17 @@ export async function POST(req){
       return NextResponse.json({ok:true});
     }
     d={...d,customerName:name};state="confirm";await saveSession(db,tenantId,phone,state,d);
-    await reply(db,tenantId,instance,phone,
+    const confirmText=
       "✅ *Revise antes de confirmar*\n\n"+
       "*"+textLabel(d.service.name)+"*\n"+
       textLabel(d.slot.barber_name)+" · "+textLabel(d.unit.name)+"\n"+
       fmtDate(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+" às "+fmtTime(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+"\n"+
       "*"+money(d.service.price_cents)+"*\n\n"+
-      "Está tudo certo?\n"+
+      "Está tudo certo?";
+    await reply(db,tenantId,instance,phone,confirmText);
+    await replyChoice(
+      db,tenantId,instance,phone,"✅ Confirmar agendamento",
+      ["Confirmar","Voltar","Falar com atendente"],
       "Responda *SIM* para confirmar ou *NÃO* para voltar."
     );
     return NextResponse.json({ok:true,state});
@@ -555,7 +625,11 @@ export async function POST(req){
     }
     if(!confirmYes){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"Responda *SIM* para confirmar ou *NÃO* para voltar.");
+      await replyChoice(
+        db,tenantId,instance,phone,"✅ Confirmar agendamento",
+        ["Confirmar","Voltar","Falar com atendente"],
+        "Responda *SIM* para confirmar ou *NÃO* para voltar."
+      );
       return NextResponse.json({ok:true});
     }
     const {data:confirmation,error}=await db.rpc("public_book_multi",{
