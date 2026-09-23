@@ -1,6 +1,6 @@
 import {timingSafeEqual} from "node:crypto";
 import {NextResponse} from "next/server";
-import {extractEvolutionQr,normalizeEvolutionState,sendEvolutionText} from "../../../../../lib/evolution";
+import {normalizeEvolutionState,sendEvolutionText,tenantIdFromEvolutionInstance} from "../../../../../lib/evolution";
 import {whatsappAdmin} from "../../../../../lib/whatsapp-server";
 
 const TZ="America/Sao_Paulo";
@@ -87,43 +87,25 @@ async function availableSlots(db,slug,unit,service,barbers,date){
     const k=x.starts_at+"|"+x.barber_id;if(seen.has(k))return false;seen.add(k);return true;
   }).slice(0,12);
 }
-function connectionPhone(data){
-  const jid=data?.wuid||data?.instance?.wuid||data?.instance?.owner||data?.owner||"";
-  return digits(String(jid).split("@")[0]);
-}
-
 export async function POST(req){
   if(!safeSecret(req))return NextResponse.json({error:"Webhook não autorizado."},{status:401});
   let body;try{body=await req.json()}catch{return NextResponse.json({error:"JSON inválido."},{status:400})}
   const db=whatsappAdmin(),event=eventName(body),instance=String(body?.instance||body?.instanceName||body?.data?.instance||"");
   if(!instance)return NextResponse.json({ok:true,ignored:"missing_instance"});
 
-  const {data:integration}=await db.from("whatsapp_integrations")
-    .select("tenant_id,instance_name,status,metadata,tenants(name,slug,address,whatsapp,status)")
-    .eq("instance_name",instance).maybeSingle();
-  if(!integration)return NextResponse.json({ok:true,ignored:"unknown_instance"});
-  const tenantId=integration.tenant_id,tenant=integration.tenants;
+  const tenantId=tenantIdFromEvolutionInstance(instance);
+  if(!tenantId)return NextResponse.json({ok:true,ignored:"unknown_instance"});
+  const {data:tenant}=await db.from("tenants")
+    .select("id,name,slug,address,whatsapp,status")
+    .eq("id",tenantId).maybeSingle();
+  if(!tenant)return NextResponse.json({ok:true,ignored:"unknown_tenant"});
 
   if(event==="QRCODE_UPDATED"){
-    const qr=extractEvolutionQr(body);
-    await db.from("whatsapp_integrations").update({
-      status:"connecting",metadata:{...(integration.metadata||{}),qr_base64:qr||null},
-      last_event_at:new Date().toISOString(),updated_at:new Date().toISOString()
-    }).eq("tenant_id",tenantId);
-    return NextResponse.json({ok:true});
+    return NextResponse.json({ok:true,status:"connecting"});
   }
 
   if(event==="CONNECTION_UPDATE"){
-    const data=payloadData(body),status=normalizeEvolutionState(data),phone=connectionPhone(data);
-    await db.from("whatsapp_integrations").update({
-      status,
-      display_phone:phone||integration.display_phone||null,
-      connected_jid:data?.wuid||data?.instance?.wuid||integration.connected_jid||null,
-      connected_at:status==="connected"?new Date().toISOString():integration.connected_at||null,
-      last_event_at:new Date().toISOString(),
-      metadata:status==="connected"?{}:(integration.metadata||{}),
-      updated_at:new Date().toISOString()
-    }).eq("tenant_id",tenantId);
+    const status=normalizeEvolutionState(payloadData(body));
     return NextResponse.json({ok:true,status});
   }
 
