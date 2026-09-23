@@ -3,12 +3,12 @@ import {NextResponse} from "next/server";
 import {normalizeEvolutionState,sendEvolutionText,tenantIdFromEvolutionInstance} from "../../../../../lib/evolution";
 import {whatsappAdmin} from "../../../../../lib/whatsapp-server";
 
-const TZ="America/Sao_Paulo";
+const DEFAULT_TZ="America/Sao_Paulo";
 const digits=v=>String(v||"").replace(/\D/g,"");
 const clean=v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
 const money=v=>(Number(v||0)/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
-const fmtTime=v=>new Date(v).toLocaleTimeString("pt-BR",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});
-const fmtDate=v=>new Date(v).toLocaleDateString("pt-BR",{timeZone:TZ,day:"2-digit",month:"2-digit",year:"numeric"});
+const fmtTime=(v,tz=DEFAULT_TZ)=>new Date(v).toLocaleTimeString("pt-BR",{timeZone:tz||DEFAULT_TZ,hour:"2-digit",minute:"2-digit"});
+const fmtDate=(v,tz=DEFAULT_TZ)=>new Date(v).toLocaleDateString("pt-BR",{timeZone:tz||DEFAULT_TZ,day:"2-digit",month:"2-digit",year:"numeric"});
 
 function safeSecret(req){
   const expected=String(process.env.EVOLUTION_WEBHOOK_SECRET||"");
@@ -38,23 +38,23 @@ function extractText(message){
     ""
   ).trim();
 }
-function localDate(offset=0){
-  const d=new Date(new Date().toLocaleString("en-US",{timeZone:TZ}));
+function localDate(offset=0,tz=DEFAULT_TZ){
+  const d=new Date(new Date().toLocaleString("en-US",{timeZone:tz||DEFAULT_TZ}));
   d.setDate(d.getDate()+offset);
   return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 }
-function parseRequestedDate(text){
+function parseRequestedDate(text,tz=DEFAULT_TZ){
   const t=clean(text);
-  if(/\bhoje\b/.test(t))return localDate(0);
-  if(/\bamanha\b/.test(t))return localDate(1);
+  if(/\bhoje\b/.test(t))return localDate(0,tz);
+  if(/\bamanha\b/.test(t))return localDate(1,tz);
   const m=t.match(/\b(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?\b/);
   if(!m)return "";
-  const now=new Date(new Date().toLocaleString("en-US",{timeZone:TZ}));
+  const now=new Date(new Date().toLocaleString("en-US",{timeZone:tz||DEFAULT_TZ}));
   let y=m[3]?Number(m[3].length===2?"20"+m[3]:m[3]):now.getFullYear(),mo=Number(m[2]),day=Number(m[1]);
   const d=new Date(Date.UTC(y,mo-1,day));
   if(d.getUTCFullYear()!==y||d.getUTCMonth()!==mo-1||d.getUTCDate()!==day)return "";
   const out=y+"-"+String(mo).padStart(2,"0")+"-"+String(day).padStart(2,"0");
-  return out>=localDate(0)?out:"";
+  return out>=localDate(0,tz)?out:"";
 }
 function pick(items,text,label=x=>x.name){
   const n=Number(String(text).trim());
@@ -206,21 +206,21 @@ export async function POST(req){
   }
 
   if(state==="date"){
-    const date=parseRequestedDate(text);
+    const date=parseRequestedDate(text,d.unit?.timezone||DEFAULT_TZ);
     if(!date){await saveSession(db,tenantId,phone,state,d);await reply(db,tenantId,instance,phone,"Não entendi a data. Envie HOJE, AMANHÃ ou no formato DD/MM.");return NextResponse.json({ok:true})}
     const barbers=d.barberAny?(d.barbers||[]):[d.barber].filter(Boolean);
     const slots=await availableSlots(db,tenant.slug,d.unit.id,d.service.id,barbers,date);
     if(!slots.length){await saveSession(db,tenantId,phone,state,d);await reply(db,tenantId,instance,phone,"Não encontrei horários disponíveis nessa data. Envie outra data.");return NextResponse.json({ok:true})}
     d={...d,date,slots};state="slot";await saveSession(db,tenantId,phone,state,d);
-    await reply(db,tenantId,instance,phone,"Horários disponíveis em "+date.split("-").reverse().join("/") +":\n"+slots.map((x,i)=>(i+1)+". "+fmtTime(x.starts_at)+(d.barberAny?" — "+x.barber_name:"")).join("\n")+"\n\nDigite o número do horário.");
+    await reply(db,tenantId,instance,phone,"Horários disponíveis em "+date.split("-").reverse().join("/") +":\n"+slots.map((x,i)=>(i+1)+". "+fmtTime(x.starts_at,d.unit?.timezone||DEFAULT_TZ)+(d.barberAny?" — "+x.barber_name:"")).join("\n")+"\n\nDigite o número do horário.");
     return NextResponse.json({ok:true,state});
   }
 
   if(state==="slot"){
-    let slot=pick(d.slots||[],text,x=>fmtTime(x.starts_at));
+    let slot=pick(d.slots||[],text,x=>fmtTime(x.starts_at,d.unit?.timezone||DEFAULT_TZ));
     if(!slot){
       const hm=t.match(/\b(\d{1,2})(?::|h)(\d{2})?\b/);
-      if(hm){const wanted=String(Number(hm[1])).padStart(2,"0")+":"+String(Number(hm[2]||0)).padStart(2,"0");slot=(d.slots||[]).find(x=>fmtTime(x.starts_at)===wanted)}
+      if(hm){const wanted=String(Number(hm[1])).padStart(2,"0")+":"+String(Number(hm[2]||0)).padStart(2,"0");slot=(d.slots||[]).find(x=>fmtTime(x.starts_at,d.unit?.timezone||DEFAULT_TZ)===wanted)}
     }
     if(!slot){await saveSession(db,tenantId,phone,state,d);await reply(db,tenantId,instance,phone,"Esse horário não está na lista. Digite o número de uma opção disponível.");return NextResponse.json({ok:true})}
     d={...d,slot};state="name";await saveSession(db,tenantId,phone,state,d);
@@ -236,8 +236,8 @@ export async function POST(req){
       "Confira seu agendamento:\n\n"+
       "Serviço: "+d.service.name+"\n"+
       "Profissional: "+d.slot.barber_name+"\n"+
-      "Data: "+fmtDate(d.slot.starts_at)+"\n"+
-      "Horário: "+fmtTime(d.slot.starts_at)+"\n"+
+      "Data: "+fmtDate(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+"\n"+
+      "Horário: "+fmtTime(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+"\n"+
       "Valor: "+money(d.service.price_cents)+"\n"+
       "Unidade: "+d.unit.name+"\n\n"+
       "Posso confirmar? Responda SIM ou NÃO."
@@ -267,7 +267,7 @@ export async function POST(req){
     await reply(db,tenantId,instance,phone,
       "Agendamento confirmado!\n\n"+
       d.service.name+" com "+d.slot.barber_name+"\n"+
-      fmtDate(d.slot.starts_at)+" às "+fmtTime(d.slot.starts_at)+"\n"+
+      fmtDate(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+" às "+fmtTime(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+"\n"+
       "Valor: "+money(d.service.price_cents)+"\n\n"+
       "Seu horário já está registrado na agenda da "+tenant.name+".\n"+
       "Para um novo agendamento, envie MENU."
