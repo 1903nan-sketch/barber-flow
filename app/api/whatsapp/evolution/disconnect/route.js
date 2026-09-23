@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {evolutionConfigured,logoutEvolutionInstance} from "../../../../../lib/evolution";
+import {evolutionConfigured,evolutionInstanceName,logoutEvolutionInstance} from "../../../../../lib/evolution";
 import {requireWhatsappSettingsAccess} from "../../../../../lib/whatsapp-server";
 
 export async function POST(req){
@@ -7,13 +7,9 @@ export async function POST(req){
   const tenant=payload?.tenant;
   const auth=await requireWhatsappSettingsAccess(req,tenant);
   if(auth.error)return NextResponse.json({error:auth.error},{status:auth.status});
-  const {data:integration}=await auth.admin.from("whatsapp_integrations").select("instance_name").eq("tenant_id",tenant).maybeSingle();
-  if(!integration)return NextResponse.json({ok:true,status:"disconnected"});
-  if(evolutionConfigured()){
-    try{await logoutEvolutionInstance(integration.instance_name)}catch{}
-  }
-  await auth.admin.from("whatsapp_integrations").update({
-    status:"disconnected",display_phone:null,connected_jid:null,connected_at:null,metadata:{},updated_at:new Date().toISOString()
-  }).eq("tenant_id",tenant);
+  if(!evolutionConfigured())return NextResponse.json({ok:true,status:"disconnected"});
+
+  const instance=evolutionInstanceName(tenant);
+  try{await logoutEvolutionInstance(instance)}catch{}
   return NextResponse.json({ok:true,status:"disconnected"});
 }
