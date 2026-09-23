@@ -1,6 +1,6 @@
 import {timingSafeEqual} from "node:crypto";
 import {NextResponse} from "next/server";
-import {getEvolutionWebhookSecret,normalizeEvolutionState,sendEvolutionText,tenantIdFromEvolutionInstance} from "../../../../../lib/evolution";
+import {getEvolutionWebhookSecret,normalizeEvolutionState,sendEvolutionPoll,sendEvolutionText,tenantIdFromEvolutionInstance} from "../../../../../lib/evolution";
 import {whatsappAdmin} from "../../../../../lib/whatsapp-server";
 
 const DEFAULT_TZ="America/Sao_Paulo";
@@ -46,6 +46,15 @@ function extractText(message){
     message?.templateButtonReplyMessage?.selectedDisplayText||
     ""
   ).trim();
+}
+function eventCandidate(body){
+  const d=payloadData(body);
+  return Array.isArray(d)?d[0]:d;
+}
+function extractPollSelection(body){
+  const candidate=eventCandidate(body),updates=candidate?.pollUpdates||candidate?.message?.pollUpdates||[];
+  const selected=(updates||[]).find(x=>Array.isArray(x?.voters)&&x.voters.length>0);
+  return String(selected?.name||"").trim();
 }
 function localDate(offset=0,tz=DEFAULT_TZ){
   const d=new Date(new Date().toLocaleString("en-US",{timeZone:tz||DEFAULT_TZ}));
@@ -130,6 +139,25 @@ function serviceOptions(services){
 function professionalOptions(barbers){
   return barbers.map((x,i)=>"*"+(i+1)+" — "+textLabel(x.name)+"*").join("\n")+"\n*0 — Qualquer profissional disponível*";
 }
+function dateChoiceOptions(tz=DEFAULT_TZ){
+  return Array.from({length:7},(_,i)=>{
+    const key=localDate(i,tz),parts=key.split("-"),label=parts[2]+"/"+parts[1];
+    if(i===0)return "Hoje · "+label;
+    if(i===1)return "Amanhã · "+label;
+    const weekday=new Date(key+"T12:00:00Z").toLocaleDateString("pt-BR",{timeZone:"UTC",weekday:"short"}).replace(".","");
+    return weekday.charAt(0).toUpperCase()+weekday.slice(1)+" · "+label;
+  });
+}
+function slotChoiceOptions(data){
+  const slots=data?.slots||[],page=Math.max(0,Number(data?.slotPage||0)),pageSize=9,start=page*pageSize,tz=data?.unit?.timezone||DEFAULT_TZ;
+  const options=slots.slice(start,start+pageSize).map(x=>
+    fmtTime(x.starts_at,tz)+(data?.barberAny?" · "+textLabel(x.barber_name):"")
+  );
+  if(page>0)options.push("Horários anteriores");
+  if(start+pageSize<slots.length)options.push("Mais horários");
+  options.push("Falar com atendente");
+  return options;
+}
 async function saveSession(db,tenant,phone,state,data){
   await db.from("whatsapp_booking_sessions").upsert({
     tenant_id:tenant,phone,state,data,updated_at:new Date().toISOString()
@@ -141,6 +169,18 @@ async function log(db,tenant,phone,direction,message){
 async function reply(db,tenant,instance,phone,text){
   await sendEvolutionText(instance,phone,text);
   await log(db,tenant,phone,"out",text);
+}
+async function replyChoice(db,tenant,instance,phone,question,options,fallbackText){
+  const values=[...new Set((options||[]).map(textLabel).filter(Boolean))].slice(0,12);
+  if(values.length>=2){
+    try{
+      await sendEvolutionPoll(instance,phone,question,values);
+      await log(db,tenant,phone,"out","[OPÇÕES] "+question+" | "+values.join(" | "));
+      return true;
+    }catch{}
+  }
+  await reply(db,tenant,instance,phone,fallbackText);
+  return false;
 }
 async function availableSlots(db,slug,unit,service,barbers,date){
   const rows=await Promise.all(barbers.map(async b=>{
@@ -254,14 +294,27 @@ export async function POST(req){
 
   if(event==="QRCODE_UPDATED")return NextResponse.json({ok:true,status:"connecting"});
   if(event==="CONNECTION_UPDATE")return NextResponse.json({ok:true,status:normalizeEvolutionState(payloadData(body))});
-  if(event!=="MESSAGES_UPSERT")return NextResponse.json({ok:true,ignored:event||"unknown_event"});
+  if(!["MESSAGES_UPSERT","MESSAGES_UPDATE"].includes(event))return NextResponse.json({ok:true,ignored:event||"unknown_event"});
   if(!["active","trial","pending","overdue"].includes(tenant?.status))return NextResponse.json({ok:true,ignored:"tenant_inactive"});
 
-  const key=extractKey(body),message=extractMessage(body);
-  if(key?.fromMe)return NextResponse.json({ok:true,ignored:"from_me"});
-  const jid=String(key?.remoteJid||"");
+  let key,message,jid,text,messageId;
+  if(event==="MESSAGES_UPDATE"){
+    const candidate=eventCandidate(body);
+    text=extractPollSelection(body);
+    if(!text)return NextResponse.json({ok:true,ignored:"non_poll_update"});
+    jid=String(candidate?.remoteJid||candidate?.key?.remoteJid||"");
+    messageId="poll:"+String(candidate?.keyId||candidate?.id||"")+":"+clean(text);
+    key={remoteJid:jid,fromMe:false,id:messageId};
+    message={};
+  }else{
+    key=extractKey(body);message=extractMessage(body);
+    if(key?.fromMe)return NextResponse.json({ok:true,ignored:"from_me"});
+    jid=String(key?.remoteJid||"");
+    text=extractText(message);
+    messageId=String(key?.id||"");
+  }
   if(!jid||jid.includes("@g.us")||jid.includes("status@broadcast"))return NextResponse.json({ok:true,ignored:"non_direct"});
-  const phone=digits(jid.split("@")[0]),text=extractText(message),messageId=String(key?.id||"");
+  const phone=digits(jid.split("@")[0]);
   if(!phone||!text)return NextResponse.json({ok:true,ignored:"empty"});
 
   const employee=await findEmployee(db,tenantId,phone);
