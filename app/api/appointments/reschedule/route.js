@@ -1,6 +1,6 @@
 import {createClient} from "@supabase/supabase-js";
 import {NextResponse} from "next/server";
-import {evolutionConfigured,evolutionInstanceName,sendEvolutionList,sendEvolutionText} from "../../../../lib/evolution";
+import {evolutionConfigured,evolutionInstanceName,resolveEvolutionNumber,sendEvolutionList,sendEvolutionText} from "../../../../lib/evolution";
 
 const digits=value=>String(value||"").replace(/\D/g,"");
 const whatsappNumber=value=>{
@@ -155,9 +155,23 @@ export async function POST(request){
     ]);
     const tenant=tenantResult.data,client=clientResult.data,barber=barberResult.data,service=serviceResult.data,unit=unitResult.data;
     if(!unit?.active)return NextResponse.json({error:"A unidade deste atendimento não está ativa."},{status:400});
-    const phone=whatsappNumber(client?.phone);
-    if(!phone)return NextResponse.json({error:"O cliente "+text(client?.name||"selecionado")+" está com um número de WhatsApp inválido. Corrija o telefone no cadastro antes de enviar a proposta."},{status:400});
+    const storedPhone=whatsappNumber(client?.phone);
+    if(!storedPhone)return NextResponse.json({error:"O cliente "+text(client?.name||"selecionado")+" está com um número de WhatsApp inválido. Corrija o telefone no cadastro antes de enviar a proposta."},{status:400});
     if(!(await evolutionConfigured()))return NextResponse.json({error:"O WhatsApp da barbearia não está conectado."},{status:503});
+    const instance=evolutionInstanceName(tenantId);
+    let phone="";
+    try{
+      phone=await resolveEvolutionNumber(instance,storedPhone);
+    }catch(numberError){
+      console.error("WhatsApp number validation failed",numberError);
+      return NextResponse.json({error:"Não consegui validar o WhatsApp do cliente agora. Tente novamente em alguns segundos."},{status:502});
+    }
+    if(!phone){
+      return NextResponse.json({
+        error:"O número cadastrado para "+text(client?.name||"este cliente")+" não foi encontrado no WhatsApp. Confira o telefone do cliente e tente novamente.",
+        code:"whatsapp_number_not_found"
+      },{status:400});
+    }
 
     if(!(await proposedSlotAvailable(admin,appointment,unit,startsAt))){
       return NextResponse.json({error:"Esse horário acabou de ficar indisponível. Escolha outro horário livre."},{status:409});
@@ -204,10 +218,10 @@ export async function POST(request){
     ].join("\n");
 
     try{
-      await sendEvolutionText(evolutionInstanceName(tenantId),phone,message);
+      await sendEvolutionText(instance,phone,message);
       try{
         await sendEvolutionList(
-          evolutionInstanceName(tenantId),
+          instance,
           phone,
           "Confirmar reagendamento",
           "Toque em *Escolher opção* e selecione abaixo.",
