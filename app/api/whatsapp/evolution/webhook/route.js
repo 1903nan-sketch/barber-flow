@@ -32,6 +32,12 @@ function extractKey(body){
   const d=payloadData(body),candidate=Array.isArray(d)?d[0]:d;
   return candidate?.key||candidate?.message?.key||candidate?.messages?.[0]?.key||{};
 }
+function directJid(key){
+  const primary=String(key?.remoteJid||"");
+  const alt=String(key?.remoteJidAlt||"");
+  if(primary.endsWith("@lid")&&alt.endsWith("@s.whatsapp.net"))return alt;
+  return primary||alt;
+}
 function extractMessage(body){
   const d=payloadData(body),candidate=Array.isArray(d)?d[0]:d;
   return candidate?.message||candidate?.messages?.[0]?.message||{};
@@ -324,14 +330,15 @@ export async function POST(req){
     const candidate=eventCandidate(body);
     text=extractPollSelection(body);
     if(!text)return NextResponse.json({ok:true,ignored:"non_poll_update"});
-    jid=String(candidate?.remoteJid||candidate?.key?.remoteJid||"");
+    const candidateKey=candidate?.key||candidate||{};
+    jid=directJid({remoteJid:candidate?.remoteJid||candidateKey?.remoteJid,remoteJidAlt:candidate?.remoteJidAlt||candidateKey?.remoteJidAlt});
     messageId="poll:"+String(candidate?.keyId||candidate?.id||"")+":"+clean(text);
     key={remoteJid:jid,fromMe:false,id:messageId};
     message={};
   }else{
     key=extractKey(body);message=extractMessage(body);
     if(key?.fromMe)return NextResponse.json({ok:true,ignored:"from_me"});
-    jid=String(key?.remoteJid||"");
+    jid=directJid(key);
     text=extractText(message);
     messageId=String(key?.id||"");
   }
