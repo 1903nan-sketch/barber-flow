@@ -1,6 +1,6 @@
 import {timingSafeEqual} from "node:crypto";
 import {NextResponse} from "next/server";
-import {getEvolutionWebhookSecret,normalizeEvolutionState,sendEvolutionButtons,sendEvolutionText,setEvolutionWebhook,tenantIdFromEvolutionInstance} from "../../../../../lib/evolution";
+import {getEvolutionWebhookSecret,normalizeEvolutionState,sendEvolutionList,sendEvolutionText,setEvolutionWebhook,tenantIdFromEvolutionInstance} from "../../../../../lib/evolution";
 import {whatsappAdmin} from "../../../../../lib/whatsapp-server";
 
 const DEFAULT_TZ="America/Sao_Paulo";
@@ -188,15 +188,15 @@ async function reply(db,tenant,instance,phone,text){
   await log(db,tenant,phone,"out",text);
 }
 async function replyChoice(db,tenant,instance,phone,question,options,fallbackText){
-  const values=[...new Set((options||[]).map(textLabel).filter(Boolean))].slice(0,12);
+  const values=[...new Set((options||[]).map(textLabel).filter(Boolean))].slice(0,10);
   await reply(db,tenant,instance,phone,fallbackText);
-  if(values.length>=1&&values.length<=3){
+  if(values.length>=1){
     try{
-      await sendEvolutionButtons(instance,phone,question,"Toque em uma opção abaixo:",values);
-      await log(db,tenant,phone,"out","[BOTÕES] "+question+" | "+values.join(" | "));
+      await sendEvolutionList(instance,phone,question,"Toque em *Escolher opção* e selecione abaixo.",values);
+      await log(db,tenant,phone,"out","[LISTA] "+question+" | "+values.join(" | "));
       return true;
     }catch(error){
-      console.error("Evolution buttons failed",error?.message||error);
+      console.error("Evolution list failed",error?.message||error);
     }
   }
   return false;
