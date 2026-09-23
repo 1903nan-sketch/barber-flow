@@ -368,7 +368,11 @@ export async function POST(req){
     const unit=pick(d.units||[],text);
     if(!unit){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"*Não encontrei essa unidade.*\n\nEnvie o número de uma das opções mostradas acima.");
+      await reply(db,tenantId,instance,phone,
+        "Não consegui identificar a unidade.\n\n📍 *Escolha uma opção*\n\n"+
+        (d.units||[]).map((x,i)=>"*"+(i+1)+" — "+textLabel(x.name)+"*").join("\n")+
+        "\n\n_Envie o número da opção._"
+      );
       return NextResponse.json({ok:true});
     }
     d.unit=unit;state="service";await saveSession(db,tenantId,phone,state,d);
@@ -489,12 +493,14 @@ export async function POST(req){
   }
 
   if(state==="confirm"){
-    if(/^(nao|n|voltar)$/.test(t)){
+    const confirmNo=/^(nao|n)\b/.test(t)||/\b(voltar|desistir)\b/.test(t);
+    const confirmYes=/^(sim|s|ok|beleza)\b/.test(t)||/\b(confirmo|confirmar|pode confirmar)\b/.test(t);
+    if(confirmNo){
       d={last_message_id:d.last_message_id};state="start";await saveSession(db,tenantId,phone,state,d);
       await reply(db,tenantId,instance,phone,"Sem problema. Nenhum agendamento foi criado.\n\n_Envie *MENU* quando quiser começar de novo._");
       return NextResponse.json({ok:true,state});
     }
-    if(!/^(sim|s|confirmo|confirmar|pode|pode confirmar|ok|beleza)$/.test(t)){
+    if(!confirmYes){
       await saveSession(db,tenantId,phone,state,d);
       await reply(db,tenantId,instance,phone,"Responda *SIM* para confirmar ou *NÃO* para voltar.");
       return NextResponse.json({ok:true});
