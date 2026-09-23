@@ -1,6 +1,6 @@
 import {NextResponse} from "next/server";
-import {evolutionConfigured,logoutEvolutionInstance} from "../../../../../../lib/evolution";
-import {requireWhatsappSettingsAccess} from "../../../../../../lib/whatsapp-server";
+import {evolutionConfigured,logoutEvolutionInstance} from "../../../../../lib/evolution";
+import {requireWhatsappSettingsAccess} from "../../../../../lib/whatsapp-server";
 
 export async function POST(req){
   let payload;try{payload=await req.json()}catch{return NextResponse.json({error:"Requisição inválida."},{status:400})}
