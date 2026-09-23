@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
@@ -32,8 +33,14 @@ const items = [
   { label: "Site, Instagram e WhatsApp", href: "/dashboard/configuracoes", icon: Settings, ownerOnly: true },
 ];
 
+const roleLabel={owner:"Proprietário",manager:"Gerente",reception:"Recepção",barber:"Barbeiro"};
+const initials=name=>String(name||"BF").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
+
 export default function Sidebar({ workspace }) {
   const pathname = usePathname();
+  const [workspaceOpen,setWorkspaceOpen]=useState(false);
+  async function changeWorkspace(tenantId){localStorage.setItem("barberflow_workspace",tenantId);setWorkspaceOpen(false);window.location.href="/dashboard"}
+  async function changeAccount(){localStorage.removeItem("barberflow_workspace");await supabase?.auth.signOut();window.location.href="/login"}
 
   return (
     <aside className="sidebar">
@@ -41,10 +48,21 @@ export default function Sidebar({ workspace }) {
         <div className="brand-client-lockup"><RuptixLogo/><div><div className="brand">Barber Flow</div><span className="brand-subtitle">Gestão inteligente</span></div></div>
       </div>
 
-      <div className="workspace-card">
-        <span className="workspace-avatar">{String(workspace?.tenant?.name||"BF").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase()}</span>
-        <div><strong>{workspace?.tenant?.name||"Barber Flow"}</strong><small>{workspace?.membership?.role==="owner"?"Proprietário":workspace?.membership?.role||"Equipe"}</small></div>
-        <ChevronRight size={17} />
+      <div className="workspace-switcher">
+        <button type="button" className={"workspace-card workspace-card-button "+(workspaceOpen?"open":"")} onClick={()=>setWorkspaceOpen(v=>!v)}>
+          <span className="workspace-avatar">{initials(workspace?.tenant?.name)}</span>
+          <div><strong>{workspace?.tenant?.name||"Barber Flow"}</strong><small>{roleLabel[workspace?.membership?.role]||workspace?.membership?.role||"Equipe"}</small></div>
+          <ChevronRight size={17} />
+        </button>
+        {workspaceOpen&&<div className="workspace-menu">
+          <p>Trocar perfil</p>
+          {(workspace?.memberships||[]).map(m=><button type="button" key={m.tenant_id} className={m.tenant_id===workspace?.tenant?.id?"current":""} onClick={()=>changeWorkspace(m.tenant_id)}>
+            <span className="workspace-avatar mini">{initials(m.tenants?.name)}</span>
+            <span><strong>{m.tenants?.name||"Barbearia"}</strong><small>{roleLabel[m.role]||m.role}</small></span>
+            {m.tenant_id===workspace?.tenant?.id&&<b>Atual</b>}
+          </button>)}
+          <button type="button" className="workspace-other-account" onClick={changeAccount}>Entrar em outra conta</button>
+        </div>}
       </div>
 
       <p className="nav-title">MENU PRINCIPAL</p>
