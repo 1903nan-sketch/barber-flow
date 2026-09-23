@@ -5,7 +5,8 @@ import {supabase} from "../../../lib/supabase";
 import QRCode from "qrcode";
 import ScheduleManager from "./ScheduleManager";
 import ModuleShell from "../_components/ModuleShell";
-const money=v=>(Number(v||0)/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});\nconst localDateValue=value=>{const d=new Date(value||Date.now());return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const money=v=>(Number(v||0)/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const localDateValue=value=>{const d=new Date(value||Date.now());return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const crc16=s=>{let crc=0xffff;for(let i=0;i<s.length;i++){crc^=s.charCodeAt(i)<<8;for(let j=0;j<8;j++)crc=(crc&0x8000)?(crc<<1)^0x1021:crc<<1;crc&=0xffff}return crc.toString(16).toUpperCase().padStart(4,"0")};
 const field=(id,value)=>id+String(value.length).padStart(2,"0")+value;
 function pixPayload(key,name,city,amount,txid){const clean=v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9 .-]/g,"").toUpperCase();const merchant=field("00","BR.GOV.BCB.PIX")+field("01",String(key).trim());let p=field("00","01")+field("26",merchant)+field("52","0000")+field("53","986")+field("54",(amount/100).toFixed(2))+field("58","BR")+field("59",clean(name).slice(0,25)||"BARBEARIA")+field("60",clean(city).slice(0,15)||"SAO PAULO")+field("62",field("05",clean(txid).replace(/[^A-Z0-9]/g,"").slice(0,25)||"***"))+"6304";return p+crc16(p)}
