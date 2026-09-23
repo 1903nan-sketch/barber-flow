@@ -26,6 +26,7 @@ const items = [
   { label: "Clientes", href: "/dashboard/clientes", icon: Users },
   { label: "Barbeiros", href: "/dashboard/barbeiros", icon: UserRound },
   { label: "Serviços", href: "/dashboard/servicos", icon: Scissors },
+  { label: "Estoque", href: "/dashboard/estoque", icon: Sparkles, permission: "inventory" },
   { label: "Vendas", href: "/dashboard/vendas", icon: CircleDollarSign },
   { label: "Relatórios", href: "/dashboard/relatorios", icon: BarChart3 },
   { label: "Mensalidade", href: "/dashboard/mensalidade", icon: CreditCard, ownerOnly: true },
@@ -67,7 +68,7 @@ export default function Sidebar({ workspace }) {
 
       <p className="nav-title">MENU PRINCIPAL</p>
       <nav>
-        {items.filter(item => !item.ownerOnly || ["owner","manager"].includes(workspace?.membership?.role)).map(({ label, href, icon: Icon, soon }) => {
+        {items.filter(item => (!item.ownerOnly || ["owner","manager"].includes(workspace?.membership?.role)) && (!item.permission || workspace?.membership?.role==="owner" || ["manager","reception"].includes(workspace?.membership?.role)&&workspace?.membership?.permissions?.includes(item.permission))).map(({ label, href, icon: Icon, soon }) => {
           const active = href === "/dashboard" ? pathname === href : pathname.startsWith(href);
           return (
             <a key={href} href={soon ? "#" : href} className={active ? "active" : ""}>
