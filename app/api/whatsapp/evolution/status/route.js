@@ -1,6 +1,6 @@
 import {NextResponse} from "next/server";
-import {evolutionConfigured,evolutionConnectionState,normalizeEvolutionState} from "../../../../../../lib/evolution";
-import {requireWhatsappSettingsAccess} from "../../../../../../lib/whatsapp-server";
+import {evolutionConfigured,evolutionConnectionState,normalizeEvolutionState} from "../../../../../lib/evolution";
+import {requireWhatsappSettingsAccess} from "../../../../../lib/whatsapp-server";
 
 export async function GET(req){
   const tenant=new URL(req.url).searchParams.get("tenant");
