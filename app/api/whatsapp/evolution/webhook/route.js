@@ -101,10 +101,13 @@ function statusLabel(value){
   return labels[s]||String(value||"Agendado");
 }
 function serviceOptions(services){
-  return services.map((x,i)=>(i+1)+". "+x.name+" — "+money(x.price_cents)+" · "+x.duration+" min").join("\n");
+  return services.map((x,i)=>
+    "*"+(i+1)+" — "+x.name+"*\n"+
+    "   "+money(x.price_cents)+" · "+x.duration+" min"
+  ).join("\n\n");
 }
 function professionalOptions(barbers){
-  return barbers.map((x,i)=>(i+1)+". "+x.name).join("\n")+"\n0. Qualquer profissional disponível";
+  return barbers.map((x,i)=>"*"+(i+1)+" — "+x.name+"*").join("\n")+"\n*0 — Qualquer profissional disponível*";
 }
 async function saveSession(db,tenant,phone,state,data){
   await db.from("whatsapp_booking_sessions").upsert({
@@ -196,23 +199,19 @@ async function employeeAppointments(db,tenantId,barberId,date,tz){
 }
 function employeeAgendaText(rows,date,tz){
   const label=new Date(date+"T12:00:00Z").toLocaleDateString("pt-BR",{timeZone:"UTC",day:"2-digit",month:"2-digit",year:"numeric"});
-  if(!rows.length)return "📅 *Sua agenda — "+label+"*\n\nNenhum atendimento agendado.\n\nComandos: HOJE · AMANHÃ · AGENDA DD/MM · PRÓXIMO CLIENTE";
+  if(!rows.length)return "📅 *Agenda · "+label+"*\n\nNenhum atendimento marcado para esse dia.\n\n_Use HOJE, AMANHÃ, AGENDA DD/MM ou PRÓXIMO CLIENTE._";
   const items=rows.map(x=>
-    "⏰ *"+fmtTime(x.starts_at,tz)+"*\n"+
-    "👤 "+x.client_name+"\n"+
-    "✂️ "+x.service_name+"\n"+
-    "Status: "+statusLabel(x.status)
+    "*"+fmtTime(x.starts_at,tz)+" — "+x.client_name+"*\n"+
+    x.service_name+" · "+statusLabel(x.status)
   ).join("\n\n");
-  return "📅 *Sua agenda — "+label+"*\n\n"+items+"\n\n"+rows.length+" atendimento"+(rows.length===1?"":"s")+" no dia.";
+  return "📅 *Agenda · "+label+"*\n\n"+items+"\n\n_"+rows.length+" atendimento"+(rows.length===1?"":"s")+" no dia._";
 }
 function nextClientText(rows,tz){
   const now=Date.now(),next=rows.find(x=>new Date(x.starts_at).getTime()>now&&!["cancelled","canceled","completed","finished"].includes(clean(x.status).replace(/\s+/g,"_")));
-  if(!next)return "📅 *Próximo cliente*\n\nNenhum atendimento restante hoje.";
+  if(!next)return "📅 *Próximo cliente*\n\nSua agenda de hoje não tem mais atendimentos pendentes.";
   return "📅 *Próximo cliente*\n\n"+
-    "⏰ "+fmtTime(next.starts_at,tz)+"\n"+
-    "👤 "+next.client_name+"\n"+
-    "✂️ "+next.service_name+"\n"+
-    "Status: "+statusLabel(next.status);
+    "*"+fmtTime(next.starts_at,tz)+" — "+next.client_name+"*\n"+
+    next.service_name+" · "+statusLabel(next.status);
 }
 
 export async function POST(req){
@@ -248,11 +247,11 @@ export async function POST(req){
     await saveSession(db,tenantId,phone,"employee",{last_message_id:messageId||employeeSession?.data?.last_message_id||""});
 
     if(employee.ambiguous){
-      await reply(db,tenantId,instance,phone,"👤 *Não foi possível abrir sua agenda*\n\nEste WhatsApp está vinculado a mais de um cadastro ativo nesta barbearia. Ajuste os números em Equipe.");
+      await reply(db,tenantId,instance,phone,"👤 *Não consegui abrir sua agenda*\n\nEste WhatsApp aparece em mais de um cadastro ativo. Revise os números na área *Equipe* e tente novamente.");
       return NextResponse.json({ok:true,employee:true,ambiguous:true});
     }
     if(employee.unlinked){
-      await reply(db,tenantId,instance,phone,"👤 *Acesso de funcionário identificado*\n\nSeu WhatsApp está cadastrado, mas seu usuário ainda não está vinculado a uma agenda ativa. Ajuste o cadastro em Equipe.");
+      await reply(db,tenantId,instance,phone,"👤 *Seu número foi reconhecido*\n\nFalta apenas vincular seu usuário a uma agenda ativa. Faça o ajuste em *Equipe* para consultar seus horários pelo WhatsApp.");
       return NextResponse.json({ok:true,employee:true,unlinked:true});
     }
 
@@ -264,7 +263,7 @@ export async function POST(req){
       await reply(db,tenantId,instance,phone,response);
       return NextResponse.json({ok:true,employee:true,barber_id:employee.barber.id,date});
     }catch{
-      await reply(db,tenantId,instance,phone,"Não foi possível consultar sua agenda agora. Tente novamente em instantes.");
+      await reply(db,tenantId,instance,phone,"Não consegui carregar sua agenda agora. Tente novamente daqui a pouco.");
       return NextResponse.json({ok:true,employee:true,agenda_error:true});
     }
   }
@@ -285,8 +284,8 @@ export async function POST(req){
   if(wantsHuman){
     state="human";await saveSession(db,tenantId,phone,state,d);
     const contact=digits(tenant?.whatsapp);
-    const reason=wantsCancelOrReschedule?"Cancelamentos e remarcações são realizados pelo atendimento humano.":"Vou encaminhar você para o atendimento humano.";
-    await reply(db,tenantId,instance,phone,"👤 *Atendimento humano*\n\n"+reason+(contact?"\n📲 WhatsApp: +"+contact:"")+"\n\nPara voltar ao assistente, envie *MENU*.");
+    const reason=wantsCancelOrReschedule?"Para alterar ou cancelar um horário, nossa equipe continua com você por aqui.":"Nossa equipe continua o atendimento com você a partir daqui.";
+    await reply(db,tenantId,instance,phone,"👤 *Atendimento humano*\n\n"+reason+(contact?"\n\n📲 "+contact:"")+"\n\n_Para voltar ao agendamento automático, envie *MENU*._");
     return NextResponse.json({ok:true,handoff:true});
   }
   if(state==="human"&&!resume){
@@ -297,12 +296,12 @@ export async function POST(req){
 
   if(/\b(endereco|localizacao|onde fica)\b/.test(t)&&tenant?.address){
     await saveSession(db,tenantId,phone,state,d);
-    await reply(db,tenantId,instance,phone,"📍 *Endereço*\n"+tenant.address+"\n\nPara agendar, envie *MENU*.");
+    await reply(db,tenantId,instance,phone,"📍 *Onde estamos*\n\n"+tenant.address+"\n\n_Para fazer um agendamento, envie *MENU*._");
     return NextResponse.json({ok:true});
   }
   if(/\b(site|link|agenda online|agendamento online)\b/.test(t)){
     await saveSession(db,tenantId,phone,state,d);
-    await reply(db,tenantId,instance,phone,"📲 *Agendamento online*\n"+origin+"/agendar/"+tenant.slug);
+    await reply(db,tenantId,instance,phone,"📲 *Prefere agendar pelo site?*\n\n"+origin+"/agendar/"+tenant.slug+"\n\n_O link abre direto na agenda da "+tenant.name+"._");
     return NextResponse.json({ok:true});
   }
 
@@ -313,25 +312,27 @@ export async function POST(req){
     ]);
     if(!units?.length||!services?.length){
       await saveSession(db,tenantId,phone,"start",d);
-      await reply(db,tenantId,instance,phone,"A agenda da "+tenant.name+" ainda não está disponível pelo WhatsApp. Fale com o atendimento.");
+      await reply(db,tenantId,instance,phone,"*Agenda temporariamente indisponível*\n\nAinda não há serviços ou unidades configurados para agendamento pelo WhatsApp. Fale com nossa equipe para continuar.");
       return NextResponse.json({ok:true});
     }
     d={last_message_id:d.last_message_id,units,services};
     if(units.length>1){
       state="unit";await saveSession(db,tenantId,phone,state,d);
       await reply(db,tenantId,instance,phone,
-        "👋 *Olá! Você está falando com a "+tenant.name+".*\n\n"+
-        "📍 *Escolha a unidade*\n"+
-        units.map((x,i)=>(i+1)+". "+x.name).join("\n")+
-        "\n\nResponda com o número da opção."
+        "👋 *Olá! Bem-vindo à "+tenant.name+".*\n"+
+        "Vou te ajudar a reservar seu horário.\n\n"+
+        "📍 *Escolha a unidade*\n\n"+
+        units.map((x,i)=>"*"+(i+1)+" — "+x.name+"*").join("\n")+
+        "\n\n_Responda apenas com o número da opção._"
       );
     }else{
       d.unit=units[0];state="service";await saveSession(db,tenantId,phone,state,d);
       await reply(db,tenantId,instance,phone,
-        "👋 *Olá! Você está falando com a "+tenant.name+".*\n\n"+
-        "✂️ *Escolha o serviço*\n"+
+        "👋 *Olá! Bem-vindo à "+tenant.name+".*\n"+
+        "Vou te ajudar a reservar seu horário.\n\n"+
+        "✂️ *Qual serviço você deseja?*\n\n"+
         serviceOptions(services)+
-        "\n\nResponda com o número ou nome do serviço."
+        "\n\n_Envie o número ou o nome do serviço._"
       );
     }
     return NextResponse.json({ok:true,state});
@@ -341,11 +342,11 @@ export async function POST(req){
     const unit=pick(d.units||[],text);
     if(!unit){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"📍 Não encontrei essa unidade. Responda com o número de uma opção da lista.");
+      await reply(db,tenantId,instance,phone,"*Não encontrei essa unidade.*\n\nEnvie o número de uma das opções mostradas acima.");
       return NextResponse.json({ok:true});
     }
     d.unit=unit;state="service";await saveSession(db,tenantId,phone,state,d);
-    await reply(db,tenantId,instance,phone,"✂️ *Escolha o serviço*\n"+serviceOptions(d.services||[])+"\n\nResponda com o número ou nome do serviço.");
+    await reply(db,tenantId,instance,phone,"✂️ *Qual serviço você deseja?*\n\n"+serviceOptions(d.services||[])+"\n\n_Envie o número ou o nome do serviço._");
     return NextResponse.json({ok:true,state});
   }
 
@@ -353,7 +354,7 @@ export async function POST(req){
     const service=pick(d.services||[],text);
     if(!service){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"✂️ Não encontrei esse serviço. Responda com o número ou nome de uma opção da lista.");
+      await reply(db,tenantId,instance,phone,"*Não encontrei esse serviço.*\n\nEscolha uma das opções da lista ou envie o nome do serviço.");
       return NextResponse.json({ok:true});
     }
     const [{data:bu},{data:bs}]=await Promise.all([
@@ -364,14 +365,14 @@ export async function POST(req){
     const barbers=(bu||[]).map(x=>x.barbers).filter(x=>x?.active&&qualified.has(x.id));
     if(!barbers.length){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"👤 Nenhum profissional está disponível para esse serviço no momento. Envie *MENU* para escolher novamente.");
+      await reply(db,tenantId,instance,phone,"👤 *Nenhum profissional disponível agora*\n\nEsse serviço não tem profissionais disponíveis nesta unidade no momento.\n\n_Envie *MENU* para escolher outra opção._");
       return NextResponse.json({ok:true});
     }
     d={...d,service,barbers};state="barber";await saveSession(db,tenantId,phone,state,d);
     await reply(db,tenantId,instance,phone,
-      "👤 *Escolha o profissional*\n"+
+      "👤 *Com quem você quer agendar?*\n\n"+
       professionalOptions(barbers)+
-      "\n\nResponda com o número, nome ou *0* para qualquer disponível."
+      "\n\n_Envie o número da opção._"
     );
     return NextResponse.json({ok:true,state});
   }
@@ -381,11 +382,11 @@ export async function POST(req){
     const barber=any?null:pick(d.barbers||[],text);
     if(!any&&!barber){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"👤 Não encontrei esse profissional. Envie o número, o nome ou *0* para qualquer disponível.");
+      await reply(db,tenantId,instance,phone,"*Não encontrei esse profissional.*\n\nEnvie o número da opção ou *0* para qualquer profissional disponível.");
       return NextResponse.json({ok:true});
     }
     d={...d,barber,barberAny:any};state="date";await saveSession(db,tenantId,phone,state,d);
-    await reply(db,tenantId,instance,phone,"📅 *Qual dia você prefere?*\n\nEnvie *HOJE*, *AMANHÃ* ou uma data como *25/09*.");
+    await reply(db,tenantId,instance,phone,"📅 *Escolha a data*\n\nVocê pode responder:\n*HOJE*\n*AMANHÃ*\nou uma data como *25/09*.");
     return NextResponse.json({ok:true,state});
   }
 
@@ -393,21 +394,21 @@ export async function POST(req){
     const date=parseRequestedDate(text,d.unit?.timezone||DEFAULT_TZ);
     if(!date){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"📅 Não entendi a data. Envie *HOJE*, *AMANHÃ* ou no formato *DD/MM*.");
+      await reply(db,tenantId,instance,phone,"*Não entendi essa data.*\n\nEnvie *HOJE*, *AMANHÃ* ou use o formato *DD/MM*.");
       return NextResponse.json({ok:true});
     }
     const barbers=d.barberAny?(d.barbers||[]):[d.barber].filter(Boolean);
     const slots=await availableSlots(db,tenant.slug,d.unit.id,d.service.id,barbers,date);
     if(!slots.length){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"⏰ *Sem horários disponíveis*\n\nNão encontrei horários nessa data. Envie outra data para consultar.");
+      await reply(db,tenantId,instance,phone,"⏰ *Essa data está sem horários*\n\nEscolha outro dia e eu verifico a agenda para você.\n\n_Envie *AMANHÃ* ou uma nova data no formato *DD/MM*._");
       return NextResponse.json({ok:true});
     }
     d={...d,date,slots};state="slot";await saveSession(db,tenantId,phone,state,d);
     await reply(db,tenantId,instance,phone,
-      "⏰ *Horários disponíveis — "+date.split("-").reverse().join("/")+"*\n\n"+
-      slots.map((x,i)=>(i+1)+". "+fmtTime(x.starts_at,d.unit?.timezone||DEFAULT_TZ)+(d.barberAny?" — "+x.barber_name:"")).join("\n")+
-      "\n\nResponda com o número do horário."
+      "⏰ *Horários disponíveis · "+date.split("-").reverse().join("/")+"*\n\n"+
+      slots.map((x,i)=>"*"+(i+1)+" — "+fmtTime(x.starts_at,d.unit?.timezone||DEFAULT_TZ)+"*"+(d.barberAny?" · "+x.barber_name:"")).join("\n")+
+      "\n\n_Envie o número do horário que prefere._"
     );
     return NextResponse.json({ok:true,state});
   }
@@ -423,11 +424,11 @@ export async function POST(req){
     }
     if(!slot){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"⏰ Esse horário não está disponível. Responda com o número de uma opção da lista.");
+      await reply(db,tenantId,instance,phone,"*Esse horário não está mais disponível.*\n\nEscolha um dos horários da lista acima.");
       return NextResponse.json({ok:true});
     }
     d={...d,slot};state="name";await saveSession(db,tenantId,phone,state,d);
-    await reply(db,tenantId,instance,phone,"👤 *Para finalizar, qual é o seu nome?*");
+    await reply(db,tenantId,instance,phone,"*Quase lá.*\n\n👤 Qual nome devo colocar no agendamento?");
     return NextResponse.json({ok:true,state});
   }
 
@@ -435,19 +436,18 @@ export async function POST(req){
     const name=String(text).trim().replace(/\s+/g," ").slice(0,80);
     if(name.length<2){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"👤 Digite seu nome para continuar.");
+      await reply(db,tenantId,instance,phone,"Digite seu nome para eu continuar com a reserva.");
       return NextResponse.json({ok:true});
     }
     d={...d,customerName:name};state="confirm";await saveSession(db,tenantId,phone,state,d);
     await reply(db,tenantId,instance,phone,
-      "✅ *Confira seu agendamento*\n\n"+
-      "✂️ Serviço: "+d.service.name+"\n"+
-      "👤 Profissional: "+d.slot.barber_name+"\n"+
-      "📅 Data: "+fmtDate(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+"\n"+
-      "⏰ Horário: "+fmtTime(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+"\n"+
-      "📍 Unidade: "+d.unit.name+"\n"+
-      "💰 Valor: "+money(d.service.price_cents)+"\n\n"+
-      "Se estiver tudo certo, responda *SIM* para confirmar."
+      "✅ *Revise antes de confirmar*\n\n"+
+      "*"+d.service.name+"*\n"+
+      d.slot.barber_name+" · "+d.unit.name+"\n"+
+      fmtDate(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+" às "+fmtTime(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+"\n"+
+      "*"+money(d.service.price_cents)+"*\n\n"+
+      "Está tudo certo?\n"+
+      "Responda *SIM* para confirmar ou *NÃO* para voltar."
     );
     return NextResponse.json({ok:true,state});
   }
@@ -455,12 +455,12 @@ export async function POST(req){
   if(state==="confirm"){
     if(/^(nao|n|voltar)$/.test(t)){
       d={last_message_id:d.last_message_id};state="start";await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"Tudo certo. O agendamento não foi criado. Envie *MENU* para começar novamente.");
+      await reply(db,tenantId,instance,phone,"Sem problema. Nenhum agendamento foi criado.\n\n_Envie *MENU* quando quiser começar de novo._");
       return NextResponse.json({ok:true,state});
     }
     if(!/^(sim|s|confirmo|confirmar|pode|pode confirmar|ok|beleza)$/.test(t)){
       await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"✅ Para confirmar, responda *SIM*. Para voltar, responda *NÃO*.");
+      await reply(db,tenantId,instance,phone,"Responda *SIM* para confirmar ou *NÃO* para voltar.");
       return NextResponse.json({ok:true});
     }
     const {data:confirmation,error}=await db.rpc("public_book_multi",{
@@ -469,24 +469,22 @@ export async function POST(req){
     });
     if(error){
       state="date";d={...d,slots:[],slot:null};await saveSession(db,tenantId,phone,state,d);
-      await reply(db,tenantId,instance,phone,"⏰ Esse horário acabou de ficar indisponível. Envie outra data para consultar novos horários.");
+      await reply(db,tenantId,instance,phone,"⏰ *Esse horário acabou de ser reservado*\n\nEnvie outra data e eu mostro as próximas opções disponíveis.");
       return NextResponse.json({ok:true,booking:false});
     }
     await saveSession(db,tenantId,phone,"start",{last_message_id:d.last_message_id});
     await reply(db,tenantId,instance,phone,
-      "🎉 *Agendamento confirmado!*\n\n"+
-      "✂️ "+d.service.name+"\n"+
-      "👤 "+d.slot.barber_name+"\n"+
-      "📅 "+fmtDate(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+"\n"+
-      "⏰ "+fmtTime(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+"\n"+
-      "📍 "+d.unit.name+"\n"+
-      "💰 "+money(d.service.price_cents)+"\n\n"+
-      "Seu horário já está na agenda da "+tenant.name+"."
+      "🎉 *Seu horário está confirmado*\n\n"+
+      "*"+d.service.name+"* com "+d.slot.barber_name+"\n"+
+      fmtDate(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+" · "+fmtTime(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+"\n"+
+      d.unit.name+"\n"+
+      "*"+money(d.service.price_cents)+"*\n\n"+
+      "Até breve, "+d.customerName+"."
     );
     return NextResponse.json({ok:true,booking:true,confirmation});
   }
 
   await saveSession(db,tenantId,phone,"start",{last_message_id:d.last_message_id});
-  await reply(db,tenantId,instance,phone,"Envie *MENU* para iniciar um agendamento.");
+  await reply(db,tenantId,instance,phone,"Para começar um agendamento, envie *MENU*.");
   return NextResponse.json({ok:true,state:"start"});
 }
