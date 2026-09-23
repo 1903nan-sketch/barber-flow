@@ -1,6 +1,6 @@
 import {timingSafeEqual} from "node:crypto";
 import {NextResponse} from "next/server";
-import {getEvolutionWebhookSecret,normalizeEvolutionState,sendEvolutionPoll,sendEvolutionText,setEvolutionWebhook,tenantIdFromEvolutionInstance} from "../../../../../lib/evolution";
+import {getEvolutionWebhookSecret,normalizeEvolutionState,sendEvolutionButtons,sendEvolutionText,setEvolutionWebhook,tenantIdFromEvolutionInstance} from "../../../../../lib/evolution";
 import {whatsappAdmin} from "../../../../../lib/whatsapp-server";
 
 const DEFAULT_TZ="America/Sao_Paulo";
@@ -36,15 +36,25 @@ function extractMessage(body){
   const d=payloadData(body),candidate=Array.isArray(d)?d[0]:d;
   return candidate?.message||candidate?.messages?.[0]?.message||{};
 }
+function extractInteractiveText(message){
+  const params=message?.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson;
+  if(!params)return "";
+  try{
+    const parsed=JSON.parse(params);
+    return String(parsed?.id||parsed?.display_text||parsed?.title||"").trim();
+  }catch{return ""}
+}
 function extractText(message){
   return String(
     message?.conversation||
     message?.extendedTextMessage?.text||
-    message?.buttonsResponseMessage?.selectedDisplayText||
     message?.buttonsResponseMessage?.selectedButtonId||
-    message?.listResponseMessage?.title||
-    message?.listResponseMessage?.singleSelectReply?.selectedRowId||
+    message?.buttonsResponseMessage?.selectedDisplayText||
+    message?.templateButtonReplyMessage?.selectedId||
     message?.templateButtonReplyMessage?.selectedDisplayText||
+    extractInteractiveText(message)||
+    message?.listResponseMessage?.singleSelectReply?.selectedRowId||
+    message?.listResponseMessage?.title||
     ""
   ).trim();
 }
@@ -173,12 +183,14 @@ async function reply(db,tenant,instance,phone,text){
 }
 async function replyChoice(db,tenant,instance,phone,question,options,fallbackText){
   const values=[...new Set((options||[]).map(textLabel).filter(Boolean))].slice(0,12);
-  if(values.length>=2){
+  if(values.length>=1&&values.length<=3){
     try{
-      await sendEvolutionPoll(instance,phone,question,values);
-      await log(db,tenant,phone,"out","[OPÇÕES] "+question+" | "+values.join(" | "));
+      await sendEvolutionButtons(instance,phone,question,"Toque em uma opção abaixo:",values);
+      await log(db,tenant,phone,"out","[BOTÕES] "+question+" | "+values.join(" | "));
       return true;
-    }catch{}
+    }catch(error){
+      console.error("Evolution buttons failed",error?.message||error);
+    }
   }
   await reply(db,tenant,instance,phone,fallbackText);
   return false;
