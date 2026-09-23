@@ -14,6 +14,7 @@ import {
   CreditCard,
   Users,
   UserRound,
+  MessageCircle,
 } from "lucide-react";
 import { supabase } from "../../../lib/supabase";
 import RuptixLogo from "../../_components/RuptixLogo";
@@ -27,6 +28,7 @@ const items = [
   { label: "Vendas", href: "/dashboard/vendas", icon: CircleDollarSign },
   { label: "Relatórios", href: "/dashboard/relatorios", icon: BarChart3 },
   { label: "Mensalidade", href: "/dashboard/mensalidade", icon: CreditCard, ownerOnly: true },
+  { label: "WhatsApp", href: "/dashboard/whatsapp", icon: MessageCircle, ownerOnly: true },
   { label: "Site, Instagram e WhatsApp", href: "/dashboard/configuracoes", icon: Settings, ownerOnly: true },
 ];
 
