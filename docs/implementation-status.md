@@ -10,6 +10,9 @@
 - Financial account list uses due dates and exports the displayed results as CSV (up to 200 records).
 - Inventory and finance access is restricted to owners or authorized managers/reception. Permissions are available when creating staff accounts.
 
+- Order tabs: appointment-linked or walk-in, service/product items, original price and commission snapshots, split payments, client pending balance, atomic stock deduction, audited cancellation and stock return. Duplicate checkout through the old appointment flow is blocked.
+- Reports label individual payment records as receipts; split payments are not presented as separate sale counts.
+
 ## Validation
 
 All fixtures run inside a transaction and roll back. No real customer bookings or financial transactions are created by these tests.
@@ -17,12 +20,12 @@ All fixtures run inside a transaction and roll back. No real customer bookings o
 - `tests/database-regression.sql`: 27 assertions.
 - `tests/inventory-regression.sql`: 24 assertions.
 - `tests/finance-regression.sql`: 19 assertions.
+- `tests/orders-regression.sql`: 30 assertions (100 total across four suites).
 - Next.js production build succeeds after merging current upstream WhatsApp and agenda changes.
 - Authenticated UI workflows and real mobile-device verification remain outstanding; database tests and a successful build are not substitutes for those checks.
 
 ## Still outstanding
 
-- Complete multi-item order tabs (services and products, split payments).
 - Commission rules per professional/service and commission settlement. Product rate snapshots alone are not a complete commission module.
 - Cash register opening/closing and reconciliation; recurring bills and installments.
 - Comprehensive unit/report filters, client history access and reports beyond the delivered summaries.

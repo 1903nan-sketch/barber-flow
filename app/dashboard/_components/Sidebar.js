@@ -28,6 +28,7 @@ const items = [
   { label: "Serviços", href: "/dashboard/servicos", icon: Scissors },
   { label: "Financeiro", href: "/dashboard/financeiro", icon: CircleDollarSign, permission: "finance" },
   { label: "Estoque", href: "/dashboard/estoque", icon: Sparkles, permission: "inventory" },
+  { label: "Comandas", href: "/dashboard/comandas", icon: CircleDollarSign },
   { label: "Vendas", href: "/dashboard/vendas", icon: CircleDollarSign },
   { label: "Relatórios", href: "/dashboard/relatorios", icon: BarChart3 },
   { label: "Mensalidade", href: "/dashboard/mensalidade", icon: CreditCard, ownerOnly: true },
