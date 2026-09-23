@@ -364,6 +364,65 @@ export async function POST(req){
   let d=session?.state==="employee"?{last_message_id:messageId||""}:{...(session?.data||{}),last_message_id:messageId||session?.data?.last_message_id||""};
   const t=clean(text),origin=new URL(req.url).origin;
 
+  if(state==="reschedule_pending"){
+    const expired=!d.expires_at||new Date(d.expires_at).getTime()<Date.now();
+    if(expired){
+      await saveSession(db,tenantId,phone,"start",{last_message_id:d.last_message_id});
+      await reply(db,tenantId,instance,phone,"📅 *Proposta expirada*\n\nO pedido de reagendamento expirou e seu horário original foi mantido. Fale com a equipe se quiser receber uma nova opção.");
+      return NextResponse.json({ok:true,reschedule:true,expired:true});
+    }
+
+    const confirmReschedule=/^(sim|s|ok|confirmar|confirmo)\b/.test(t)||/\b(confirmar novo horario|aceitar novo horario|aceito)\b/.test(t);
+    const keepCurrent=/^(nao|n|manter|recusar)\b/.test(t)||/\b(manter horario atual|ficar com horario atual|nao posso)\b/.test(t);
+    const askHuman=/\b(falar com atendente|atendente|humano|recepcao)\b/.test(t);
+
+    if(confirmReschedule){
+      const {error:rescheduleError}=await db.rpc("server_confirm_reschedule",{
+        p_tenant:tenantId,
+        p_appointment:d.appointment_id,
+        p_starts_at:d.proposed_starts_at
+      });
+      if(rescheduleError){
+        await saveSession(db,tenantId,phone,"human",{...d,last_message_id:d.last_message_id});
+        await reply(db,tenantId,instance,phone,"⏰ *Esse novo horário não está mais disponível*\n\nSeu horário anterior foi mantido. Nossa equipe vai precisar enviar uma nova opção.");
+        return NextResponse.json({ok:true,reschedule:true,confirmed:false,unavailable:true});
+      }
+      await saveSession(db,tenantId,phone,"start",{last_message_id:d.last_message_id});
+      await reply(db,tenantId,instance,phone,
+        "✅ *Reagendamento confirmado*\n\n"+
+        "*"+textLabel(d.service_name||"Atendimento")+"* com "+textLabel(d.barber_name||"Profissional")+"\n"+
+        fmtDate(d.proposed_starts_at,d.timezone||DEFAULT_TZ)+" · "+fmtTime(d.proposed_starts_at,d.timezone||DEFAULT_TZ)+"\n"+
+        textLabel(d.unit_name||"Unidade")+"\n\n"+
+        "Seu novo horário já está confirmado na agenda."
+      );
+      return NextResponse.json({ok:true,reschedule:true,confirmed:true});
+    }
+
+    if(keepCurrent){
+      await saveSession(db,tenantId,phone,"start",{last_message_id:d.last_message_id});
+      await reply(db,tenantId,instance,phone,
+        "👍 *Horário mantido*\n\n"+
+        "Tudo certo. Seu agendamento continua em *"+
+        fmtDate(d.original_starts_at,d.timezone||DEFAULT_TZ)+" às "+fmtTime(d.original_starts_at,d.timezone||DEFAULT_TZ)+"*."
+      );
+      return NextResponse.json({ok:true,reschedule:true,kept_original:true});
+    }
+
+    if(askHuman){
+      await saveSession(db,tenantId,phone,"human",{...d,last_message_id:d.last_message_id});
+      await reply(db,tenantId,instance,phone,"👤 *Atendimento humano*\n\nCerto. A equipe vai continuar com você por aqui para acertar o melhor horário.");
+      return NextResponse.json({ok:true,reschedule:true,handoff:true});
+    }
+
+    await saveSession(db,tenantId,phone,state,d);
+    await replyChoice(
+      db,tenantId,instance,phone,"Confirmar reagendamento",
+      ["Confirmar novo horário","Manter horário atual","Falar com atendente"],
+      "Responda *CONFIRMAR* para aceitar o novo horário ou *MANTER* para continuar com o horário atual."
+    );
+    return NextResponse.json({ok:true,reschedule:true,pending:true});
+  }
+
   const wantsCancelOrReschedule=/\b(cancelar|cancelamento|desmarcar|remarcar|remarcacao)\b/.test(t);
   const wantsHuman=wantsCancelOrReschedule||/\b(atendente|humano|pessoa|recepcao|falar com alguem)\b/.test(t);
   const asksAvailability=/\b(horario|horarios|agenda|disponibilidade|disponivel|disponiveis|vaga|vagas)\b/.test(t);
