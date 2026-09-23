@@ -62,13 +62,22 @@ function parseDateText(text,tz=DEFAULT_TZ,{allowPast=false}={}){
   const y=m[3]?Number(m[3].length===2?"20"+m[3]:m[3]):now.getFullYear(),mo=Number(m[2]),day=Number(m[1]);
   const d=new Date(Date.UTC(y,mo-1,day));
   if(d.getUTCFullYear()!==y||d.getUTCMonth()!==mo-1||d.getUTCDate()!==day)return "";
-  const out=y+"-"+String(mo).padStart(2,"0")+"-"+String(day).padStart(2,"0");
+  let out=y+"-"+String(mo).padStart(2,"0")+"-"+String(day).padStart(2,"0");
+  if(!allowPast&&!m[3]&&out<localDate(0,tz)){
+    y+=1;
+    out=y+"-"+String(mo).padStart(2,"0")+"-"+String(day).padStart(2,"0");
+  }
   return allowPast||out>=localDate(0,tz)?out:"";
 }
 function parseRequestedDate(text,tz=DEFAULT_TZ){return parseDateText(text,tz,{allowPast:false})}
 function pick(items,text,label=x=>x.name){
-  const n=Number(String(text).trim());
+  const raw=String(text).trim(),n=Number(raw);
   if(Number.isInteger(n)&&n>=1&&n<=items.length)return items[n-1];
+  const numbers=raw.match(/\b\d+\b/g);
+  if(numbers?.length===1){
+    const option=Number(numbers[0]);
+    if(Number.isInteger(option)&&option>=1&&option<=items.length)return items[option-1];
+  }
   const t=clean(text);
   if(!t)return null;
   return items.find(x=>clean(label(x))===t)||
@@ -141,10 +150,13 @@ async function availableSlots(db,slug,unit,service,barbers,date){
     if(error)return [];
     return (data||[]).map(x=>({starts_at:x?.starts_at||x?.start_at||x,barber_id:b.id,barber_name:textLabel(b.name)}));
   }));
-  const seen=new Set();
+  const seen=new Set(),anyProfessional=barbers.length>1;
   return rows.flat().filter(x=>x.starts_at).sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at)).filter(x=>{
-    const k=x.starts_at+"|"+x.barber_id;if(seen.has(k))return false;seen.add(k);return true;
-  }).slice(0,12);
+    const k=anyProfessional?x.starts_at:x.starts_at+"|"+x.barber_id;
+    if(seen.has(k))return false;
+    seen.add(k);
+    return true;
+  }).slice(0,40);
 }
 async function findEmployee(db,tenantId,phone){
   const [{data:members},{data:professionals}]=await Promise.all([
@@ -397,7 +409,7 @@ export async function POST(req){
   }
 
   if(state==="barber"){
-    const any=/^(0|qualquer|qualquer um|sem preferencia|sem preferência|primeiro disponivel|primeiro disponível|qualquer profissional disponivel|qualquer profissional disponível)$/.test(String(text).toLowerCase().trim())||/\bqualquer profissional\b/.test(t);
+    const any=/^0$/.test(String(text).trim())||/\b(qualquer|sem preferencia|primeiro disponivel)\b/.test(t);
     const barber=any?null:pick(d.barbers||[],text);
     if(!any&&!barber){
       await saveSession(db,tenantId,phone,state,d);
