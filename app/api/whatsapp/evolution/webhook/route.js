@@ -183,6 +183,7 @@ async function reply(db,tenant,instance,phone,text){
 }
 async function replyChoice(db,tenant,instance,phone,question,options,fallbackText){
   const values=[...new Set((options||[]).map(textLabel).filter(Boolean))].slice(0,12);
+  await reply(db,tenant,instance,phone,fallbackText);
   if(values.length>=1&&values.length<=3){
     try{
       await sendEvolutionButtons(instance,phone,question,"Toque em uma opção abaixo:",values);
@@ -192,7 +193,6 @@ async function replyChoice(db,tenant,instance,phone,question,options,fallbackTex
       console.error("Evolution buttons failed",error?.message||error);
     }
   }
-  await reply(db,tenant,instance,phone,fallbackText);
   return false;
 }
 async function availableSlots(db,slug,unit,service,barbers,date){
