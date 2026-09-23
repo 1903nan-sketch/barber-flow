@@ -9,7 +9,8 @@ export async function POST(request){
   if(userError||!user)return NextResponse.json({error:"Sessão expirada."},{status:401});
   const {data:allowed}=await admin.from("platform_admins").select("user_id,access_role").eq("user_id",user.id).maybeSingle();
   if(!allowed||allowed.access_role!=="full")return NextResponse.json({error:"Acesso restrito ao administrador mestre."},{status:403});
-  const body=await request.json(),email=String(body.owner_email||"").trim().toLowerCase(),password=String(body.password||"");\n  if(!String(body.name||"").trim()||!String(body.owner_name||"").trim()||!email||!String(body.slug||"").trim()||!body.plan_id)return NextResponse.json({error:"Preencha os dados obrigatórios da barbearia, proprietário e plano."},{status:400});
+  const body=await request.json(),email=String(body.owner_email||"").trim().toLowerCase(),password=String(body.password||"");
+  if(!String(body.name||"").trim()||!String(body.owner_name||"").trim()||!email||!String(body.slug||"").trim()||!body.plan_id)return NextResponse.json({error:"Preencha os dados obrigatórios da barbearia, proprietário e plano."},{status:400});
   if(password.length<8)return NextResponse.json({error:"A senha precisa ter pelo menos 8 caracteres."},{status:400});
   const {data:created,error:createError}=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{name:body.owner_name}});
   if(createError)return NextResponse.json({error:createError.message.includes("already")?"Este e-mail já possui uma conta. Use outro e-mail.":createError.message},{status:400});
