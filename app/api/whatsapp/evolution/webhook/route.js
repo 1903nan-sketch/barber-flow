@@ -199,23 +199,19 @@ async function employeeAppointments(db,tenantId,barberId,date,tz){
 }
 function employeeAgendaText(rows,date,tz){
   const label=new Date(date+"T12:00:00Z").toLocaleDateString("pt-BR",{timeZone:"UTC",day:"2-digit",month:"2-digit",year:"numeric"});
-  if(!rows.length)return "📅 *Sua agenda — "+label+"*\n\nNenhum atendimento agendado.\n\nComandos: HOJE · AMANHÃ · AGENDA DD/MM · PRÓXIMO CLIENTE";
+  if(!rows.length)return "📅 *Agenda · "+label+"*\n\nNenhum atendimento marcado para esse dia.\n\n_Use HOJE, AMANHÃ, AGENDA DD/MM ou PRÓXIMO CLIENTE._";
   const items=rows.map(x=>
-    "⏰ *"+fmtTime(x.starts_at,tz)+"*\n"+
-    "👤 "+x.client_name+"\n"+
-    "✂️ "+x.service_name+"\n"+
-    "Status: "+statusLabel(x.status)
+    "*"+fmtTime(x.starts_at,tz)+" — "+x.client_name+"*\n"+
+    x.service_name+" · "+statusLabel(x.status)
   ).join("\n\n");
-  return "📅 *Sua agenda — "+label+"*\n\n"+items+"\n\n"+rows.length+" atendimento"+(rows.length===1?"":"s")+" no dia.";
+  return "📅 *Agenda · "+label+"*\n\n"+items+"\n\n_"+rows.length+" atendimento"+(rows.length===1?"":"s")+" no dia._";
 }
 function nextClientText(rows,tz){
   const now=Date.now(),next=rows.find(x=>new Date(x.starts_at).getTime()>now&&!["cancelled","canceled","completed","finished"].includes(clean(x.status).replace(/\s+/g,"_")));
-  if(!next)return "📅 *Próximo cliente*\n\nNenhum atendimento restante hoje.";
+  if(!next)return "📅 *Próximo cliente*\n\nSua agenda de hoje não tem mais atendimentos pendentes.";
   return "📅 *Próximo cliente*\n\n"+
-    "⏰ "+fmtTime(next.starts_at,tz)+"\n"+
-    "👤 "+next.client_name+"\n"+
-    "✂️ "+next.service_name+"\n"+
-    "Status: "+statusLabel(next.status);
+    "*"+fmtTime(next.starts_at,tz)+" — "+next.client_name+"*\n"+
+    next.service_name+" · "+statusLabel(next.status);
 }
 
 export async function POST(req){
@@ -288,7 +284,7 @@ export async function POST(req){
   if(wantsHuman){
     state="human";await saveSession(db,tenantId,phone,state,d);
     const contact=digits(tenant?.whatsapp);
-    const reason=wantsCancelOrReschedule?"Cancelamentos e remarcações são realizados pelo atendimento humano.":"Vou encaminhar você para o atendimento humano.";
+    const reason=wantsCancelOrReschedule?"Para alterar ou cancelar um horário, nossa equipe continua com você por aqui.":"Nossa equipe continua o atendimento com você a partir daqui.";
     await reply(db,tenantId,instance,phone,"👤 *Atendimento humano*\n\n"+reason+(contact?"\n\n📲 "+contact:"")+"\n\n_Para voltar ao agendamento automático, envie *MENU*._");
     return NextResponse.json({ok:true,handoff:true});
   }
