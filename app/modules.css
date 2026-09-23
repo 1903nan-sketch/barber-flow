@@ -302,3 +302,18 @@
   .agenda-card-actions .checkout-btn{font-size:9px!important}
   .agenda-card-actions .checkout-btn:after{content:none!important;display:none!important}
 }
+
+
+/* Agenda action polish */
+.agenda-card-actions .checkout-btn:after{content:none!important}
+.agenda-card-actions .checkout-btn{font-size:9px!important}
+.reschedule-hint{
+  margin:14px 0 0;
+  padding:12px 13px;
+  border:1px solid rgba(139,108,255,.18);
+  border-radius:11px;
+  background:rgba(125,88,235,.08);
+  color:#aeb7c6!important;
+  font-size:10px!important;
+  line-height:1.55;
+}
