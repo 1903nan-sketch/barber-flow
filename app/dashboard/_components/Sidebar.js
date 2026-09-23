@@ -16,6 +16,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { supabase } from "../../../lib/supabase";
+import RuptixLogo from "../../_components/RuptixLogo";
 
 const items = [
   { label: "Visão geral", href: "/dashboard", icon: LayoutDashboard },
@@ -35,11 +36,7 @@ export default function Sidebar({ workspace }) {
   return (
     <aside className="sidebar">
       <div className="brand-wrap">
-        <div className="brand-mark"><Scissors size={21} /></div>
-        <div>
-          <div className="brand">Barber Flow</div>
-          <span className="brand-subtitle">Gestão inteligente</span>
-        </div>
+        <div className="brand-client-lockup"><RuptixLogo/><div><div className="brand">Barber Flow</div><span className="brand-subtitle">Gestão inteligente</span></div></div>
       </div>
 
       <div className="workspace-card">
