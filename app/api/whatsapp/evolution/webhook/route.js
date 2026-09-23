@@ -7,6 +7,7 @@ const DEFAULT_TZ="America/Sao_Paulo";
 const digits=v=>String(v||"").replace(/\D/g,"");
 const clean=v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
 const textLabel=v=>String(v||"").trim().replace(/\s+/g," ");
+const brandLabel=v=>{const s=textLabel(v);return s&&s===s.toLowerCase()?s.charAt(0).toUpperCase()+s.slice(1):s};
 const money=v=>(Number(v||0)/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const formatPhone=v=>{
   let d=digits(v);
@@ -237,7 +238,7 @@ export async function POST(req){
     .select("id,name,slug,address,whatsapp,status")
     .eq("id",tenantId).maybeSingle();
   if(!tenant)return NextResponse.json({ok:true,ignored:"unknown_tenant"});
-  const shopName=textLabel(shopName)||"barbearia";
+  const shopName=brandLabel(tenant.name)||"barbearia";
 
   if(event==="QRCODE_UPDATED")return NextResponse.json({ok:true,status:"connecting"});
   if(event==="CONNECTION_UPDATE")return NextResponse.json({ok:true,status:normalizeEvolutionState(payloadData(body))});
