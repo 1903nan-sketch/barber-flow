@@ -174,3 +174,13 @@ html:has(.admin-layout),body:has(.admin-layout){background:#05090e!important}
 .agenda-panel-head p{margin:0;color:#999aa5}
 .agenda-action-link{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 @media(max-width:680px){.agenda-subnav{grid-template-columns:repeat(2,1fr);gap:7px;padding:7px}.agenda-subnav button{min-height:44px;font-size:13px}.agenda-panel{min-height:190px}}
+
+/* Ruptix brand lockup */
+.ruptix-logo{display:inline-flex;align-items:center;gap:12px;color:#fff;line-height:1}
+.ruptix-logo svg{width:42px;height:36px;display:block;flex:0 0 auto}
+.ruptix-logo>span{font-size:18px;font-weight:650;letter-spacing:.34em}
+.rh2-logo .ruptix-logo svg{width:48px;height:41px}.rh2-logo .ruptix-logo>span{font-size:20px}
+.brand-client-lockup{display:flex;align-items:center;gap:14px}.brand-client-lockup>.ruptix-logo{padding-right:14px;border-right:1px solid rgba(255,255,255,.12)}.brand-client-lockup>.ruptix-logo svg{width:30px;height:27px}.brand-client-lockup>.ruptix-logo>span{display:none}
+.ruptix-logo-small{gap:6px;margin-left:5px;vertical-align:middle}.ruptix-logo-small svg{width:20px;height:18px}.ruptix-logo-small>span{font-size:10px;letter-spacing:.24em}
+.premium-booking footer .ruptix-logo{display:inline-flex}
+@media(max-width:680px){.ruptix-logo>span{font-size:14px}.rh2-logo .ruptix-logo svg{width:38px;height:34px}.brand-client-lockup{gap:9px}.brand-client-lockup>.ruptix-logo{padding-right:9px}}
