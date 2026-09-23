@@ -413,3 +413,5 @@
   .reschedule-current{align-items:flex-start;flex-direction:column;gap:5px}
   .reschedule-slots{grid-template-columns:repeat(3,minmax(0,1fr));max-height:190px}
 }
+
+.finance-cards{grid-template-columns:repeat(auto-fit,minmax(190px,1fr));margin:20px 0}

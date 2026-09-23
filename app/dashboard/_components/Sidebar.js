@@ -26,6 +26,7 @@ const items = [
   { label: "Clientes", href: "/dashboard/clientes", icon: Users },
   { label: "Barbeiros", href: "/dashboard/barbeiros", icon: UserRound },
   { label: "Serviços", href: "/dashboard/servicos", icon: Scissors },
+  { label: "Financeiro", href: "/dashboard/financeiro", icon: CircleDollarSign, permission: "finance" },
   { label: "Estoque", href: "/dashboard/estoque", icon: Sparkles, permission: "inventory" },
   { label: "Vendas", href: "/dashboard/vendas", icon: CircleDollarSign },
   { label: "Relatórios", href: "/dashboard/relatorios", icon: BarChart3 },
