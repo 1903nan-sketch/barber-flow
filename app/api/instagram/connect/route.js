@@ -5,7 +5,7 @@ export async function GET(req){
  if(!token||!tenant)return NextResponse.redirect(new URL("/dashboard/configuracoes?instagram=erro",url.origin));
  const sb=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,{global:{headers:{Authorization:"Bearer "+token}}});
  const {data:{user}}=await sb.auth.getUser();if(!user)return NextResponse.redirect(new URL("/login",url.origin));
- const {data}=await sb.from("memberships").select("tenant_id").eq("user_id",user.id).eq("tenant_id",tenant).maybeSingle();if(!data)return NextResponse.redirect(new URL("/dashboard/configuracoes?instagram=erro",url.origin));
+ const {data}=await sb.from("memberships").select("tenant_id,role,active").eq("user_id",user.id).eq("tenant_id",tenant).eq("active",true).maybeSingle();if(!data||!["owner","manager"].includes(data.role))return NextResponse.redirect(new URL("/dashboard/configuracoes?instagram=erro",url.origin));
  const state=Buffer.from(JSON.stringify({tenant,uid:user.id,ts:Date.now()})).toString("base64url");
  const appId=process.env.INSTAGRAM_APP_ID,redirect=process.env.INSTAGRAM_REDIRECT_URI||url.origin+"/api/instagram/callback";if(!appId)return NextResponse.redirect(new URL("/dashboard/configuracoes?instagram=config",url.origin));
  const auth=new URL("https://www.instagram.com/oauth/authorize");
