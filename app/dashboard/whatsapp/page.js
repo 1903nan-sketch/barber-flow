@@ -1,4 +1,5 @@
 "use client";
+import {notify} from "../../../lib/notify";
 
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {Bot,CheckCircle2,ExternalLink,MessageCircle,RefreshCw,ShieldCheck,Smartphone,Unplug,UserRound} from "lucide-react";
@@ -66,7 +67,7 @@ function WhatsAppContent({workspace}){
         body:JSON.stringify({tenant:tenant.id})
       });
       const out=await res.json();
-      if(!res.ok)throw new Error(out.error||"Não foi possível desconectar.");
+      if(!res.ok)throw new Error(out.error||"Não foi possível desconectar.");notify("WhatsApp desconectado com sucesso.");
       setStatus("disconnected");setPhone("");setQr("");
     }catch(e){setError(e.message||"Não foi possível desconectar.")}finally{setBusy(false)}
   }
