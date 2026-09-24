@@ -1075,3 +1075,22 @@ html:has(.admin-layout),body:has(.admin-layout){background:#05090e!important}
 .global-notice button:hover{background:rgba(255,255,255,.06);color:#fff}
 @keyframes notice-in{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}
 @media(max-width:600px){.global-notice{top:14px;right:14px;left:14px;width:auto}}
+
+
+/* Hide sensitive PIX copy-and-paste payload while keeping copy action */
+.dashboard-shell .pix-hidden-code{
+ min-height:46px;
+ display:flex;
+ align-items:center;
+ padding:10px 12px;
+ border:1px solid #304052;
+ border-radius:10px;
+ background:#091019;
+ color:#7f8b9d;
+ font-size:10px;
+ letter-spacing:.02em;
+}
+.dashboard-shell .service-results button:disabled{
+ opacity:.45;
+ cursor:not-allowed;
+}
