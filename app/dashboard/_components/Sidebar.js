@@ -16,9 +16,10 @@ import {
   Users,
   UserRound,
   MessageCircle,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { supabase } from "../../../lib/supabase";
-import RuptixLogo from "../../_components/RuptixLogo";
 
 const items = [
   { label: "Visão geral", href: "/dashboard", icon: LayoutDashboard },
@@ -39,7 +40,7 @@ const items = [
 const roleLabel={owner:"Proprietário",manager:"Gerente",reception:"Recepção",barber:"Barbeiro"};
 const initials=name=>String(name||"BF").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
 
-export default function Sidebar({ workspace }) {
+export default function Sidebar({ workspace, collapsed=false, onToggle }) {
   const pathname = usePathname();
   const [workspaceOpen,setWorkspaceOpen]=useState(false);
   const starter=String(workspace?.tenant?.plans?.name||"").toLowerCase()==="starter";
@@ -48,9 +49,12 @@ export default function Sidebar({ workspace }) {
   async function changeAccount(){localStorage.removeItem("barberflow_workspace");await supabase?.auth.signOut();window.location.href="/login"}
 
   return (
-    <aside className="sidebar">
+    <aside className={"sidebar "+(collapsed?"collapsed":"")}>
       <div className="brand-wrap">
-        <div className="brand-client-lockup"><RuptixLogo/><div><div className="brand">Barber Flow</div><span className="brand-subtitle">Gestão inteligente</span></div></div>
+        <div className="brand-client-lockup"><span className="bf-simple-mark" aria-hidden="true"/><div className="brand-copy"><div className="brand">Barber Flow</div><span className="brand-subtitle">Gestão inteligente</span></div></div>
+        <button type="button" className="sidebar-toggle" onClick={onToggle} aria-label={collapsed?"Expandir menu":"Minimizar menu"} title={collapsed?"Expandir menu":"Minimizar menu"}>
+          {collapsed?<PanelLeftOpen size={18}/>:<PanelLeftClose size={18}/>}
+        </button>
       </div>
 
       <div className="workspace-switcher">
@@ -75,7 +79,7 @@ export default function Sidebar({ workspace }) {
         {items.filter(item => (!starter||starterRoutes.has(item.href)) && (!item.ownerOnly || ["owner","manager"].includes(workspace?.membership?.role)) && (!item.permission || workspace?.membership?.role==="owner" || ["manager","reception"].includes(workspace?.membership?.role)&&workspace?.membership?.permissions?.includes(item.permission))).map(({ label, href, icon: Icon, soon }) => {
           const active = href === "/dashboard" ? pathname === href : pathname.startsWith(href);
           return (
-            <a key={href} href={soon ? "#" : href} className={active ? "active" : ""}>
+            <a key={href} href={soon ? "#" : href} className={active ? "active" : ""} title={collapsed?label:undefined}>
               <Icon size={19} />
               <span>{label}</span>
               {soon && <small className="soon">Em breve</small>}
