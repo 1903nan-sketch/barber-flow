@@ -993,3 +993,49 @@ html:has(.admin-layout),body:has(.admin-layout){background:#05090e!important}
   }
   .dashboard-shell .sidebar.collapsed nav a span{display:block!important}
 }
+
+
+/* ChatGPT-like sidebar edge tab */
+.dashboard-shell .sidebar{position:sticky!important}
+.dashboard-shell .sidebar-top{padding-right:34px}
+.dashboard-shell .sidebar-edge-tab{
+  position:absolute!important;
+  top:42px!important;
+  right:0!important;
+  left:auto!important;
+  width:30px!important;
+  height:42px!important;
+  min-height:42px!important;
+  border:1px solid #2b3746!important;
+  border-right:0!important;
+  border-radius:12px 0 0 12px!important;
+  background:#0d141d!important;
+  color:#8d98aa!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:0!important;
+  transform:none!important;
+  z-index:20;
+  box-shadow:-6px 0 20px rgba(0,0,0,.16);
+}
+.dashboard-shell .sidebar-edge-tab:hover{
+  background:#17202b!important;
+  color:#fff!important;
+  border-color:#465568!important;
+}
+.dashboard-shell .sidebar.collapsed .sidebar-top{
+  padding-right:0;
+  margin-bottom:18px;
+}
+.dashboard-shell .sidebar.collapsed .sidebar-edge-tab{
+  position:absolute!important;
+  top:42px!important;
+  right:0!important;
+  left:auto!important;
+  transform:none!important;
+}
+.dashboard-shell .sidebar.collapsed .sidebar-edge-tab svg{transform:rotate(180deg)}
+@media(max-width:760px){
+  .dashboard-shell .sidebar-edge-tab{display:none!important}
+  .dashboard-shell .sidebar-top{padding-right:0}
+}

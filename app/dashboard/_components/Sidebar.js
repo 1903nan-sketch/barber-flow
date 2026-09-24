@@ -16,8 +16,7 @@ import {
   Users,
   UserRound,
   MessageCircle,
-  PanelLeftClose,
-  PanelLeftOpen,
+  ChevronLeft,
 } from "lucide-react";
 import { supabase } from "../../../lib/supabase";
 
@@ -58,10 +57,10 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
             <span className="brand-subtitle">Gestão inteligente</span>
           </div>
         </div>
-        <button type="button" className="sidebar-toggle" onClick={onToggle} aria-label={collapsed?"Expandir menu":"Minimizar menu"} title={collapsed?"Expandir menu":"Minimizar menu"}>
-          {collapsed?<PanelLeftOpen size={18}/>:<PanelLeftClose size={18}/>}
-        </button>
       </div>
+      <button type="button" className="sidebar-toggle sidebar-edge-tab" onClick={onToggle} aria-label={collapsed?"Expandir menu":"Minimizar menu"} title={collapsed?"Expandir menu":"Minimizar menu"}>
+        <ChevronLeft size={17}/>
+      </button>
 
       <div className="workspace-switcher">
         <button type="button" className={"workspace-card workspace-card-button "+(workspaceOpen?"open":"")} onClick={()=>setWorkspaceOpen(v=>!v)}>
