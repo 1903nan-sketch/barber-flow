@@ -1,4 +1,5 @@
 "use client";
+import {notify} from "../../../lib/notify";
 import {useCallback,useEffect,useState} from 'react';
 import {Package,Plus,Search,X} from 'lucide-react';
 import {supabase} from '../../../lib/supabase';
@@ -19,7 +20,7 @@ function Inventory({workspace}){
  if(modal.type==='product'){const p=Object.fromEntries(f);p.id=modal.product?.id||null;p.unit_id=modal.product?.unit_id||p.unit_id;p.active=modal.product?f.get('active')==='on':true;result=await supabase.rpc('inventory_save',{t,p})}
  else if(modal.type==='move')result=await supabase.rpc('inventory_move',{t,i:modal.product.id,k:f.get('kind'),q:Number(f.get('quantity')),n:f.get('notes'),r:modal.key});
  else {if(f.get('method')!=='account'&&!f.get('received'))throw new Error('Confirme o recebimento antes de registrar a venda.');result=await supabase.rpc('inventory_sell',{t,i:modal.product.id,q:Number(f.get('quantity')),c:f.get('client')||null,b:f.get('barber')||null,m:f.get('method'),r:modal.key})}
- if(result.error)throw result.error;setModal(null);setNotice(modal.type==='sale'?'Venda registrada e estoque atualizado. Consulte o recebimento em Vendas.':'Registro salvo com sucesso.');await load();
+ if(result.error)throw result.error;notify(modal.type==='product'?(modal.product?'Produto atualizado com sucesso.':'Produto criado com sucesso.'):modal.type==='move'?'Estoque atualizado com sucesso.':'Venda de produto registrada com sucesso.');setModal(null);setNotice(modal.type==='sale'?'Venda registrada e estoque atualizado. Consulte o recebimento em Vendas.':'Registro salvo com sucesso.');await load();
  }catch(e){setError(e.message.includes('products_sku_unit')?'Já existe esse SKU nesta unidade.':e.message)}finally{setBusy(false)}}
  const list=products.filter(p=>(!unit||p.unit_id===unit)&&(!onlyLow||p.active&&Number(p.stock_quantity)<=Number(p.minimum_stock))&&`${p.name} ${p.sku||''} ${p.category}`.toLowerCase().includes(search.toLowerCase()));
  const unitName=id=>units.find(u=>u.id===id)?.name||'Unidade';

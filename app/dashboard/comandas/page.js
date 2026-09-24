@@ -1,4 +1,5 @@
 "use client";
+import {notify} from "../../../lib/notify";
 import {useCallback,useEffect,useState} from 'react';
 import {Plus,X} from 'lucide-react';
 import ModuleShell from '../_components/ModuleShell';
@@ -17,8 +18,8 @@ function Orders({workspace}){
  else if(modal.type==='add'){const [k,ref]=String(f.get('item')).split(':');r=await supabase.rpc('order_add_item',{t,i:selected.id,k,ref,q:Number(f.get('quantity')),r:modal.key})}
  else if(modal.type==='close')r=await supabase.rpc('order_close',{t,i:selected.id,payments:payments.map(p=>({method:p.method,amount_cents:Math.round(Number(p.amount)*100)})),expected_total:total});
  else r=await supabase.rpc('order_cancel',{t,i:selected.id,reason:f.get('reason')});
- if(r.error)throw r.error;const id=modal.type==='new'?r.data:selected.id;setModal(null);await load();const fresh=await supabase.from('order_tabs').select('*').eq('tenant_id',t).eq('id',id).single();if(fresh.error)throw fresh.error;await detail(fresh.data)}catch(e){setError(e.message)}finally{setBusy(false)}}
- async function remove(item){if(!window.confirm('Remover '+item.name+' da comanda? O registro será mantido no histórico.'))return;setBusy(true);setError('');try{const r=await supabase.rpc('order_remove_item',{t,i:selected.id,item_id:item.id});if(r.error)throw r.error;await detail(selected)}catch(e){setError(e.message)}finally{setBusy(false)}}
+ if(r.error)throw r.error;const action=modal.type;const id=action==='new'?r.data:selected.id;setModal(null);notify(action==='new'?'Comanda criada com sucesso.':action==='add'?'Item adicionado à comanda.':action==='close'?'Comanda fechada e pagamentos registrados.':'Comanda cancelada e histórico atualizado.');await load();const fresh=await supabase.from('order_tabs').select('*').eq('tenant_id',t).eq('id',id).single();if(fresh.error)throw fresh.error;await detail(fresh.data)}catch(e){setError(e.message)}finally{setBusy(false)}}
+ async function remove(item){if(!window.confirm('Remover '+item.name+' da comanda? O registro será mantido no histórico.'))return;setBusy(true);setError('');try{const r=await supabase.rpc('order_remove_item',{t,i:selected.id,item_id:item.id});if(r.error)throw r.error;notify("Item removido da comanda.");await detail(selected)}catch(e){setError(e.message)}finally{setBusy(false)}}
  const activeItems=items.filter(x=>!x.removed_at),total=activeItems.reduce((s,x)=>s+x.quantity*x.unit_price_cents,0),allocated=payments.reduce((s,p)=>s+Math.round(Number(p.amount||0)*100),0);
  const name=(rows,id)=>rows.find(x=>x.id===id)?.name||'Cadastro';
  return <><section className="box inventory-header"><div><h2>Comandas</h2><p>Serviços, produtos e pagamentos no mesmo atendimento.</p></div><button className="primary" disabled={busy||!units.length||!clients.length||!barbers.length} onClick={()=>open('new')}><Plus size={18}/>Abrir comanda</button></section>{error&&!modal&&<p role="alert" className="form-alert error">{error}</p>}
