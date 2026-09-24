@@ -335,3 +335,485 @@ html:has(.admin-layout),body:has(.admin-layout){background:#05090e!important}
  .sidebar.collapsed nav a{width:auto;height:43px;min-height:43px;margin:0;padding:0 13px;justify-content:flex-start}
  .sidebar.collapsed nav a span{display:block!important}
 }
+
+
+/* =========================================================
+   BARBER FLOW DASHBOARD — authoritative UI normalization
+   Keeps every internal module on the same dark visual system.
+   ========================================================= */
+.dashboard-shell{
+  --bg:#070b11;
+  --surface:#0d141d;
+  --surface-2:#101923;
+  --surface-3:#141e2a;
+  --text:#f5f7fb;
+  --muted:#8d98aa;
+  --line:#263444;
+  --purple:#805cff;
+  --purple-soft:#21184a;
+  --green:#4bd49a;
+  min-height:100vh;
+  background:#070b11!important;
+  color:var(--text)!important;
+}
+.dashboard-shell .content{
+  min-width:0;
+  overflow-x:hidden;
+  background:
+    radial-gradient(circle at 76% -8%,rgba(126,88,255,.12),transparent 30%),
+    #070b11!important;
+  color:var(--text)!important;
+}
+.dashboard-shell .topbar{
+  border-bottom:1px solid #1d2835;
+  padding-bottom:20px;
+}
+.dashboard-shell .topbar h1,
+.dashboard-shell h1,
+.dashboard-shell h2,
+.dashboard-shell h3,
+.dashboard-shell strong{color:#f5f7fb}
+.dashboard-shell p,
+.dashboard-shell small,
+.dashboard-shell label{color:var(--muted)}
+.dashboard-shell a{color:inherit}
+
+/* Surfaces */
+.dashboard-shell .box,
+.dashboard-shell .stat,
+.dashboard-shell .metric-card,
+.dashboard-shell .social-card,
+.dashboard-shell .network-box,
+.dashboard-shell .inventory-card,
+.dashboard-shell .monthly-card{
+  background:linear-gradient(145deg,#111923,#0b121a)!important;
+  border:1px solid var(--line)!important;
+  color:var(--text)!important;
+  box-shadow:0 12px 30px rgba(0,0,0,.18)!important;
+}
+.dashboard-shell .box{border-radius:18px!important}
+.dashboard-shell .metric-card{border-radius:16px;padding:18px}
+.dashboard-shell .metric-card small{display:block;color:#8994a6!important;font-size:10px}
+.dashboard-shell .metric-card strong{display:block;margin-top:8px;font-size:23px}
+
+/* Generic module headers/toolbars */
+.dashboard-shell .module-toolbar,
+.dashboard-shell .inventory-header,
+.dashboard-shell .report-filter,
+.dashboard-shell .box-head,
+.dashboard-shell .social-settings-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.dashboard-shell .module-toolbar,
+.dashboard-shell .inventory-header{margin-bottom:18px}
+.dashboard-shell .module-toolbar h2,
+.dashboard-shell .inventory-header h2,
+.dashboard-shell .report-filter h2{margin:0;color:#f5f7fb}
+.dashboard-shell .module-toolbar p,
+.dashboard-shell .inventory-header p,
+.dashboard-shell .report-filter p{margin:5px 0 0;color:#8792a5}
+
+/* Inputs */
+.dashboard-shell .content input,
+.dashboard-shell .content select,
+.dashboard-shell .content textarea{
+  width:100%;
+  min-height:42px;
+  border:1px solid #314153!important;
+  border-radius:10px!important;
+  background:#09111a!important;
+  color:#f7f8fb!important;
+  -webkit-text-fill-color:#f7f8fb!important;
+  outline:none;
+  padding:10px 12px;
+  color-scheme:dark;
+}
+.dashboard-shell .content textarea{min-height:96px;resize:vertical}
+.dashboard-shell .content input::placeholder,
+.dashboard-shell .content textarea::placeholder{color:#667286!important;-webkit-text-fill-color:#667286!important}
+.dashboard-shell .content input:focus,
+.dashboard-shell .content select:focus,
+.dashboard-shell .content textarea:focus{
+  border-color:#8062ef!important;
+  box-shadow:0 0 0 3px rgba(128,98,239,.14)!important;
+}
+.dashboard-shell .content label{
+  display:grid;
+  gap:7px;
+  font-size:11px;
+  font-weight:700;
+}
+.dashboard-shell .form-grid,
+.dashboard-shell .quick-sale-form{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+.dashboard-shell .form-grid .wide,
+.dashboard-shell .quick-sale-form .wide{grid-column:1/-1}
+.dashboard-shell fieldset{
+  border:0;
+  padding:0;
+  margin:0;
+  min-width:0;
+}
+
+/* Buttons */
+.dashboard-shell .content button{
+  font:inherit;
+  cursor:pointer;
+}
+.dashboard-shell .content button:not(.primary):not(.checkout-close):not(.agenda-action):not(.payment-methods button):not(.qty button):not(.remove-item){
+  min-height:40px;
+  border:1px solid #344354;
+  border-radius:10px;
+  background:#111a24;
+  color:#d9deea;
+  padding:9px 13px;
+  font-size:11px;
+  font-weight:750;
+  transition:.18s ease;
+}
+.dashboard-shell .content button:not(.primary):not(.checkout-close):not(.agenda-action):not(.payment-methods button):not(.qty button):not(.remove-item):hover{
+  background:#172231;
+  border-color:#596b82;
+  color:#fff;
+}
+.dashboard-shell .content button:disabled{
+  opacity:.42!important;
+  cursor:not-allowed!important;
+}
+.dashboard-shell .primary{
+  border:1px solid rgba(255,255,255,.08)!important;
+  background:linear-gradient(135deg,#8d6cff,#6844df)!important;
+  color:#fff!important;
+  box-shadow:0 10px 25px rgba(104,68,223,.24)!important;
+}
+.dashboard-shell .secondary-action{
+  border:1px solid #344354!important;
+  background:#101822!important;
+  color:#cbd2de!important;
+}
+.dashboard-shell .secondary-action:hover{
+  background:#172231!important;
+  border-color:#6952c9!important;
+  color:#fff!important;
+}
+
+/* Search + filters */
+.dashboard-shell .search-field{
+  display:flex!important;
+  align-items:center;
+  gap:8px;
+  min-width:min(100%,280px);
+  min-height:42px;
+  padding:0 11px;
+  border:1px solid #314153;
+  border-radius:10px;
+  background:#09111a;
+  color:#778397;
+}
+.dashboard-shell .search-field input{
+  min-height:38px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.dashboard-shell .sales-filters,
+.dashboard-shell .inventory-filters,
+.dashboard-shell .report-filters{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px;
+  margin:14px 0 18px;
+}
+.dashboard-shell .report-filters label{gap:6px}
+
+/* Lists */
+.dashboard-shell .data-list{display:grid}
+.dashboard-shell .data-list article{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:13px 4px;
+  border-bottom:1px solid #222e3b!important;
+  color:#e9edf4;
+}
+.dashboard-shell .data-list article:last-child{border-bottom:0!important}
+.dashboard-shell .data-list article:hover{background:#101923!important}
+.dashboard-shell .data-list article>div{min-width:0;flex:1}
+.dashboard-shell .data-list article small{color:#8994a6!important}
+.dashboard-shell .empty,
+.dashboard-shell .empty-state{color:#7f8a9c!important}
+
+/* Inventory, finance and comandas */
+.dashboard-shell .inventory-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:13px;
+}
+.dashboard-shell .inventory-card{
+  border-radius:15px!important;
+  padding:17px;
+}
+.dashboard-shell .inventory-card h3{margin:0 0 8px}
+.dashboard-shell .inventory-card p{margin:6px 0;color:#8e99aa}
+.dashboard-shell .inventory-card-title{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.dashboard-shell .inventory-actions{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+.dashboard-shell .inventory-history{display:grid}
+.dashboard-shell .inventory-history article{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 0;
+  border-bottom:1px solid #222e3b;
+}
+.dashboard-shell .inventory-history article span{color:#8792a5;font-size:11px}
+.dashboard-shell .inventory-check{
+  display:flex!important;
+  grid-column:1/-1;
+  grid-template-columns:auto 1fr;
+  align-items:flex-start;
+  gap:9px!important;
+  color:#aab2c0!important;
+}
+.dashboard-shell .inventory-check input,
+.dashboard-shell .check-line input{
+  width:16px!important;
+  height:16px!important;
+  min-height:16px!important;
+  flex:0 0 16px;
+  accent-color:#805cff;
+}
+.dashboard-shell .inventory-low{color:#ffad6b!important}
+
+/* Modals */
+.dashboard-shell .checkout-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  display:grid;
+  place-items:center;
+  padding:18px;
+  background:rgba(2,5,9,.76);
+  backdrop-filter:blur(10px);
+}
+.dashboard-shell .checkout-modal{
+  width:min(720px,100%);
+  max-height:90vh;
+  overflow:auto;
+  border-radius:20px!important;
+  padding:24px!important;
+  background:#0d151f!important;
+  border:1px solid #2b3949!important;
+  color:#f5f7fb!important;
+  box-shadow:0 30px 90px rgba(0,0,0,.52)!important;
+}
+.dashboard-shell .checkout-close{
+  border:0!important;
+  background:transparent!important;
+  color:#8f9aac!important;
+}
+.dashboard-shell .checkout-close:hover{color:#fff!important;background:#17212d!important}
+.dashboard-shell .checkout-total{color:#fff!important}
+
+/* Payments */
+.dashboard-shell .payment-methods{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.dashboard-shell .payment-methods button{
+  min-height:38px;
+  padding:8px 12px;
+  border-radius:10px;
+  border:1px solid #314153;
+  background:#0d151f;
+  color:#aeb7c5;
+}
+.dashboard-shell .payment-methods button.active{
+  border-color:#8163ef;
+  background:#271c55;
+  color:#fff;
+}
+.dashboard-shell .pix-box,
+.dashboard-shell .account-warning,
+.dashboard-shell .client-account-summary{
+  border:1px solid #2d3b4c!important;
+  background:#0a121b!important;
+  color:#dbe0e9!important;
+  border-radius:13px!important;
+}
+
+/* Reports */
+.dashboard-shell .report-actions{display:flex;gap:9px;flex-wrap:wrap}
+.dashboard-shell .report-actions button{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+.dashboard-shell .report-cards{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin:0 0 18px;
+}
+.dashboard-shell .report-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+  margin-top:16px;
+}
+.dashboard-shell .ranking-list{display:grid}
+.dashboard-shell .ranking-list>div{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:11px 0;
+  border-bottom:1px solid #222e3b;
+}
+.dashboard-shell .ranking-list>div:last-child{border-bottom:0}
+.dashboard-shell .ranking-list span{color:#98a2b3}
+.dashboard-shell .sales-report-print{
+  background:linear-gradient(145deg,#111923,#0b121a)!important;
+  border-color:#2a3848!important;
+}
+.dashboard-shell .sales-report-head{border-color:#2b3948!important}
+.dashboard-shell .sales-report-summary>div{
+  background:#0b131c!important;
+  border-color:#2b3948!important;
+}
+.dashboard-shell .sales-report-summary small{color:#8994a6!important}
+.dashboard-shell .sales-report-summary strong{color:#f6f8fb!important}
+.dashboard-shell .sales-report-table th{
+  background:#0b131c!important;
+  color:#8793a6!important;
+  border-color:#2b3948!important;
+}
+.dashboard-shell .sales-report-table td{
+  color:#e7ebf1!important;
+  border-color:#263442!important;
+}
+.dashboard-shell .sales-report-footer{color:#707c90!important}
+
+/* Social/settings */
+.dashboard-shell .social-settings{display:grid;gap:16px}
+.dashboard-shell .social-card,
+.dashboard-shell .network-box{border-radius:16px!important;padding:18px}
+.dashboard-shell .social-network-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:12px;
+}
+.dashboard-shell .network-title,
+.dashboard-shell .network-actions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.dashboard-shell .network-ok,
+.dashboard-shell .site-status{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  color:#54d99c!important;
+}
+.dashboard-shell .upload-box{
+  border:1px dashed #3b4b5e!important;
+  background:#0a121b!important;
+  border-radius:14px!important;
+  color:#9ba5b5!important;
+}
+.dashboard-shell .site-link,
+.dashboard-shell .settings-secondary{
+  background:#0a121b!important;
+  border:1px solid #2d3b4c!important;
+  color:#dce1ea!important;
+  border-radius:12px!important;
+}
+
+/* Agenda */
+.dashboard-shell .agenda-live{overflow:hidden}
+.dashboard-shell .agenda-time-block{
+  color:#a88cff!important;
+  background:#241a4f!important;
+  border:1px solid #4d397e!important;
+}
+.dashboard-shell .agenda-action{
+  border:1px solid #344354!important;
+  background:#101822!important;
+  color:#d5dbe5!important;
+}
+.dashboard-shell .agenda-action.danger{color:#ff8585!important;border-color:#61373c!important;background:#251317!important}
+.dashboard-shell .agenda-action.warning{color:#ffc56f!important;border-color:#5a492e!important;background:#221b0d!important}
+.dashboard-shell .agenda-action.success{color:#5cdda7!important;border-color:#285743!important;background:#0c2119!important}
+.dashboard-shell .agenda-action.primary-action{color:#fff!important;border-color:#795bea!important;background:#6947dc!important}
+
+/* Statuses */
+.dashboard-shell .pill{
+  border:1px solid #314052!important;
+  background:#111b26!important;
+  color:#a9b3c2!important;
+}
+.dashboard-shell .pill.confirmed,
+.dashboard-shell .pill.completed,
+.dashboard-shell .pill.confirmado,
+.dashboard-shell .pill.concluido{
+  border-color:#24533f!important;
+  background:#0d261c!important;
+  color:#57d8a0!important;
+}
+
+/* Responsive */
+@media(max-width:1000px){
+  .dashboard-shell .report-grid{grid-template-columns:1fr}
+  .dashboard-shell .report-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .dashboard-shell .content{padding:20px 14px 48px!important}
+  .dashboard-shell .form-grid,
+  .dashboard-shell .quick-sale-form{grid-template-columns:1fr}
+  .dashboard-shell .form-grid .wide,
+  .dashboard-shell .quick-sale-form .wide{grid-column:auto}
+  .dashboard-shell .report-cards{grid-template-columns:1fr 1fr}
+  .dashboard-shell .module-toolbar,
+  .dashboard-shell .inventory-header,
+  .dashboard-shell .report-filter,
+  .dashboard-shell .social-settings-head{align-items:stretch;flex-direction:column}
+  .dashboard-shell .module-toolbar .search-field{width:100%}
+  .dashboard-shell .inventory-grid{grid-template-columns:1fr}
+  .dashboard-shell .inventory-history article{align-items:flex-start;flex-direction:column}
+}
+@media(max-width:440px){
+  .dashboard-shell .report-cards{grid-template-columns:1fr}
+}
+
+/* Printed sales report stays intentionally light and clean */
+@media print{
+  .dashboard-shell .sales-report-print{background:#fff!important;color:#111!important}
+  .dashboard-shell .sales-report-print h2,
+  .dashboard-shell .sales-report-print strong,
+  .dashboard-shell .sales-report-table td{color:#111!important}
+  .dashboard-shell .sales-report-summary>div,
+  .dashboard-shell .sales-report-table th{background:#f6f7f9!important}
+  .dashboard-shell .sales-report-table th{color:#555!important}
+}
