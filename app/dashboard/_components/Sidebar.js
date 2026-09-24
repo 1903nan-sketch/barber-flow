@@ -43,7 +43,7 @@ export default function Sidebar({ workspace }) {
   const pathname = usePathname();
   const [workspaceOpen,setWorkspaceOpen]=useState(false);
   const starter=String(workspace?.tenant?.plans?.name||"").toLowerCase()==="starter";
-  const starterRoutes=new Set(["/dashboard","/dashboard/vendas","/dashboard/mensalidade"]);
+  const starterRoutes=new Set(["/dashboard","/dashboard/vendas","/dashboard/relatorios","/dashboard/mensalidade"]);
   async function changeWorkspace(tenantId){localStorage.setItem("barberflow_workspace",tenantId);setWorkspaceOpen(false);window.location.href="/dashboard"}
   async function changeAccount(){localStorage.removeItem("barberflow_workspace");await supabase?.auth.signOut();window.location.href="/login"}
 
