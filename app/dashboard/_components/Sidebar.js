@@ -42,6 +42,8 @@ const initials=name=>String(name||"BF").trim().split(/\s+/).slice(0,2).map(x=>x[
 export default function Sidebar({ workspace }) {
   const pathname = usePathname();
   const [workspaceOpen,setWorkspaceOpen]=useState(false);
+  const starter=String(workspace?.tenant?.plans?.name||"").toLowerCase()==="starter";
+  const starterRoutes=new Set(["/dashboard","/dashboard/vendas","/dashboard/mensalidade"]);
   async function changeWorkspace(tenantId){localStorage.setItem("barberflow_workspace",tenantId);setWorkspaceOpen(false);window.location.href="/dashboard"}
   async function changeAccount(){localStorage.removeItem("barberflow_workspace");await supabase?.auth.signOut();window.location.href="/login"}
 
@@ -70,7 +72,7 @@ export default function Sidebar({ workspace }) {
 
       <p className="nav-title">MENU PRINCIPAL</p>
       <nav>
-        {items.filter(item => (!item.ownerOnly || ["owner","manager"].includes(workspace?.membership?.role)) && (!item.permission || workspace?.membership?.role==="owner" || ["manager","reception"].includes(workspace?.membership?.role)&&workspace?.membership?.permissions?.includes(item.permission))).map(({ label, href, icon: Icon, soon }) => {
+        {items.filter(item => (!starter||starterRoutes.has(item.href)) && (!item.ownerOnly || ["owner","manager"].includes(workspace?.membership?.role)) && (!item.permission || workspace?.membership?.role==="owner" || ["manager","reception"].includes(workspace?.membership?.role)&&workspace?.membership?.permissions?.includes(item.permission))).map(({ label, href, icon: Icon, soon }) => {
           const active = href === "/dashboard" ? pathname === href : pathname.startsWith(href);
           return (
             <a key={href} href={soon ? "#" : href} className={active ? "active" : ""}>
@@ -83,7 +85,7 @@ export default function Sidebar({ workspace }) {
       </nav>
 
       <div className="sidebar-footer">
-        <a href="/dashboard/configuracoes"><Settings size={19} /><span>Configurações do site</span></a>
+        {!starter&&<a href="/dashboard/configuracoes"><Settings size={19} /><span>Configurações do site</span></a>}
         <button className="profile-card" style={{ width: "100%", background: "transparent", color: "inherit", borderLeft: 0, borderRight: 0, borderBottom: 0, textAlign: "left", cursor: "pointer" }} type="button" onClick={async () => {await supabase?.auth.signOut();window.location.href="/login"}}>
           <span className="profile-avatar">AD</span>
           <div><strong>{workspace?.membership?.name||"Administrador"}</strong><small>Plano {workspace?.tenant?.plans?.name||"contratado"}</small></div>
@@ -91,7 +93,7 @@ export default function Sidebar({ workspace }) {
         </button>
         <div className="upgrade-card">
           <Sparkles size={20} />
-          <div><strong>Libere todo o potencial</strong><small>Conheça os planos</small></div>
+          <div><strong>{starter?"Recursos Pro e Premium":"Libere todo o potencial"}</strong><small>{starter?"Site, agenda e WhatsApp":"Conheça os planos"}</small></div>
         </div>
       </div>
     </aside>

@@ -315,9 +315,10 @@ export async function POST(req){
     }
   }
   const {data:tenant}=await db.from("tenants")
-    .select("id,name,slug,address,whatsapp,status")
+    .select("id,name,slug,address,whatsapp,status,plans(name)")
     .eq("id",tenantId).maybeSingle();
   if(!tenant)return NextResponse.json({ok:true,ignored:"unknown_tenant"});
+  if(String(tenant?.plans?.name||"").toLowerCase()==="starter")return NextResponse.json({ok:true,ignored:"plan_without_whatsapp"});
   const shopName=brandLabel(tenant.name)||"barbearia";
 
   if(event==="QRCODE_UPDATED")return NextResponse.json({ok:true,status:"connecting"});
