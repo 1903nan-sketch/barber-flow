@@ -1094,3 +1094,12 @@ html:has(.admin-layout),body:has(.admin-layout){background:#05090e!important}
  opacity:.45;
  cursor:not-allowed;
 }
+
+/* Inventory receiving flow */
+.dashboard-shell .inventory-header-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.dashboard-shell .inventory-header-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.dashboard-shell input[readonly]{opacity:.72;cursor:not-allowed}
+@media(max-width:760px){
+ .dashboard-shell .inventory-header-actions{width:100%;display:grid;grid-template-columns:1fr}
+ .dashboard-shell .inventory-header-actions button{width:100%}
+}
