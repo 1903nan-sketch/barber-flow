@@ -1039,3 +1039,16 @@ html:has(.admin-layout),body:has(.admin-layout){background:#05090e!important}
   .dashboard-shell .sidebar-edge-tab{display:none!important}
   .dashboard-shell .sidebar-top{padding-right:0}
 }
+
+/* Master admin: tenant plan linkage */
+.admin-tenant-list article{grid-template-columns:auto minmax(190px,1fr) 120px 120px 135px auto!important}
+.admin-tenant-list .tenant-plan-select{width:120px;min-height:38px}
+.admin-register-submit .primary:disabled{opacity:.62;cursor:wait}
+@media(max-width:900px){
+ .admin-tenant-list article{grid-template-columns:42px minmax(0,1fr)!important}
+ .admin-tenant-list article>.tenant-plan-select,
+ .admin-tenant-list article>.pill,
+ .admin-tenant-list article>select,
+ .admin-tenant-list article>input,
+ .admin-tenant-list article>.paid-action{grid-column:2;width:100%!important;min-height:40px}
+}
