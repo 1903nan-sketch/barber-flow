@@ -32,7 +32,7 @@ export default async function HomePage(){
   <div className="rh2-next"><span>02</span><div><small>EM DESENVOLVIMENTO · LINHA BELEZA</small><h3>BeautyFlow.</h3></div><p>Software da linha de beleza voltado a salões, estética e operações do segmento.</p></div>
  </div></section>
  <section className="rh2-manifesto" id="sobre"><span>02 / RUPTIX</span><p>Não fazemos software para <i>parecer moderno.</i><br/>Fazemos software para <strong>funcionar melhor.</strong></p><div><b>PRODUTO</b><b>DESIGN</b><b>TECNOLOGIA</b></div></section>
- <section className="rh2-end"><div><span>RUPTIX®</span><h2>O próximo<br/>grande produto<br/>começa aqui.</h2></div><a href="mailto:contato@3ruptix.com">FALAR COM A RUPTIX <ArrowUpRight/></a></section>
- <footer className="rh2-footer"><b>RUPTIX®</b><div className="rh2-footer-info"><span>SOFTWARE STUDIO</span><small>SAC: (11) 99999-9999</small><small>CNPJ: 12.345.678/0001-90</small></div><small>Idealizado em 15.09.2026</small></footer>
+ <section className="rh2-end"><div><span>RUPTIX®</span><h2>O próximo<br/>grande produto<br/>começa aqui.</h2></div><a href="mailto:vendas@3ruptix.com">FALAR COM A RUPTIX <ArrowUpRight/></a></section>
+ <footer className="rh2-footer"><b>RUPTIX®</b><div className="rh2-footer-info"><span>SOFTWARE STUDIO</span><small>SAC: (11) 99999-9999</small><small>Contato: <a href="mailto:vendas@3ruptix.com">vendas@3ruptix.com</a></small><small>CNPJ: 12.345.678/0001-90</small></div><small>Idealizado em 15.09.2026</small></footer>
  </main>
 }
