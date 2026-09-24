@@ -50,8 +50,14 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
 
   return (
     <aside className={"sidebar "+(collapsed?"collapsed":"")}>
-      <div className="brand-wrap">
-        <div className="brand-client-lockup"><span className="bf-simple-mark" aria-hidden="true"/><div className="brand-copy"><div className="brand">Barber Flow</div><span className="brand-subtitle">Gestão inteligente</span></div></div>
+      <div className="sidebar-top">
+        <div className="brand-client-lockup">
+          <span className="bf-simple-mark" aria-hidden="true"/>
+          <div className="brand-copy">
+            <div className="brand">Barber Flow</div>
+            <span className="brand-subtitle">Gestão inteligente</span>
+          </div>
+        </div>
         <button type="button" className="sidebar-toggle" onClick={onToggle} aria-label={collapsed?"Expandir menu":"Minimizar menu"} title={collapsed?"Expandir menu":"Minimizar menu"}>
           {collapsed?<PanelLeftOpen size={18}/>:<PanelLeftClose size={18}/>}
         </button>
