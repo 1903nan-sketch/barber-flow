@@ -24,7 +24,7 @@ const items = [
   { label: "Visão geral", href: "/dashboard", icon: LayoutDashboard },
   { label: "Agenda", href: "/dashboard/agenda", icon: CalendarDays },
   { label: "Clientes", href: "/dashboard/clientes", icon: Users },
-  { label: "Profissionais", href: "/dashboard/barbeiros", icon: UserRound },
+  { label: "Funcionárias", href: "/dashboard/barbeiros", icon: UserRound },
   { label: "Serviços", href: "/dashboard/servicos", icon: Scissors },
   { label: "Financeiro", href: "/dashboard/financeiro", icon: CircleDollarSign, permission: "finance" },
   { label: "Estoque", href: "/dashboard/estoque", icon: Sparkles, permission: "inventory" },
@@ -36,7 +36,7 @@ const items = [
   { label: "Site, Instagram e WhatsApp", href: "/dashboard/configuracoes", icon: Settings, ownerOnly: true },
 ];
 
-const roleLabel={owner:"Proprietário",manager:"Gerente",reception:"Recepção",barber:"Profissional"};
+const roleLabel={owner:"Proprietária",manager:"Gerente",reception:"Recepcionista",barber:"Profissional"};
 const initials=name=>String(name||"BT").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
 
 export default function Sidebar({ workspace, collapsed=false, onToggle }) {
