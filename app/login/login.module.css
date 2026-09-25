@@ -45,3 +45,53 @@
 .link{color:#a5538a!important}
 .mobileLogo{color:#2a1b2a!important}
 
+
+
+/* BEAUTYTIX LOGIN CONTRAST FIX */
+.card{
+  background:rgba(255,250,252,.94)!important;
+  border-color:rgba(150,82,126,.16)!important;
+}
+.card h2{
+  color:#2b1a2b!important;
+  text-shadow:none!important;
+}
+.card .intro{
+  color:#7c6b78!important;
+}
+.card .label{
+  color:#5f4758!important;
+}
+.card .welcome{
+  color:#d56b9f!important;
+}
+.card .footer{
+  color:#9a8794!important;
+  border-top-color:#dbcbd4!important;
+}
+.card .link{
+  color:#a64f83!important;
+}
+.card .inputWrap .inputIcon{
+  color:#c35e96!important;
+}
+.card .toggle{
+  color:#b26491!important;
+}
+.card .toggle:hover{
+  background:rgba(207,115,170,.10)!important;
+}
+.card .input{
+  background:#10131b!important;
+  border-color:#2e3242!important;
+  color:#f8f6f9!important;
+  -webkit-text-fill-color:#f8f6f9!important;
+}
+.card .input::placeholder{
+  color:#9399aa!important;
+  -webkit-text-fill-color:#9399aa!important;
+}
+.card .input:focus{
+  border-color:#d675aa!important;
+  box-shadow:0 0 0 4px rgba(214,117,170,.13)!important;
+}
