@@ -10,3 +10,38 @@
 @media(max-width:850px){.page{grid-template-columns:1fr}.brand{display:none}.panel{padding:36px 20px;min-height:100dvh}.mobileLogo{display:flex;margin-bottom:30px}.card{max-width:460px;padding:28px}.card h2{font-size:30px}}
 @media(max-width:380px){.panel{padding:20px 12px}.card{padding:22px 18px}.card h2{font-size:27px}.links{gap:0;flex-direction:column;align-items:flex-start}}
 @media(prefers-reduced-motion:reduce){.page .input{transition:none}}
+
+
+/* BEAUTYTIX THEME — ROSE / PLUM / NUDE */
+.page{
+  background:
+    radial-gradient(circle at 15% 20%,rgba(224,119,171,.25),transparent 34%),
+    radial-gradient(circle at 80% 75%,rgba(151,88,202,.24),transparent 38%),
+    linear-gradient(145deg,#170f19 0%,#291329 50%,#3c2036 100%);
+}
+.brand{
+  background:
+    radial-gradient(circle at 20% 80%,rgba(223,113,169,.27),transparent 35%),
+    radial-gradient(circle at 75% 20%,rgba(153,94,210,.22),transparent 40%),
+    linear-gradient(145deg,#171019,#2c162c 62%,#43223c)!important;
+}
+.logo svg{color:#ec97be!important}
+.kicker,.welcome{color:#e99ac0!important}
+.brand h1 em{color:#e894bd!important}
+.panel{background:linear-gradient(160deg,#fffafc 0%,#f8eef3 65%,#f4e8e2 100%)!important}
+.card{
+  border:1px solid rgba(175,104,145,.12);
+  background:rgba(255,250,252,.80);
+  box-shadow:0 28px 70px rgba(88,43,76,.12);
+  backdrop-filter:blur(18px);
+}
+.inputWrap:focus-within{border-color:#cf73aa!important;box-shadow:0 0 0 4px rgba(220,111,167,.11)!important}
+.inputIcon{color:#b96194!important}
+.toggle{color:#9e6f8c!important}
+.submit{
+  background:linear-gradient(135deg,#df70a8 0%,#ae62ce 58%,#8345a8 100%)!important;
+  box-shadow:0 14px 34px rgba(183,80,153,.28)!important;
+}
+.link{color:#a5538a!important}
+.mobileLogo{color:#2a1b2a!important}
+
