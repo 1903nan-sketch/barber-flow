@@ -21,3 +21,29 @@
  .admin-sidebar nav button.active{background:#251744!important;color:#fff!important;border-color:#51377f!important}
  .admin-content .admin-register-head,.admin-content .admin-register-section,.admin-content .box{border-radius:18px!important}
 }
+
+/* BEAUTYTIX THEME — ROSE / PLUM / NUDE */
+.admin-layout,.admin-content{background:linear-gradient(145deg,#160f19,#211221 58%,#2a1727)!important}
+.admin-sidebar{background:
+  radial-gradient(circle at 20% 0%,rgba(224,119,171,.18),transparent 35%),
+  linear-gradient(180deg,#170f1a,#28142a 60%,#1a101d)!important;
+  border-right:1px solid rgba(236,169,202,.10)}
+.admin-sidebar .brand-mark{background:linear-gradient(135deg,#e477ad,#a65ed4 58%,#8242a5)!important}
+.admin-sidebar nav button.active{background:linear-gradient(135deg,#df70a8,#a45fd2)!important;box-shadow:0 10px 26px rgba(189,77,151,.2)}
+.admin-sidebar nav button:hover{background:rgba(224,119,171,.09)!important;color:#fff!important}
+.admin-content .box,.admin-register-section,.admin-register-head,.admin-stats article{
+  background:rgba(34,19,34,.72)!important;
+  border-color:rgba(238,183,209,.10)!important;
+  box-shadow:0 20px 45px rgba(0,0,0,.16)!important;
+  backdrop-filter:blur(16px)
+}
+.admin-content input,.admin-content select,.admin-content textarea{
+  background:#1a111c!important;border-color:#493044!important;color:#f9f1f6!important
+}
+.admin-content input:focus,.admin-content select:focus,.admin-content textarea:focus{
+  border-color:#dc76aa!important;box-shadow:0 0 0 3px rgba(220,118,170,.12)!important
+}
+.admin-badge{background:rgba(222,112,168,.13)!important;color:#efafd0!important;border:1px solid rgba(222,112,168,.18)}
+.admin-section-title>span,.service-icon{background:linear-gradient(135deg,#df70a8,#9e5bd0)!important;color:#fff!important}
+.admin-content .primary,.paid-action{background:linear-gradient(135deg,#df70a8,#9e5bd0)!important;color:#fff!important;border-color:transparent!important}
+
