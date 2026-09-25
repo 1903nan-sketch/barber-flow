@@ -1103,3 +1103,53 @@ html:has(.admin-layout),body:has(.admin-layout){background:#05090e!important}
  .dashboard-shell .inventory-header-actions{width:100%;display:grid;grid-template-columns:1fr}
  .dashboard-shell .inventory-header-actions button{width:100%}
 }
+
+
+/* BEAUTYTIX THEME — ROSE / PLUM / NUDE */
+:root{
+  --bg:#f6edf2;
+  --surface:#fff9fb;
+  --text:#2a1c2b;
+  --muted:#8f7b88;
+  --line:#eadde4;
+  --purple:#9b62d6;
+  --purple-soft:#f2e8fb;
+  --nav:#1a101d;
+  --beauty-pink:#dc6fa7;
+  --beauty-pink-soft:#f8dfe9;
+  --beauty-plum:#7b3fa0;
+  --beauty-nude:#d9b9ad;
+  --beauty-nude-soft:#f4e8e2;
+}
+body{background:linear-gradient(135deg,#f8f0f4 0%,#f2e8f4 55%,#f8eee9 100%);color:var(--text)}
+.dash{background:linear-gradient(145deg,#f8f0f4 0%,#f3e9f4 52%,#f7ede8 100%)}
+.sidebar{background:
+  radial-gradient(circle at 20% 0%,rgba(220,111,167,.18),transparent 30%),
+  radial-gradient(circle at 90% 85%,rgba(155,98,214,.18),transparent 36%),
+  linear-gradient(180deg,#1b111f 0%,#241428 55%,#1a111d 100%);
+  border-right:1px solid rgba(233,194,214,.08)}
+.brand-mark{background:linear-gradient(135deg,#e47faf,#a663d8 58%,#7f43a5);box-shadow:0 10px 30px rgba(220,111,167,.28)}
+.workspace-card{background:rgba(255,255,255,.055);border-color:rgba(238,207,221,.11);backdrop-filter:blur(16px)}
+.workspace-avatar{background:linear-gradient(135deg,#e27bad,#9c61d6)}
+.sidebar nav a:hover,.sidebar nav a.active,.sidebar-footer>a:hover{background:linear-gradient(90deg,rgba(222,112,168,.18),rgba(155,98,214,.14));color:#fff}
+.sidebar nav a.active{box-shadow:inset 3px 0 0 #e17cad}
+.upgrade-card{border-color:rgba(222,112,168,.30);background:linear-gradient(135deg,rgba(222,112,168,.18),rgba(155,98,214,.13));color:#efadd0}
+.upgrade-card strong{color:#f7d9e8}
+.primary{background:linear-gradient(135deg,#df70a8,#a25fd4 58%,#8244a8);box-shadow:0 12px 28px rgba(183,80,153,.26)}
+.primary:hover{box-shadow:0 14px 34px rgba(183,80,153,.34)}
+.stat,.box{background:rgba(255,250,252,.88);border-color:#eadce4;box-shadow:0 14px 38px rgba(72,39,66,.055);backdrop-filter:blur(14px)}
+.stat-icon.purple,.quick-icon.purple{color:#8f4fc0;background:#f2e6f8}
+.stat-icon.blue,.quick-icon.blue{color:#bf5e98;background:#fae5ef}
+.stat-icon.orange,.quick-icon.orange{color:#9f6c5b;background:#f5e7df}
+.client-avatar{background:linear-gradient(135deg,#f7d9e8,#eadcf8);color:#934fba}
+.form input:focus,.form select:focus,.form textarea:focus{border-color:#cf78aa;box-shadow:0 0 0 3px rgba(220,111,167,.13)}
+.monthly-plan{background:
+  radial-gradient(circle at 10% 5%,rgba(226,123,173,.2),transparent 30%),
+  linear-gradient(155deg,#24152a,#49233f 52%,#382050)}
+.monthly-label,.monthly-plan>span{color:#eda6c9}
+.monthly-copy{background:linear-gradient(135deg,#df70a8,#9c5bd0)}
+.admin-sidebar{background:linear-gradient(180deg,#1b111f,#261429 58%,#1a101d)}
+.admin-sidebar nav button.active{background:linear-gradient(135deg,#df70a8,#9c5fd4)}
+.admin-badge{background:#f7e1ed;color:#a94e80}
+.admin-stats article>svg,.report-lock>svg{color:#c35f98}
+
