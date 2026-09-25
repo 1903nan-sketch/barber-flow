@@ -47,3 +47,13 @@
 .admin-section-title>span,.service-icon{background:linear-gradient(135deg,#df70a8,#9e5bd0)!important;color:#fff!important}
 .admin-content .primary,.paid-action{background:linear-gradient(135deg,#df70a8,#9e5bd0)!important;color:#fff!important;border-color:transparent!important}
 
+
+
+/* BEAUTYTIX MASTER OVERVIEW */
+.admin-content .admin-stats{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))!important;gap:12px!important}
+.admin-content .admin-stats article{min-height:86px!important;background:linear-gradient(145deg,rgba(40,22,39,.92),rgba(31,20,34,.92))!important;border:1px solid rgba(227,122,174,.16)!important}
+.admin-content .admin-stats article>svg{color:#e07aaa!important}
+.admin-content .admin-stats article strong{font-size:20px!important}
+.admin-content .admin-stats article span{color:#b89eae!important}
+@media(max-width:640px){.admin-content .admin-stats{grid-template-columns:1fr 1fr!important}.admin-content .admin-stats article{min-height:78px!important}}
+@media(max-width:390px){.admin-content .admin-stats{grid-template-columns:1fr!important}}
