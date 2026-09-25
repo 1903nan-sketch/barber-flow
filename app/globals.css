@@ -1103,3 +1103,32 @@ html:has(.admin-layout),body:has(.admin-layout){background:#05090e!important}
  .dashboard-shell .inventory-header-actions{width:100%;display:grid;grid-template-columns:1fr}
  .dashboard-shell .inventory-header-actions button{width:100%}
 }
+
+
+/* Active BeautyTix product in Ruptix institutional line */
+.rh2-next-active{
+  position:relative;
+  transition:transform .22s ease,border-color .22s ease,color .22s ease,background .22s ease;
+}
+.rh2-next-active:hover{
+  transform:translateY(-3px);
+  border-color:#8d6cff;
+  color:#c8b8ff;
+  background:linear-gradient(90deg,rgba(216,111,169,.055),rgba(139,91,196,.04));
+}
+.rh2-next-active small{color:#d889b5!important}
+.rh2-next-active h3{color:#f1e7ef!important}
+.rh2-next-active p{color:#9297a2!important}
+.rh2-next-active p b{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-top:9px;
+  color:#d9a0c1;
+  font-size:8px;
+  letter-spacing:.12em;
+}
+.rh2-next-active p b svg{width:13px;height:13px}
+@media(max-width:800px){
+  .rh2-next-active p{display:block!important;grid-column:2}
+}
