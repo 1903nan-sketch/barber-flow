@@ -10,7 +10,7 @@ export default function LoginPage(){
  const [mode,setMode]=useState('login'),[show,setShow]=useState(false),[loading,setLoading]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState(''),[caps,setCaps]=useState(false);
  useEffect(()=>{if(!supabase)return;const recovery=location.hash.includes('type=recovery')||new URLSearchParams(location.search).has('code');if(recovery)setMode('new-password');const {data}=supabase.auth.onAuthStateChange(event=>{if(event==='PASSWORD_RECOVERY')setMode('new-password')});return()=>data.subscription.unsubscribe()},[]);
  function changeMode(next){setMode(next);setShow(false);setCaps(false);setError('');setMessage('')}
- async function goToPanel(userId){const {data:admin}=userId?await supabase.from('platform_admins').select('user_id').eq('user_id',userId).maybeSingle():{data:null};router.replace(admin?'/admin':'/dashboard');router.refresh()}
+ async function goToPanel(){const {data:{session}}=await supabase.auth.getSession();if(!session?.access_token){router.replace('/login');return}try{const res=await fetch('/api/admin/me',{headers:{authorization:'Bearer '+session.access_token},cache:'no-store'});const data=await res.json();router.replace(res.ok&&data?.role?'/admin':'/dashboard')}catch{router.replace('/dashboard')}router.refresh()}
  async function submit(event){
   event.preventDefault();if(pending.current)return;pending.current=true;setLoading(true);setError('');setMessage('');
   const form=new FormData(event.currentTarget);let email=String(form.get('email')||'').trim();const password=String(form.get('password')||'');
@@ -18,11 +18,11 @@ export default function LoginPage(){
    if(!supabase)throw new Error('Conexão indisponível. Tente novamente em instantes.');
    if(mode==='login'&&email.startsWith('@')){const username=email.slice(1).toLowerCase();const {data:matches,error:lookupError}=await supabase.from('staff_logins').select('login_email,tenant_id').eq('username',username).limit(20);if(lookupError)throw new Error('E-mail, usuário ou senha incorretos.');const ids=[...new Set((matches||[]).map(x=>x.tenant_id).filter(Boolean))];const {data:beautyTenants}=ids.length?await supabase.from('tenants').select('id').in('id',ids).eq('product_slug','beautytix'):{data:[]};const allowed=new Set((beautyTenants||[]).map(x=>x.id));const beautyMatches=(matches||[]).filter(x=>allowed.has(x.tenant_id));if(beautyMatches.length!==1)throw new Error('E-mail, usuário ou senha incorretos.');email=beautyMatches[0].login_email}
    if(mode==='reset'){const {error:resetError}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/login'});if(resetError)throw resetError;setMessage('Se este e-mail estiver cadastrado, você receberá um link para recuperar a senha. Confira também o spam.');return}
-   if(mode==='new-password'){const {error:updateError}=await supabase.auth.updateUser({password});if(updateError)throw updateError;setMessage('Senha alterada. Abrindo seu painel...');const {data:{user}}=await supabase.auth.getUser();await goToPanel(user?.id);return}
+   if(mode==='new-password'){const {error:updateError}=await supabase.auth.updateUser({password});if(updateError)throw updateError;setMessage('Senha alterada. Abrindo seu painel...');const {data:{user}}=await supabase.auth.getUser();await goToPanel();return}
    const result=mode==='signup'?await supabase.auth.signUp({email,password}):await supabase.auth.signInWithPassword({email,password});
    if(result.error)throw result.error;
    if(mode==='signup'&&!result.data.session){setMessage('Conta criada. Confirme seu e-mail para entrar.');return}
-   await goToPanel(result.data.user?.id||result.data.session?.user?.id);
+   await goToPanel();
   }catch(e){const text=e?.message||'';setError(text==='Invalid login credentials'?'E-mail, usuário ou senha incorretos.':text==='Email not confirmed'?'Confirme seu e-mail antes de entrar.':/fetch|network/i.test(text)?'Não foi possível conectar. Confira sua internet e tente novamente.':text||'Não foi possível concluir. Tente novamente.')}finally{pending.current=false;setLoading(false)}
  }
  return <main className={styles.page}>
