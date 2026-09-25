@@ -76,8 +76,8 @@ function WhatsAppContent({workspace}){
     <section className="box">
       <div className="box-head">
         <div>
-          <h2>WhatsApp da barbearia</h2>
-          <p>Conecte o próprio número da barbearia por QR Code. O robô usa a agenda real do BarberFlow.</p>
+          <h2>WhatsApp do espaço</h2>
+          <p>Conecte o próprio número do espaço por QR Code. O robô usa a agenda real do BeautyTix.</p>
         </div>
         <span style={{display:"inline-flex",alignItems:"center",gap:7,fontSize:12,fontWeight:800,padding:"8px 11px",border:"1px solid var(--line)",borderRadius:999}}>
           {status==="connected"?<CheckCircle2 size={16}/>:<MessageCircle size={16}/>}
@@ -86,7 +86,7 @@ function WhatsAppContent({workspace}){
       </div>
 
       {!configured&&<div className="form-alert error" style={{marginBottom:16}}>
-        A Evolution API ainda precisa ser configurada no servidor do BarberFlow. Adicione EVOLUTION_API_URL, EVOLUTION_API_KEY e EVOLUTION_WEBHOOK_SECRET na Vercel.
+        A Evolution API ainda precisa ser configurada no servidor do BeautyTix. Adicione EVOLUTION_API_URL, EVOLUTION_API_KEY e EVOLUTION_WEBHOOK_SECRET na Vercel.
       </div>}
 
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:12}}>
@@ -98,7 +98,7 @@ function WhatsAppContent({workspace}){
       {qrSrc&&status!=="connected"&&<div style={{marginTop:20,display:"grid",placeItems:"center",gap:12,padding:22,border:"1px solid var(--line)",borderRadius:16}}>
         <strong>Escaneie este QR Code no WhatsApp</strong>
         <img src={qrSrc} alt="QR Code para conectar WhatsApp" width="260" height="260" style={{width:260,maxWidth:"100%",height:"auto",background:"#fff",padding:10,borderRadius:14}}/>
-        <p style={{maxWidth:520,textAlign:"center",fontSize:12,color:"var(--muted)",lineHeight:1.6}}>No celular da barbearia: WhatsApp → Aparelhos conectados → Conectar aparelho. O status será atualizado automaticamente.</p>
+        <p style={{maxWidth:520,textAlign:"center",fontSize:12,color:"var(--muted)",lineHeight:1.6}}>No celular do espaço: WhatsApp → Aparelhos conectados → Conectar aparelho. O status será atualizado automaticamente.</p>
       </div>}
 
       {error&&<div className="form-alert error" style={{marginTop:16}}>{error}</div>}
@@ -112,15 +112,15 @@ function WhatsAppContent({workspace}){
     </section>
 
     <section className="box">
-      <div className="box-head"><div><h2>Como o atendimento funciona</h2><p>O WhatsApp e o site continuam usando a mesma agenda do BarberFlow.</p></div></div>
+      <div className="box-head"><div><h2>Como o atendimento funciona</h2><p>O WhatsApp e o site continuam usando a mesma agenda do BeautyTix.</p></div></div>
       <div style={{display:"grid",gap:12}}>
         <div className="appointment"><span className="quick-icon green">1</span><div className="appointment-main"><b>Cliente envia uma mensagem</b><p>Ex.: “Quero cortar amanhã” ou simplesmente “Oi”.</p></div></div>
-        <div className="appointment"><span className="quick-icon purple">2</span><div className="appointment-main"><b>BarberFlow consulta dados reais</b><p>Serviços, profissionais, unidades e horários vêm do Supabase.</p></div></div>
+        <div className="appointment"><span className="quick-icon purple">2</span><div className="appointment-main"><b>BeautyTix consulta dados reais</b><p>Serviços, profissionais, unidades e horários vêm do Supabase.</p></div></div>
         <div className="appointment"><span className="quick-icon blue">3</span><div className="appointment-main"><b>Confirmação antes de gravar</b><p>O horário só é criado depois que o cliente responde SIM e a disponibilidade é validada novamente.</p></div></div>
       </div>
       <div style={{marginTop:18,padding:16,border:"1px solid var(--line)",borderRadius:12}}>
         <strong style={{fontSize:12,display:"flex",alignItems:"center",gap:7}}><ShieldCheck size={17}/> Integração não oficial</strong>
-        <p style={{fontSize:11,color:"var(--muted)",lineHeight:1.6}}>Esta conexão utiliza Evolution API/WhatsApp Web. Evite disparos em massa e automações de spam. O BarberFlow usa esta integração para atendimento receptivo e agendamento.</p>
+        <p style={{fontSize:11,color:"var(--muted)",lineHeight:1.6}}>Esta conexão utiliza Evolution API/WhatsApp Web. Evite disparos em massa e automações de spam. O BeautyTix usa esta integração para atendimento receptivo e agendamento.</p>
       </div>
     </section>
   </div>
