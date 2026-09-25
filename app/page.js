@@ -20,7 +20,7 @@ async function getActiveUsers(){
 export default async function HomePage(){
  const activeUsers=await getActiveUsers();
  const host=(await headers()).get("host")?.split(":")[0]?.toLowerCase();
- if(host==="barberflow.3ruptix.com") redirect("/login");
+ if(host==="barberflow.3ruptix.com"||host==="barbertix.3ruptix.com") redirect("/login");
 
  return <main className="ruptix-hub rh-v2">
  <nav className="rh2-nav"><Link href="/" className="rh2-logo">RUPTIX<span>®</span></Link><div><a href="#produtos">PRODUTOS</a><a href="#sobre">SOBRE</a></div><span className="rh2-nav-right"><span className="rh2-system-status"><i/> ONLINE <b>USERS: {activeUsers}</b></span><a href="#produtos" className="rh2-client">PRODUTOS <ArrowUpRight/></a></span></nav>
@@ -29,7 +29,7 @@ export default async function HomePage(){
  <div className="rh2-line">
   <div className="rh2-line-head"><div><span>LINHA 01</span><h3>Beleza.</h3></div><p>Soluções digitais para barbearias, salões, estética e outros negócios do setor de beleza.</p></div>
   <Link href="/produtos/barber-flow" className="rh2-featured"><div className="rh2-card-head"><span className="rh2-live"><i/> PRODUTO ATIVO</span><span>01</span></div><div className="rh2-card-icon"><Scissors/></div><div className="rh2-card-copy"><span>BARBEARIAS · LINHA BELEZA</span><h3>Barber<br/>Tix.</h3><p>Uma plataforma completa para agenda, clientes, equipe, vendas e crescimento.</p><b>EXPLORAR PRODUTO <ArrowUpRight/></b></div></Link>
-  <a className="rh2-featured rh2-featured-beauty" href="https://barber-flow-git-beautytix-ref10.vercel.app/login"><div className="rh2-card-head"><span className="rh2-live rh2-live-beauty"><i/> PRODUTO ATIVO</span><span>02</span></div><div className="rh2-card-icon rh2-card-icon-beauty"><Sparkles/></div><div className="rh2-card-copy"><span>SALÕES & ESTÉTICA · LINHA BELEZA</span><h3>Beauty<br/>Tix.</h3><p>Gestão completa para salões, estética e negócios de beleza.</p><b>EXPLORAR PRODUTO <ArrowUpRight/></b></div></a>
+  <a className="rh2-featured rh2-featured-beauty" href="https://beautytix.3ruptix.com/login"><div className="rh2-card-head"><span className="rh2-live rh2-live-beauty"><i/> PRODUTO ATIVO</span><span>02</span></div><div className="rh2-card-icon rh2-card-icon-beauty"><Sparkles/></div><div className="rh2-card-copy"><span>SALÕES & ESTÉTICA · LINHA BELEZA</span><h3>Beauty<br/>Tix.</h3><p>Gestão completa para salões, estética e negócios de beleza.</p><b>EXPLORAR PRODUTO <ArrowUpRight/></b></div></a>
  </div></section>
  <section className="rh2-manifesto" id="sobre"><span>02 / RUPTIX</span><p>Não fazemos software para <i>parecer moderno.</i><br/>Fazemos software para <strong>funcionar melhor.</strong></p><div><b>PRODUTO</b><b>DESIGN</b><b>TECNOLOGIA</b></div></section>
  <section className="rh2-end"><div><span>RUPTIX®</span><h2>O próximo<br/>grande produto<br/>começa aqui.</h2></div><a href="mailto:vendas@3ruptix.com">FALAR COM A RUPTIX <ArrowUpRight/></a></section>
