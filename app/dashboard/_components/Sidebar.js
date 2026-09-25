@@ -37,7 +37,7 @@ const items = [
 ];
 
 const roleLabel={owner:"Proprietário",manager:"Gerente",reception:"Recepção",barber:"Barbeiro"};
-const initials=name=>String(name||"BF").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
+const initials=name=>String(name||"BT").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
 
 export default function Sidebar({ workspace, collapsed=false, onToggle }) {
   const pathname = usePathname();
@@ -53,7 +53,7 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
         <div className="brand-client-lockup">
           <span className="bf-simple-mark" aria-hidden="true"/>
           <div className="brand-copy">
-            <div className="brand">Barber Flow</div>
+            <div className="brand">BarberTix</div>
             <span className="brand-subtitle">Gestão inteligente</span>
           </div>
         </div>
@@ -65,7 +65,7 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
       <div className="workspace-switcher">
         <button type="button" className={"workspace-card workspace-card-button "+(workspaceOpen?"open":"")} onClick={()=>setWorkspaceOpen(v=>!v)}>
           <span className="workspace-avatar">{initials(workspace?.tenant?.name)}</span>
-          <div><strong>{workspace?.tenant?.name||"Barber Flow"}</strong><small>{roleLabel[workspace?.membership?.role]||workspace?.membership?.role||"Equipe"}</small></div>
+          <div><strong>{workspace?.tenant?.name||"BarberTix"}</strong><small>{roleLabel[workspace?.membership?.role]||workspace?.membership?.role||"Equipe"}</small></div>
           <ChevronRight size={17} />
         </button>
         {workspaceOpen&&<div className="workspace-menu">
