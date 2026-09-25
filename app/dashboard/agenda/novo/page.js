@@ -18,7 +18,7 @@ function NewAppointment({workspace}){
  async function submit(e){e.preventDefault();setBusy(true);setError("");const f=new FormData(e.currentTarget),local=f.get("scheduled_at");const st=new Date(local).toISOString();const {error}=await supabase.rpc("book_appointment",{t,u:f.get("unit_id"),b:f.get("barber_id"),c:f.get("client_id"),s:f.get("service_id"),st,existing_id:null});setBusy(false);if(error)return setError(error.message);notify("Agendamento criado com sucesso.");router.push("/dashboard/agenda");router.refresh()}
  return <form className="box form" onSubmit={submit}><div className="form-grid">
   <label>Cliente<select name="client_id" required defaultValue=""><option value="">Selecione</option>{clients.map(x=><option value={x.id} key={x.id}>{x.name}</option>)}</select></label>
-  <label>Barbeiro<select name="barber_id" required defaultValue=""><option value="">Selecione</option>{barbers.map(x=><option value={x.id} key={x.id}>{x.name}</option>)}</select></label>
+  <label>Profissional<select name="barber_id" required defaultValue=""><option value="">Selecione</option>{barbers.map(x=><option value={x.id} key={x.id}>{x.name}</option>)}</select></label>
   <label>Serviço<select name="service_id" required defaultValue=""><option value="">Selecione</option>{services.map(x=><option value={x.id} key={x.id}>{x.name} - {(x.price_cents/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</option>)}</select></label>
   <label>Unidade<select name="unit_id" required defaultValue=""><option value="">Selecione</option>{units.map(x=><option value={x.id} key={x.id}>{x.name}</option>)}</select></label>
   <label>Data e horário<input name="scheduled_at" type="datetime-local" required/></label>
