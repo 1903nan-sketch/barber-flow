@@ -62,3 +62,60 @@
     margin-bottom:20px!important;
   }
 }
+
+
+/* BEAUTYTIX THEME — ROSE / PLUM / NUDE */
+.booking-public.premium-booking{
+  background:
+    radial-gradient(circle at 10% 18%,rgba(220,111,167,.12),transparent 28%),
+    radial-gradient(circle at 85% 65%,rgba(153,94,210,.12),transparent 32%),
+    #130d15!important;
+}
+.premium-booking .premium-nav{background:rgba(24,14,25,.90)!important;border-color:rgba(239,185,211,.10)!important}
+.premium-booking .premium-brand>span{background:linear-gradient(135deg,#e37aad,#a35ed3 58%,#7c40a2)!important}
+.premium-booking .nav-book,.premium-booking .booking-submit{
+  background:linear-gradient(135deg,#df70a8,#a65ed4 58%,#8243a7)!important;
+  box-shadow:0 12px 32px rgba(190,78,151,.25)!important
+}
+.premium-booking .premium-hero{
+  background:
+    radial-gradient(circle at 73% 16%,rgba(224,119,171,.25),transparent 30%),
+    radial-gradient(circle at 82% 56%,rgba(155,98,214,.18),transparent 35%),
+    linear-gradient(135deg,#1d111d,#281629 54%,#382038)!important
+}
+.premium-booking .premium-hero:after{background:#d66ba2!important;opacity:.15!important}
+.premium-booking .premium-hero p{color:#ec9bc1!important}
+.premium-booking .premium-shell{background:#211523!important;border-color:rgba(237,187,211,.11)!important}
+.premium-booking .steps-column,.premium-booking .summary-column{background:#1a111c!important}
+.premium-booking .booking-work{background:#201522!important}
+.premium-booking .booking-work input,.premium-booking .booking-work select,.premium-booking .multi-services button,
+.premium-booking .premium-panel,.premium-booking .customer-card,.premium-booking .summary-item{
+  background:#171019!important;border-color:#432d40!important
+}
+.premium-booking .multi-services button.selected{
+  background:linear-gradient(135deg,rgba(223,112,168,.22),rgba(158,91,208,.22))!important;
+  border-color:#d873aa!important;color:#f6cae0!important
+}
+.premium-booking .calendar-head button,.premium-booking .calendar-days button{background:#251827!important;border-color:#493046!important}
+.premium-booking .calendar-days button.available{background:#3a2434!important;color:#efadc9!important}
+.premium-booking .calendar-days button.selected{background:linear-gradient(135deg,#df70a8,#9e5bd0)!important}
+.premium-booking .slots button{background:#251827!important;border-color:#493046!important}
+.premium-booking .slots button.selected,.booking-public .slots button.selected{
+  background:linear-gradient(135deg,#df70a8,#9e5bd0)!important;
+  border-color:#e89ac0!important;
+  box-shadow:0 8px 22px rgba(204,92,157,.28)!important
+}
+.premium-booking .summary-item>svg,.premium-booking .premium-benefits svg{color:#df7aae!important}
+.instagram-profile-link{
+  background:linear-gradient(135deg,#28172b,#1b121d)!important;
+  border-color:rgba(224,119,171,.24)!important
+}
+.instagram-profile-link svg{color:#e790bb!important}
+.confirmation-page{background:#130d15!important}
+.confirmation-page .booking-confirm{
+  background:linear-gradient(145deg,rgba(42,23,42,.96),rgba(25,16,27,.96))!important;
+  border-color:#53334b!important
+}
+.confirmation-page .booking-confirm>span{color:#eb94bd!important}
+.confirmation-page .confirm-actions .booking-submit{background:linear-gradient(135deg,#df70a8,#9e5bd0)!important}
+
