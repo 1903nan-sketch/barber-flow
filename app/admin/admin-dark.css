@@ -57,3 +57,108 @@
 .admin-content .admin-stats article span{color:#b89eae!important}
 @media(max-width:640px){.admin-content .admin-stats{grid-template-columns:1fr 1fr!important}.admin-content .admin-stats article{min-height:78px!important}}
 @media(max-width:390px){.admin-content .admin-stats{grid-template-columns:1fr!important}}
+
+
+/* BEAUTYTIX FINAL MASTER PANEL — neutral dark surfaces with rose/plum accents */
+.admin-layout{
+  background:
+    radial-gradient(circle at 88% 0,rgba(213,111,168,.08),transparent 28%),
+    radial-gradient(circle at 12% 100%,rgba(139,91,196,.06),transparent 30%),
+    #05090e!important;
+  color:#f6f8fb!important;
+}
+.admin-content{
+  background:#05090e!important;
+  color:#f6f8fb!important;
+}
+.admin-sidebar{
+  background:
+    radial-gradient(circle at 18% 0%,rgba(213,111,168,.08),transparent 28%),
+    linear-gradient(180deg,#0b0d13,#090b10)!important;
+  border-right:1px solid #1f2a36!important;
+}
+.admin-sidebar .brand-mark{
+  background:linear-gradient(135deg,#d86fa9,#a25fd1 58%,#8247a7)!important;
+  box-shadow:0 10px 28px rgba(183,80,153,.22)!important;
+}
+.admin-sidebar nav button{color:#929cab!important}
+.admin-sidebar nav button:hover{
+  background:#141d28!important;
+  color:#fff!important;
+}
+.admin-sidebar nav button.active{
+  background:#171b28!important;
+  border-color:#3b3044!important;
+  color:#fff!important;
+  box-shadow:inset 3px 0 0 #d86fa9!important;
+}
+.admin-content .box,
+.admin-content .admin-register-head,
+.admin-content .admin-register-section,
+.admin-content .report-lock,
+.admin-content .admin-stats article,
+.admin-content .data-list>article{
+  background:linear-gradient(145deg,#0d151f,#0a1119)!important;
+  border:1px solid #263545!important;
+  color:#f6f8fb!important;
+  box-shadow:0 16px 38px rgba(0,0,0,.22)!important;
+  backdrop-filter:none!important;
+}
+.admin-content .admin-stats article>svg,
+.admin-content .report-lock>svg{color:#d978ad!important}
+.admin-content .admin-stats article span,
+.admin-content .data-list small,
+.admin-content p,
+.admin-content small{color:#8793a4!important}
+.admin-content input,
+.admin-content select,
+.admin-content textarea{
+  background:#08111a!important;
+  color:#f7f8fb!important;
+  -webkit-text-fill-color:#f7f8fb!important;
+  border-color:#304153!important;
+}
+.admin-content input:focus,
+.admin-content select:focus,
+.admin-content textarea:focus{
+  border-color:#d071a8!important;
+  box-shadow:0 0 0 3px rgba(208,113,168,.12)!important;
+}
+.admin-content .primary,
+.admin-content .paid-action{
+  background:linear-gradient(135deg,#d86fa9,#a45fd2 58%,#8446aa)!important;
+  color:#fff!important;
+  border-color:transparent!important;
+  box-shadow:0 10px 26px rgba(183,80,153,.22)!important;
+}
+.admin-content .secondary-action{
+  background:#101923!important;
+  border-color:#334355!important;
+  color:#dce2eb!important;
+}
+.admin-content .secondary-action:hover{
+  background:#16212d!important;
+  border-color:#5b425a!important;
+  color:#fff!important;
+}
+.admin-badge{
+  background:#15151d!important;
+  color:#e5a5c8!important;
+  border:1px solid #493447!important;
+}
+.admin-section-title>span,
+.service-icon{
+  background:#211824!important;
+  color:#e79fc4!important;
+  border:1px solid #4a3548!important;
+}
+@media(max-width:760px){
+  .admin-sidebar{
+    background:rgba(7,10,15,.98)!important;
+    border-top:1px solid #22303e!important;
+  }
+  .admin-sidebar nav button.active{
+    background:#191823!important;
+    border-color:#4a3548!important;
+  }
+}

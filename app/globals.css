@@ -1153,3 +1153,162 @@ body{background:linear-gradient(135deg,#f8f0f4 0%,#f2e8f4 55%,#f8eee9 100%);colo
 .admin-badge{background:#f7e1ed;color:#a94e80}
 .admin-stats article>svg,.report-lock>svg{color:#c35f98}
 
+
+
+/* BEAUTYTIX FINAL CLIENT PANEL — dark premium, rose only as accent */
+.dashboard-shell{
+  --bg:#05090e;
+  --surface:#0b131d;
+  --surface-2:#0e1722;
+  --surface-3:#121d29;
+  --text:#f6f8fb;
+  --muted:#8e99aa;
+  --line:#243244;
+  --purple:#d56fa8;
+  --purple-soft:#241725;
+  background:
+    radial-gradient(circle at 88% -8%,rgba(213,111,168,.09),transparent 26%),
+    radial-gradient(circle at 10% 100%,rgba(139,91,196,.07),transparent 30%),
+    #05090e!important;
+  color:#f6f8fb!important;
+}
+.dashboard-shell .content{
+  background:
+    radial-gradient(circle at 82% -10%,rgba(213,111,168,.08),transparent 26%),
+    #05090e!important;
+  color:#f6f8fb!important;
+}
+.dashboard-shell .sidebar{
+  background:
+    radial-gradient(circle at 20% 0%,rgba(213,111,168,.08),transparent 26%),
+    linear-gradient(180deg,#0a0d13,#080b11)!important;
+  border-right:1px solid #1e2936!important;
+}
+.dashboard-shell .brand,
+.dashboard-shell .topbar h1,
+.dashboard-shell h1,
+.dashboard-shell h2,
+.dashboard-shell h3,
+.dashboard-shell strong{color:#f6f8fb!important}
+.dashboard-shell .brand-subtitle,
+.dashboard-shell .topbar-copy,
+.dashboard-shell p,
+.dashboard-shell small,
+.dashboard-shell label{color:#8e99aa!important}
+.dashboard-shell .workspace-card{
+  background:#0e1620!important;
+  border-color:#253345!important;
+  box-shadow:none!important;
+}
+.dashboard-shell .workspace-avatar{
+  background:linear-gradient(135deg,#d66fa9,#9d60cf)!important;
+  color:#fff!important;
+}
+.dashboard-shell .sidebar nav a,
+.dashboard-shell .sidebar-footer>a{color:#919baa!important}
+.dashboard-shell .sidebar nav a:hover,
+.dashboard-shell .sidebar nav a.active,
+.dashboard-shell .sidebar-footer>a:hover{
+  color:#fff!important;
+  background:#141d28!important;
+}
+.dashboard-shell .sidebar nav a.active{
+  box-shadow:inset 3px 0 0 #d66fa9!important;
+}
+.dashboard-shell .upgrade-card{
+  background:#121720!important;
+  border-color:#3b2d3e!important;
+  color:#d8a9c4!important;
+}
+.dashboard-shell .upgrade-card strong{color:#f3d8e7!important}
+.dashboard-shell .stat,
+.dashboard-shell .box,
+.dashboard-shell .metric-card,
+.dashboard-shell .social-card,
+.dashboard-shell .network-box,
+.dashboard-shell .inventory-card,
+.dashboard-shell .monthly-card{
+  background:linear-gradient(145deg,#0d151f,#0a1119)!important;
+  border:1px solid #253445!important;
+  color:#f6f8fb!important;
+  box-shadow:0 14px 34px rgba(0,0,0,.22)!important;
+  backdrop-filter:none!important;
+}
+.dashboard-shell .stat-icon.purple,
+.dashboard-shell .quick-icon.purple{background:#24182a!important;color:#e39bc1!important}
+.dashboard-shell .stat-icon.blue,
+.dashboard-shell .quick-icon.blue{background:#181c2c!important;color:#ae8ee6!important}
+.dashboard-shell .stat-icon.orange,
+.dashboard-shell .quick-icon.orange{background:#211a17!important;color:#d6a486!important}
+.dashboard-shell .stat-icon.green{background:#10241d!important;color:#5bd7a2!important}
+.dashboard-shell .client-avatar{
+  background:#221826!important;
+  color:#e79fc4!important;
+}
+.dashboard-shell .primary{
+  background:linear-gradient(135deg,#d86fa9,#a45fd2 58%,#8446aa)!important;
+  border:1px solid rgba(255,255,255,.06)!important;
+  color:#fff!important;
+  box-shadow:0 11px 28px rgba(183,80,153,.22)!important;
+}
+.dashboard-shell .primary:hover{box-shadow:0 14px 34px rgba(183,80,153,.30)!important}
+.dashboard-shell .secondary-action,
+.dashboard-shell .content button:not(.primary):not(.checkout-close):not(.agenda-action):not(.payment-methods button):not(.qty button):not(.remove-item){
+  background:#101923!important;
+  border-color:#304052!important;
+  color:#d7dde7!important;
+}
+.dashboard-shell .secondary-action:hover,
+.dashboard-shell .content button:not(.primary):not(.checkout-close):not(.agenda-action):not(.payment-methods button):not(.qty button):not(.remove-item):hover{
+  background:#16212d!important;
+  border-color:#59445a!important;
+  color:#fff!important;
+}
+.dashboard-shell .content input,
+.dashboard-shell .content select,
+.dashboard-shell .content textarea,
+.dashboard-shell .search-field{
+  background:#08111a!important;
+  border-color:#304052!important;
+  color:#f7f8fb!important;
+  -webkit-text-fill-color:#f7f8fb!important;
+}
+.dashboard-shell .content input:focus,
+.dashboard-shell .content select:focus,
+.dashboard-shell .content textarea:focus{
+  border-color:#d071a8!important;
+  box-shadow:0 0 0 3px rgba(208,113,168,.12)!important;
+}
+.dashboard-shell .content option{background:#0b131d!important;color:#fff!important}
+.dashboard-shell .data-list article{border-color:#202d3a!important}
+.dashboard-shell .data-list article:hover{background:#0f1924!important}
+.dashboard-shell .pill{
+  background:#101923!important;
+  border-color:#2b3a4b!important;
+  color:#aeb7c5!important;
+}
+.dashboard-shell .pill.confirmed,
+.dashboard-shell .pill.completed,
+.dashboard-shell .pill.confirmado,
+.dashboard-shell .pill.concluido{
+  background:#0d251c!important;
+  border-color:#28513f!important;
+  color:#5bdba5!important;
+}
+.dashboard-shell .sales-report-print,
+.dashboard-shell .sales-report-summary>div,
+.dashboard-shell .sales-report-table th{
+  background:#0a121b!important;
+  border-color:#263545!important;
+}
+.dashboard-shell .sales-report-table td{border-color:#243240!important}
+.dashboard-shell .sidebar-edge-tab{
+  background:#0c131c!important;
+  border-color:#2a3848!important;
+  color:#98a2b1!important;
+}
+.dashboard-shell .sidebar-edge-tab:hover{
+  background:#151e29!important;
+  border-color:#5b425a!important;
+  color:#fff!important;
+}
