@@ -157,7 +157,7 @@ export async function POST(request){
     if(!unit?.active)return NextResponse.json({error:"A unidade deste atendimento não está ativa."},{status:400});
     const storedPhone=whatsappNumber(client?.phone);
     if(!storedPhone)return NextResponse.json({error:"O cliente "+text(client?.name||"selecionado")+" está com um número de WhatsApp inválido. Corrija o telefone no cadastro antes de enviar a proposta."},{status:400});
-    if(!(await evolutionConfigured()))return NextResponse.json({error:"O WhatsApp da barbearia não está conectado."},{status:503});
+    if(!(await evolutionConfigured()))return NextResponse.json({error:"O WhatsApp do espaço não está conectado."},{status:503});
     const instance=evolutionInstanceName(tenantId);
     let phone="";
     try{
@@ -205,7 +205,7 @@ export async function POST(request){
     const message=[
       "📅 *Proposta de novo horário*",
       "",
-      "Olá, "+sessionData.client_name+". A *"+text(tenant?.name||"barbearia")+"* quer reagendar seu atendimento.",
+      "Olá, "+sessionData.client_name+". A *"+text(tenant?.name||"espaço de beleza")+"* quer reagendar seu atendimento.",
       "",
       "✂️ *Serviço:* "+sessionData.service_name,
       "👤 *Profissional:* "+sessionData.barber_name,
