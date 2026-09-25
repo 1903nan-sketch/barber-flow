@@ -24,7 +24,7 @@ const items = [
   { label: "Visão geral", href: "/dashboard", icon: LayoutDashboard },
   { label: "Agenda", href: "/dashboard/agenda", icon: CalendarDays },
   { label: "Clientes", href: "/dashboard/clientes", icon: Users },
-  { label: "Barbeiros", href: "/dashboard/barbeiros", icon: UserRound },
+  { label: "Profissionais", href: "/dashboard/barbeiros", icon: UserRound },
   { label: "Serviços", href: "/dashboard/servicos", icon: Scissors },
   { label: "Financeiro", href: "/dashboard/financeiro", icon: CircleDollarSign, permission: "finance" },
   { label: "Estoque", href: "/dashboard/estoque", icon: Sparkles, permission: "inventory" },
@@ -36,16 +36,16 @@ const items = [
   { label: "Site, Instagram e WhatsApp", href: "/dashboard/configuracoes", icon: Settings, ownerOnly: true },
 ];
 
-const roleLabel={owner:"Proprietário",manager:"Gerente",reception:"Recepção",barber:"Barbeiro"};
-const initials=name=>String(name||"BF").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
+const roleLabel={owner:"Proprietário",manager:"Gerente",reception:"Recepção",barber:"Profissional"};
+const initials=name=>String(name||"BT").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
 
 export default function Sidebar({ workspace, collapsed=false, onToggle }) {
   const pathname = usePathname();
   const [workspaceOpen,setWorkspaceOpen]=useState(false);
   const starter=String(workspace?.tenant?.plans?.name||"").toLowerCase()==="starter";
   const starterRoutes=new Set(["/dashboard","/dashboard/vendas","/dashboard/relatorios","/dashboard/mensalidade"]);
-  async function changeWorkspace(tenantId){localStorage.setItem("barberflow_workspace",tenantId);setWorkspaceOpen(false);window.location.href="/dashboard"}
-  async function changeAccount(){localStorage.removeItem("barberflow_workspace");await supabase?.auth.signOut();window.location.href="/login"}
+  async function changeWorkspace(tenantId){localStorage.setItem("beautytix_workspace",tenantId);setWorkspaceOpen(false);window.location.href="/dashboard"}
+  async function changeAccount(){localStorage.removeItem("beautytix_workspace");await supabase?.auth.signOut();window.location.href="/login"}
 
   return (
     <aside className={"sidebar "+(collapsed?"collapsed":"")}>
@@ -53,7 +53,7 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
         <div className="brand-client-lockup">
           <span className="bf-simple-mark" aria-hidden="true"/>
           <div className="brand-copy">
-            <div className="brand">Barber Flow</div>
+            <div className="brand">BeautyTix</div>
             <span className="brand-subtitle">Gestão inteligente</span>
           </div>
         </div>
@@ -65,14 +65,14 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
       <div className="workspace-switcher">
         <button type="button" className={"workspace-card workspace-card-button "+(workspaceOpen?"open":"")} onClick={()=>setWorkspaceOpen(v=>!v)}>
           <span className="workspace-avatar">{initials(workspace?.tenant?.name)}</span>
-          <div><strong>{workspace?.tenant?.name||"Barber Flow"}</strong><small>{roleLabel[workspace?.membership?.role]||workspace?.membership?.role||"Equipe"}</small></div>
+          <div><strong>{workspace?.tenant?.name||"BeautyTix"}</strong><small>{roleLabel[workspace?.membership?.role]||workspace?.membership?.role||"Equipe"}</small></div>
           <ChevronRight size={17} />
         </button>
         {workspaceOpen&&<div className="workspace-menu">
           <p>Trocar perfil</p>
           {(workspace?.memberships||[]).map(m=><button type="button" key={m.tenant_id} className={m.tenant_id===workspace?.tenant?.id?"current":""} onClick={()=>changeWorkspace(m.tenant_id)}>
             <span className="workspace-avatar mini">{initials(m.tenants?.name)}</span>
-            <span><strong>{m.tenants?.name||"Barbearia"}</strong><small>{roleLabel[m.role]||m.role}</small></span>
+            <span><strong>{m.tenants?.name||"Espaço de beleza"}</strong><small>{roleLabel[m.role]||m.role}</small></span>
             {m.tenant_id===workspace?.tenant?.id&&<b>Atual</b>}
           </button>)}
           <button type="button" className="workspace-other-account" onClick={changeAccount}>Entrar em outra conta</button>
