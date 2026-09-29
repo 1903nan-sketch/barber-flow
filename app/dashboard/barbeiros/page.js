@@ -49,8 +49,9 @@ function TeamContent({workspace}){
 }
 
 export default function TeamPage(){
- return <ModuleShell title="Equipe" eyebrow="Acessos" action={({tenant})=>{
-  const limit=Number(tenant?.plans?.max_profiles||0);
+ return <ModuleShell title="Equipe" eyebrow="Acessos" action={workspace=>{
+  if(workspace?.membership?.role!=="owner")return null;
+  const limit=Number(workspace?.tenant?.plans?.max_profiles||0);
   return <a className="primary" href="/dashboard/barbeiros/novo"><Plus size={18}/> Novo perfil ({limit} máx.)</a>
  }}>{workspace=><TeamContent workspace={workspace}/>}</ModuleShell>
 }
