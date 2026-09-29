@@ -26,7 +26,7 @@ export async function POST(request){
   if(password.length<8)return NextResponse.json({error:"A senha precisa ter pelo menos 8 caracteres."},{status:400});
 
   const {data:plan,error:planError}=await admin.from("plans").select("id,name,monthly_cents,default_grace_days").eq("id",body.plan_id).maybeSingle();
-  if(planError||!plan||!["Starter","Pro","Premium"].includes(plan.name))return NextResponse.json({error:"Selecione um plano válido."},{status:400});
+  if(planError||!plan||!["Starter","Pro","Pro + Filiais"].includes(plan.name))return NextResponse.json({error:"Selecione um plano válido."},{status:400});
 
   const baseSlug=slug;
   let suffix=2;
