@@ -2,7 +2,7 @@ import Link from "next/link";
 import {headers} from "next/headers";
 import {redirect} from "next/navigation";
 import {createClient} from "@supabase/supabase-js";
-import {ArrowUpRight,Blocks,Code2,GitBranch,Scissors,Sparkles,Workflow} from "lucide-react";
+import {ArrowUpRight,Check,Code2,GitBranch,Scissors,Sparkles,Workflow} from "lucide-react";
 
 async function getActiveUsers(){
  const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -17,13 +17,6 @@ async function getActiveUsers(){
  }catch{return 0}
 }
 
-const customServices=[
- ["Sistemas internos","Painéis, operações, financeiro, estoque, atendimento e fluxos feitos para a rotina da sua empresa.",Code2],
- ["Automações","Eliminamos tarefas repetitivas conectando processos, notificações e regras de negócio.",Workflow],
- ["SaaS e portais","Plataformas completas com login, permissões, planos, banco de dados e painéis administrativos.",Blocks],
- ["Integrações","Conectamos APIs, pagamentos, WhatsApp e outros serviços ao seu sistema.",GitBranch],
-];
-
 export default async function HomePage(){
  const activeUsers=await getActiveUsers();
  const host=(await headers()).get("host")?.split(":")[0]?.toLowerCase();
@@ -34,9 +27,38 @@ export default async function HomePage(){
 
  <section className="rh2-hero"><div className="rh2-grid"/><div className="rh2-copy"><span className="rh2-label"><i/> SOFTWARE STUDIO · SÃO PAULO</span><h1>Software<br/>feito para<br/><em>o seu negócio.</em></h1><p>A Ruptix desenvolve <strong>softwares personalizados</strong> para empresas que precisam organizar operações, automatizar processos e transformar uma necessidade real em um sistema próprio.</p><div className="rh2-hero-actions"><a className="rh2-hero-primary" href="mailto:vendas@3ruptix.com?subject=Quero%20um%20software%20personalizado">QUERO UM SOFTWARE PERSONALIZADO <ArrowUpRight/></a><a href="#produtos">VER PRODUTOS RUPTIX</a></div></div><div className="rh2-side"><span>RUPTIX / 2026</span><b>BUILD<br/>FOR YOUR<br/>BUSINESS.</b><Sparkles/></div></section>
 
- <section className="rh2-custom" id="sob-medida">
-  <div className="rh2-custom-intro"><span>01 / SOFTWARE PERSONALIZADO</span><h2>Seu processo.<br/><em>Seu sistema.</em></h2><p>Não adaptamos sua empresa a um software genérico. Entendemos sua operação e desenvolvemos uma solução pensada para o seu fluxo, seus usuários e seus objetivos.</p><a href="mailto:vendas@3ruptix.com?subject=Projeto%20de%20software%20sob%20medida">CONVERSAR SOBRE UM PROJETO <ArrowUpRight/></a></div>
-  <div className="rh2-custom-grid">{customServices.map(([title,description,Icon],i)=><article key={title}><div><Icon/></div><span>0{i+1}</span><h3>{title}</h3><p>{description}</p></article>)}</div>
+ <section className="rh2-custom-v2" id="sob-medida">
+  <div className="rh2-custom-v2-copy">
+   <span>01 / SOFTWARE SOB MEDIDA</span>
+   <h2>Seu negócio não precisa caber em um software genérico.</h2>
+   <p>Desenvolvemos sistemas personalizados em torno da sua operação — com as telas, permissões, automações, integrações e regras que a sua empresa realmente precisa.</p>
+   <div className="rh2-custom-v2-points">
+    <b><Check/> Sistema criado para o seu fluxo</b>
+    <b><Check/> Integrações com serviços que você já usa</b>
+    <b><Check/> Estrutura pronta para crescer com a empresa</b>
+   </div>
+   <a href="mailto:vendas@3ruptix.com?subject=Quero%20um%20software%20personalizado">APRESENTAR MEU PROJETO <ArrowUpRight/></a>
+  </div>
+
+  <div className="rh2-custom-v2-stage">
+   <div className="rh2-custom-v2-window">
+    <header><span><i/><i/><i/></span><b>RUPTIX / PROJETO PERSONALIZADO</b><small>BUILD_01</small></header>
+    <div className="rh2-custom-v2-window-body">
+     <div className="rh2-custom-v2-project">
+      <small>DO PROBLEMA AO PRODUTO</small>
+      <h3>Transformamos processos em software.</h3>
+      <p>Do primeiro mapeamento até o sistema rodando em produção.</p>
+     </div>
+     <div className="rh2-custom-v2-flow">
+      <article><span>01</span><div><Workflow/><b>Entender</b><small>processos e gargalos</small></div></article>
+      <article><span>02</span><div><Code2/><b>Construir</b><small>sistema sob medida</small></div></article>
+      <article><span>03</span><div><GitBranch/><b>Integrar</b><small>APIs, pagamentos e automações</small></div></article>
+      <article><span>04</span><div><Sparkles/><b>Evoluir</b><small>novas funções conforme o negócio cresce</small></div></article>
+     </div>
+    </div>
+   </div>
+   <div className="rh2-custom-v2-tags"><span>SISTEMAS INTERNOS</span><span>SAAS</span><span>AUTOMAÇÕES</span><span>PORTAIS</span><span>INTEGRAÇÕES</span></div>
+  </div>
  </section>
 
  <section className="rh2-products" id="produtos"><div className="rh2-title"><span>02 / PRODUTOS PRÓPRIOS</span><h2>Tecnologia<br/>que já opera.</h2><p>Além de projetos sob medida, a Ruptix cria produtos próprios para segmentos específicos. São sistemas reais construídos a partir de operações reais.</p></div>
