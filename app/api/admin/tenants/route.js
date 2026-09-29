@@ -25,7 +25,7 @@ export async function POST(request){
   if(!name||!ownerName||!email||!slug||!body.plan_id)return NextResponse.json({error:"Preencha os dados obrigatórios da barbearia, proprietário e plano."},{status:400});
   if(password.length<8)return NextResponse.json({error:"A senha precisa ter pelo menos 8 caracteres."},{status:400});
 
-  const {data:plan,error:planError}=await admin.from("plans").select("id,name,monthly_cents").eq("id",body.plan_id).maybeSingle();
+  const {data:plan,error:planError}=await admin.from("plans").select("id,name,monthly_cents,default_grace_days").eq("id",body.plan_id).maybeSingle();
   if(planError||!plan||!["Starter","Pro","Premium"].includes(plan.name))return NextResponse.json({error:"Selecione um plano válido."},{status:400});
 
   const baseSlug=slug;
@@ -52,12 +52,16 @@ export async function POST(request){
 
   const discountPct=Math.min(100,Math.max(0,Number(body.discount_pct||0)));
   const discountMonths=Math.min(60,Math.max(0,Number(body.discount_months||0)));
+  const billingMethod=["PIX","CREDIT_CARD"].includes(String(body.billing_method||"").toUpperCase())?String(body.billing_method).toUpperCase():"";
   const patch={
    owner_document:String(body.owner_document||"").trim(),
    manager_name:String(body.manager_name||"").trim(),
    manager_document:String(body.manager_document||"").trim(),
-   grace_days:0,
+   grace_days:Number(plan.default_grace_days||7),
    billing_due_date:body.billing_due_date||null,
+   billing_provider:billingMethod?"asaas":"",
+   billing_method:billingMethod,
+   billing_provider_status:billingMethod?"PENDING_SETUP":"",
    commitment_months:body.commitment_mode==="flex"?0:12,
    no_commitment_surcharge_pct:body.commitment_mode==="flex"?15:0,
    discount_pct:discountPct,
