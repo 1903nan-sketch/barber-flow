@@ -24,7 +24,7 @@ const items = [
   { label: "Visão geral", href: "/dashboard", icon: LayoutDashboard },
   { label: "Agenda", href: "/dashboard/agenda", icon: CalendarDays },
   { label: "Clientes", href: "/dashboard/clientes", icon: Users },
-  { label: "Barbeiros", href: "/dashboard/barbeiros", icon: UserRound },
+  { label: "Equipe", href: "/dashboard/barbeiros", icon: UserRound },
   { label: "Serviços", href: "/dashboard/servicos", icon: Scissors },
   { label: "Financeiro", href: "/dashboard/financeiro", icon: CircleDollarSign, permission: "finance" },
   { label: "Estoque", href: "/dashboard/estoque", icon: Sparkles, permission: "inventory" },
@@ -36,14 +36,14 @@ const items = [
   { label: "Site, Instagram e WhatsApp", href: "/dashboard/configuracoes", icon: Settings, ownerOnly: true },
 ];
 
-const roleLabel={owner:"Proprietário",manager:"Gerente",reception:"Recepção",barber:"Barbeiro"};
+const roleLabel={owner:"Proprietário",manager:"Gerente",reception:"Recepção",attendant:"Atendente",barber:"Barbeiro"};
 const initials=name=>String(name||"BT").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
 
 export default function Sidebar({ workspace, collapsed=false, onToggle }) {
   const pathname = usePathname();
   const [workspaceOpen,setWorkspaceOpen]=useState(false);
   const starter=String(workspace?.tenant?.plans?.name||"").toLowerCase()==="starter";
-  const starterRoutes=new Set(["/dashboard","/dashboard/vendas","/dashboard/relatorios","/dashboard/mensalidade"]);
+  const starterRoutes=new Set(["/dashboard","/dashboard/clientes","/dashboard/barbeiros","/dashboard/servicos","/dashboard/financeiro","/dashboard/estoque","/dashboard/comandas","/dashboard/vendas","/dashboard/relatorios","/dashboard/mensalidade"]);
   async function changeWorkspace(tenantId){localStorage.setItem("barberflow_workspace",tenantId);setWorkspaceOpen(false);window.location.href="/dashboard"}
   async function changeAccount(){localStorage.removeItem("barberflow_workspace");await supabase?.auth.signOut();window.location.href="/login"}
 
@@ -102,7 +102,7 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
         </button>
         <div className="upgrade-card">
           <Sparkles size={20} />
-          <div><strong>{starter?"Recursos Pro e Premium":"Libere todo o potencial"}</strong><small>{starter?"Site, agenda e WhatsApp":"Conheça os planos"}</small></div>
+          <div><strong>{starter?"Recursos do Pro":"Libere todo o potencial"}</strong><small>{starter?"Site, agenda e WhatsApp":"Conheça os planos"}</small></div>
         </div>
       </div>
     </aside>
