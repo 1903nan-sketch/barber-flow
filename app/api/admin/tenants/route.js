@@ -74,7 +74,19 @@ export async function POST(request){
    return NextResponse.json({error:"A barbearia foi criada, mas houve erro ao salvar a assinatura. Atualize a página e revise o cadastro em Barbearias."},{status:500});
   }
 
-  return NextResponse.json({id:tenantId,slug,name,plan:plan.name});
+  const ownerIsProvider=plan.name!=="Starter"&&["on","true","1",true].includes(body.owner_is_provider);
+  if(ownerIsProvider){
+   const {data:barber,error:barberError}=await admin.from("barbers").upsert({tenant_id:tenantId,user_id:created.user.id,name:ownerName,active:true},{onConflict:"tenant_id,user_id"}).select("id").single();
+   if(barberError)return NextResponse.json({error:"A barbearia foi criada, mas não foi possível habilitar o proprietário na agenda."},{status:500});
+   const [units,services]=await Promise.all([
+    admin.from("units").select("id").eq("tenant_id",tenantId).eq("active",true),
+    admin.from("services").select("id").eq("tenant_id",tenantId).eq("active",true)
+   ]);
+   if(units.data?.length)await admin.from("barber_units").upsert(units.data.map(x=>({tenant_id:tenantId,barber_id:barber.id,unit_id:x.id})),{onConflict:"tenant_id,barber_id,unit_id"});
+   if(services.data?.length)await admin.from("barber_services").upsert(services.data.map(x=>({tenant_id:tenantId,barber_id:barber.id,service_id:x.id})),{onConflict:"tenant_id,barber_id,service_id"});
+  }
+
+  return NextResponse.json({id:tenantId,slug,name,plan:plan.name,owner_is_provider:ownerIsProvider});
  }catch(error){
   console.error("Create tenant route failed",error?.message||error);
   return NextResponse.json({error:error.message||"Não foi possível criar a barbearia."},{status:500});
