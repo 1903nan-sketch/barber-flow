@@ -24,9 +24,9 @@ async function setProvider(admin,tenant,userId,name,enabled,photo=""){
   await admin.from("barbers").update({active:false}).eq("tenant_id",tenant).eq("user_id",userId);
   return null;
  }
- const {data:barber,error}=await admin.from("barbers").upsert({
-  tenant_id:tenant,user_id:userId,name,active:true,photo_url:photo||""
- },{onConflict:"tenant_id,user_id"}).select("id").single();
+ const row={tenant_id:tenant,user_id:userId,name,active:true};
+ if(photo)row.photo_url=photo;
+ const {data:barber,error}=await admin.from("barbers").upsert(row,{onConflict:"tenant_id,user_id"}).select("id").single();
  if(error)throw error;
  const [units,services]=await Promise.all([
   admin.from("units").select("id").eq("tenant_id",tenant).eq("active",true),
@@ -51,6 +51,12 @@ export async function POST(request){
   if(!["barber","manager","reception","attendant"].includes(role))return NextResponse.json({error:"Função inválida."},{status:400});
   const name=String(body.name||"").trim();
   if(!name)return NextResponse.json({error:"Informe o nome do funcionário."},{status:400});
+  const starter=String(plan.name||"").toLowerCase()==="starter";
+  const isProvider=!starter&&Boolean(body.is_provider);
+  if(isProvider){
+   const {count:providers}=await admin.from("barbers").select("id",{count:"exact",head:true}).eq("tenant_id",tenant).eq("active",true);
+   if(Number(providers||0)>=Number(plan.max_barbers||11))return NextResponse.json({error:"O limite de profissionais agendáveis do plano foi atingido."},{status:409});
+  }
   const loginEmail=`${username}.${tenant.replace(/-/g,"").slice(0,10)}@staff.barberflow.app`;
   const {data:created,error:createError}=await admin.auth.admin.createUser({email:loginEmail,password,email_confirm:true,user_metadata:{name,staff_username:"@"+username,avatar_url:body.photo_url||""}});
   if(createError)return NextResponse.json({error:createError.message.includes("already")?"Este usuário já está em uso nesta barbearia.":createError.message},{status:400});
@@ -61,15 +67,6 @@ export async function POST(request){
   const whatsapp=String(body.whatsapp||"").replace(/[^0-9]/g,"");
   if(whatsapp)await admin.from("memberships").update({whatsapp}).eq("tenant_id",tenant).eq("user_id",created.user.id);
 
-  const starter=String(plan.name||"").toLowerCase()==="starter";
-  const isProvider=!starter&&Boolean(body.is_provider);
-  if(isProvider){
-   const {count:providers}=await admin.from("barbers").select("id",{count:"exact",head:true}).eq("tenant_id",tenant).eq("active",true).neq("user_id",created.user.id);
-   if(Number(providers||0)>=Number(plan.max_barbers||11)){
-    await admin.auth.admin.deleteUser(created.user.id);
-    return NextResponse.json({error:"O limite de profissionais agendáveis do plano foi atingido."},{status:409});
-   }
-  }
   await setProvider(admin,tenant,created.user.id,name,isProvider,String(body.photo_url||""));
 
   return NextResponse.json({username:"@"+username,is_provider:isProvider,profiles_used:Number(count||0)+1,profiles_limit:maxProfiles});
