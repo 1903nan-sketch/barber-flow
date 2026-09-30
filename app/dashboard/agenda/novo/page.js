@@ -8,6 +8,7 @@ import ModuleShell from "../../_components/ModuleShell";
 
 function NewAppointment({workspace}){
  const router=useRouter(),t=workspace.tenant.id;
+ const minLocal=(()=>{const d=new Date(Date.now()-new Date().getTimezoneOffset()*60000);return d.toISOString().slice(0,16)})()
  const [clients,setClients]=useState([]),[barbers,setBarbers]=useState([]),[services,setServices]=useState([]),[units,setUnits]=useState([]),[busy,setBusy]=useState(false),[error,setError]=useState("");
  useEffect(()=>{Promise.all([
   supabase.from("clients").select("id,name").eq("tenant_id",t).order("name"),
@@ -20,8 +21,8 @@ function NewAppointment({workspace}){
   <label>Cliente<select name="client_id" required defaultValue=""><option value="">Selecione</option>{clients.map(x=><option value={x.id} key={x.id}>{x.name}</option>)}</select></label>
   <label>Barbeiro<select name="barber_id" required defaultValue=""><option value="">Selecione</option>{barbers.map(x=><option value={x.id} key={x.id}>{x.name}</option>)}</select></label>
   <label>Serviço<select name="service_id" required defaultValue=""><option value="">Selecione</option>{services.map(x=><option value={x.id} key={x.id}>{x.name} - {(x.price_cents/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</option>)}</select></label>
-  <label>Unidade<select name="unit_id" required defaultValue=""><option value="">Selecione</option>{units.map(x=><option value={x.id} key={x.id}>{x.name}</option>)}</select></label>
-  <label>Data e horário<input name="scheduled_at" type="datetime-local" required/></label>
+  <label>Unidade<select name="unit_id" required key={units.length} defaultValue={units.length===1?units[0].id:""}><option value="">Selecione</option>{units.map(x=><option value={x.id} key={x.id}>{x.name}</option>)}</select></label>
+  <label>Data e horário<input name="scheduled_at" type="datetime-local" min={minLocal} required/></label>
  </div>{error&&<div className="form-alert error">{error}</div>}<button className="primary form-submit" disabled={busy}><CalendarPlus size={17}/>{busy?"Salvando...":"Salvar agendamento"}</button></form>
 }
 export default function NewAppointmentPage(){return <ModuleShell title="Novo agendamento" eyebrow="Agenda">{workspace=><NewAppointment workspace={workspace}/>}</ModuleShell>}

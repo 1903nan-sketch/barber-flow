@@ -62,3 +62,5 @@
     margin-bottom:20px!important;
   }
 }
+.step.done>span{background:rgba(117,87,232,.16);color:#7557e8}
+.step>span{transition:background .3s,color .3s,box-shadow .3s}

@@ -33,6 +33,7 @@ function WhatsAppContent({workspace}){
       });
       const out=await res.json();
       if(!res.ok)throw new Error(out.error||"Não foi possível consultar o WhatsApp.");
+      setError("");
       setConfigured(out.configured!==false);
       setStatus(out.status||"disconnected");
       setPhone(out.phone||"");
