@@ -20,7 +20,9 @@ All fixtures run inside a transaction and roll back. No real customer bookings o
 - `tests/database-regression.sql`: 27 assertions.
 - `tests/inventory-regression.sql`: 24 assertions.
 - `tests/finance-regression.sql`: 19 assertions.
-- `tests/orders-regression.sql`: 30 assertions (100 total across four suites).
+- `tests/orders-regression.sql`: 30 assertions.
+- `tests/app-flows-regression.sql`: 40 assertions — public multi-service booking, service editing/deactivation, quick-sale cart, client account settlement, appointment status flow, weekly schedule and owner sale corrections (140 total across five suites).
+- 2026-09-30: all 140 assertions pass against a schema-only copy of production (no customer data). The four original suites were updated for the `auto_link_new_service_to_barbers` trigger, which now creates barber/service links automatically.
 - Next.js production build succeeds after merging current upstream WhatsApp and agenda changes.
 - Authenticated UI workflows and real mobile-device verification remain outstanding; database tests and a successful build are not substitutes for those checks.
 

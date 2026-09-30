@@ -29,7 +29,7 @@ INSERT INTO public.clients(id,tenant_id,name,phone) VALUES
  ('a6000000-0000-4000-8000-000000000001','a2000000-0000-4000-8000-000000000001','Client A','11999990000'),
  ('a6000000-0000-4000-8000-000000000002','a2000000-0000-4000-8000-000000000002','Client B','11999990001');
 INSERT INTO public.barber_units SELECT 'a2000000-0000-4000-8000-000000000001',id,'a3000000-0000-4000-8000-000000000001' FROM public.barbers WHERE tenant_id='a2000000-0000-4000-8000-000000000001';
-INSERT INTO public.barber_services SELECT b.tenant_id,b.id,s.id FROM public.barbers b JOIN public.services s ON s.tenant_id=b.tenant_id WHERE b.tenant_id='a2000000-0000-4000-8000-000000000001';
+INSERT INTO public.barber_services SELECT b.tenant_id,b.id,s.id FROM public.barbers b JOIN public.services s ON s.tenant_id=b.tenant_id WHERE b.tenant_id='a2000000-0000-4000-8000-000000000001' ON CONFLICT DO NOTHING;
 INSERT INTO public.weekly_windows(tenant_id,barber_id,unit_id,weekday,start_min,end_min,step_min) SELECT b.tenant_id,b.id,'a3000000-0000-4000-8000-000000000001',d,lo,hi,15 FROM public.barbers b CROSS JOIN generate_series(0,6) d CROSS JOIN (VALUES(540,720),(840,1080)) w(lo,hi) WHERE b.tenant_id='a2000000-0000-4000-8000-000000000001';
 SELECT set_config('audit.t','a2000000-0000-4000-8000-000000000001',true),set_config('audit.u','a3000000-0000-4000-8000-000000000001',true),set_config('audit.b','a4000000-0000-4000-8000-000000000001',true),set_config('audit.s','a5000000-0000-4000-8000-000000000001',true),set_config('audit.c','a6000000-0000-4000-8000-000000000001',true);
 SELECT set_config('audit.st',((current_date+2)::timestamp+interval '10 hours')::text||'-03',true);
