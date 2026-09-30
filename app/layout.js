@@ -3,6 +3,7 @@ import "./modules.css";
 import "./admin.css";
 import "./public-booking.css";
 import "./settings.css";
+import "./sidebar-motion.css";
 import GlobalNotice from "./_components/GlobalNotice";
 
 export const metadata={
