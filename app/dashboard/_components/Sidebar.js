@@ -9,9 +9,9 @@ import {
   CircleDollarSign,
   LayoutDashboard,
   LogOut,
-  Scissors,
   Settings,
   Sparkles,
+  Package,
   CreditCard,
   Users,
   UserRound,
@@ -24,10 +24,10 @@ const items = [
   { label: "Visão geral", href: "/dashboard", icon: LayoutDashboard },
   { label: "Agenda", href: "/dashboard/agenda", icon: CalendarDays },
   { label: "Clientes", href: "/dashboard/clientes", icon: Users },
-  { label: "Funcionárias", href: "/dashboard/barbeiros", icon: UserRound },
-  { label: "Serviços", href: "/dashboard/servicos", icon: Scissors },
+  { label: "Profissionais", href: "/dashboard/profissionais", icon: UserRound },
+  { label: "Serviços", href: "/dashboard/servicos", icon: Sparkles },
   { label: "Financeiro", href: "/dashboard/financeiro", icon: CircleDollarSign, permission: "finance" },
-  { label: "Estoque", href: "/dashboard/estoque", icon: Sparkles, permission: "inventory" },
+  { label: "Estoque", href: "/dashboard/estoque", icon: Package, permission: "inventory" },
   { label: "Comandas", href: "/dashboard/comandas", icon: CircleDollarSign },
   { label: "Vendas", href: "/dashboard/vendas", icon: CircleDollarSign },
   { label: "Relatórios", href: "/dashboard/relatorios", icon: BarChart3 },
@@ -54,7 +54,7 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
           <span className="bf-simple-mark" aria-hidden="true"/>
           <div className="brand-copy">
             <div className="brand">BeautyTix</div>
-            <span className="brand-subtitle">Gestão inteligente</span>
+            <span className="brand-subtitle">Gestão de beleza</span>
           </div>
         </div>
       </div>
@@ -96,8 +96,8 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
       <div className="sidebar-footer">
         {!starter&&<a href="/dashboard/configuracoes"><Settings size={19} /><span>Configurações do site</span></a>}
         <button className="profile-card" style={{ width: "100%", background: "transparent", color: "inherit", borderLeft: 0, borderRight: 0, borderBottom: 0, textAlign: "left", cursor: "pointer" }} type="button" onClick={async () => {await supabase?.auth.signOut();window.location.href="/login"}}>
-          <span className="profile-avatar">AD</span>
-          <div><strong>{workspace?.membership?.name||"Administrador"}</strong><small>Plano {workspace?.tenant?.plans?.name||"contratado"}</small></div>
+          <span className="profile-avatar">{initials(workspace?.membership?.name||"Administradora")}</span>
+          <div><strong>{workspace?.membership?.name||"Administradora"}</strong><small>Plano {workspace?.tenant?.plans?.name||"contratado"}</small></div>
           <LogOut size={18} />
         </button>
         <div className="upgrade-card">

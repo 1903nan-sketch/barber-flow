@@ -116,7 +116,7 @@ function WhatsAppContent({workspace}){
       <div style={{display:"grid",gap:12}}>
         <div className="appointment"><span className="quick-icon green">1</span><div className="appointment-main"><b>Cliente envia uma mensagem</b><p>Ex.: “Quero cortar amanhã” ou simplesmente “Oi”.</p></div></div>
         <div className="appointment"><span className="quick-icon purple">2</span><div className="appointment-main"><b>BeautyTix consulta dados reais</b><p>Serviços, profissionais, unidades e horários vêm do Supabase.</p></div></div>
-        <div className="appointment"><span className="quick-icon blue">3</span><div className="appointment-main"><b>Confirmação antes de gravar</b><p>O horário só é criado depois que o cliente responde SIM e a disponibilidade é validada novamente.</p></div></div>
+        <div className="appointment"><span className="quick-icon blue">3</span><div className="appointment-main"><b>Confirmação antes de gravar</b><p>O horário só é criado depois que a cliente responde SIM e a disponibilidade é validada novamente.</p></div></div>
       </div>
       <div style={{marginTop:18,padding:16,border:"1px solid var(--line)",borderRadius:12}}>
         <strong style={{fontSize:12,display:"flex",alignItems:"center",gap:7}}><ShieldCheck size={17}/> Integração não oficial</strong>

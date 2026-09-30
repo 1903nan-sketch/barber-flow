@@ -3,6 +3,7 @@ import "./modules.css";
 import "./admin.css";
 import "./public-booking.css";
 import "./settings.css";
+import "./beauty-theme.css";
 import GlobalNotice from "./_components/GlobalNotice";
 
 export const metadata={
@@ -18,6 +19,6 @@ export const metadata={
  }
 };
 
-export const viewport={themeColor:"#050505"};
+export const viewport={themeColor:"#f4ebee"};
 
 export default function RootLayout({children}){return <html lang="pt-BR"><body>{children}<GlobalNotice/></body></html>}

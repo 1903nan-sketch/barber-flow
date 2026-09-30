@@ -1,10 +1,10 @@
 "use client";
 import {useEffect,useMemo,useState} from "react";
-import {BarChart3,CircleDollarSign,Scissors,Users,Printer,FileDown,Filter} from "lucide-react";
+import {BarChart3,CircleDollarSign,Sparkles,Users,Printer,FileDown,Filter} from "lucide-react";
 import {supabase} from "../../../lib/supabase";
 import ModuleShell from "../_components/ModuleShell";
 const money=v=>(Number(v||0)/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
-const labels={pix:"PIX",cash:"Dinheiro",credit:"Crédito",debit:"Débito",account:"Conta do cliente"};
+const labels={pix:"PIX",cash:"Dinheiro",credit:"Crédito",debit:"Débito",account:"Conta da cliente"};
 function Reports({workspace}){const [items,setItems]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState(""),[period,setPeriod]=useState("30"),[method,setMethod]=useState("all"),[status,setStatus]=useState("all"),[from,setFrom]=useState(""),[to,setTo]=useState("");
 useEffect(()=>{let alive=true;async function load(){setLoading(true);const columns="amount_cents,method,status,paid_at,created_at,clients(name),barbers(name)";const results=await Promise.all([supabase.from("appointment_payments").select(columns+",services(name)").eq("tenant_id",workspace.tenant.id).order("created_at",{ascending:false}),supabase.from("quick_sales").select(columns+",description").eq("tenant_id",workspace.tenant.id).order("created_at",{ascending:false})]);if(!alive)return;setError(results.find(r=>r.error)?.error.message||"");setItems([...(results[0].data||[]),...(results[1].data||[]).map(x=>({...x,services:{name:x.description||"Venda avulsa"}}))]);setLoading(false)}load();return()=>{alive=false}},[workspace.tenant.id]);
 const rows=useMemo(()=>{const since=new Date();since.setDate(since.getDate()-Number(period));return items.filter(x=>{const d=new Date(x.paid_at||x.created_at);return (!from?d>=since:d>=new Date(from+"T00:00:00"))&&(!to||d<=new Date(to+"T23:59:59"))&&(method==="all"||x.method===method)&&(status==="all"||x.status===status)})},[items,period,method,status,from,to]),paid=rows.filter(x=>x.status==="paid"),revenue=paid.reduce((s,x)=>s+x.amount_cents,0),avg=paid.length?revenue/paid.length:0;

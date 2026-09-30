@@ -319,7 +319,7 @@ export async function POST(req){
     .eq("id",tenantId).maybeSingle();
   if(!tenant)return NextResponse.json({ok:true,ignored:"unknown_tenant"});
   if(String(tenant?.plans?.name||"").toLowerCase()==="starter")return NextResponse.json({ok:true,ignored:"plan_without_whatsapp"});
-  const shopName=brandLabel(tenant.name)||"barbearia";
+  const shopName=brandLabel(tenant.name)||"nosso espaço";
 
   if(event==="QRCODE_UPDATED")return NextResponse.json({ok:true,status:"connecting"});
   if(event==="CONNECTION_UPDATE")return NextResponse.json({ok:true,status:normalizeEvolutionState(payloadData(body))});
@@ -487,7 +487,7 @@ export async function POST(req){
     if(units.length>1){
       state="unit";await saveSession(db,tenantId,phone,state,d);
       const unitFallback=
-        "👋 *Olá! Bem-vindo à "+shopName+".*\n"+
+        "👋 *Olá! Bem-vinda à "+shopName+".*\n"+
         "Vou te ajudar a reservar seu horário.\n\n"+
         "📍 *Escolha a unidade*\n\n"+
         units.map((x,i)=>"*"+(i+1)+" — "+x.name+"*").join("\n")+
@@ -499,7 +499,7 @@ export async function POST(req){
     }else{
       d.unit=units[0];state="service";await saveSession(db,tenantId,phone,state,d);
       const serviceFallback=
-        "👋 *Olá! Bem-vindo à "+shopName+".*\n"+
+        "👋 *Olá! Bem-vinda à "+shopName+".*\n"+
         "Vou te ajudar a reservar seu horário.\n\n"+
         "✂️ *Qual serviço você deseja?*\n\n"+
         serviceOptions(services)+
