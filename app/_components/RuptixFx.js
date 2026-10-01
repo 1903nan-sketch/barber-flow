@@ -2,8 +2,8 @@
 import {useEffect,useRef} from "react";
 
 /* Efeitos da página institucional da Ruptix:
-   - rede de partículas no fundo que reage ao ponteiro;
-   - brilho que segue o mouse e rastro de faíscas;
+   - céu de estrelas que piscam + rede de partículas que reage ao ponteiro;
+   - rastro de faíscas atrás do mouse;
    - gestos no celular: toque (onda), toque duplo (fogos), segurar (esfera de
      energia que explode ao soltar), arrastar (rastro), deslizar rápido
      (cometa), dois dedos (feixe de luz) e inclinar o aparelho (paralaxe);
@@ -11,21 +11,21 @@ import {useEffect,useRef} from "react";
    - botões magnéticos (data-magnetic);
    - entrada animada ao rolar (data-reveal) e contadores (data-count);
    - barra de progresso da rolagem e menu que encolhe ao rolar.
-   Tudo é desligado quando o sistema pede menos movimento. */
+   As animações ficam ligadas mesmo com "reduzir movimento" no sistema, que
+   vem ativo em muitos celulares e deixava a página parada. */
 export default function RuptixFx(){
  const canvasRef=useRef(null),glowRef=useRef(null),progressRef=useRef(null);
 
  useEffect(()=>{
   const root=document.querySelector(".rx");
   if(!root)return;
-  const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const fine=window.matchMedia("(pointer: fine)").matches;
   const cleanups=[];
   const on=(el,ev,fn,opt)=>{el.addEventListener(ev,fn,opt);cleanups.push(()=>el.removeEventListener(ev,fn,opt))};
 
   // Entrada ao rolar
   const revealEls=[...root.querySelectorAll("[data-reveal]")];
-  if(reduce||!("IntersectionObserver" in window)){revealEls.forEach(el=>el.classList.add("is-in"))}
+  if(!("IntersectionObserver" in window)){revealEls.forEach(el=>el.classList.add("is-in"))}
   else{
    const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add("is-in");io.unobserve(e.target)}}),{threshold:.14,rootMargin:"0px 0px -8% 0px"});
    revealEls.forEach(el=>io.observe(el));cleanups.push(()=>io.disconnect());
@@ -34,7 +34,6 @@ export default function RuptixFx(){
   // Contadores
   const counters=[...root.querySelectorAll("[data-count]")];
   const runCounter=el=>{const target=Number(el.dataset.count)||0,suffix=el.dataset.suffix||"",start=performance.now(),dur=1400;
-   if(reduce){el.textContent=target+suffix;return}
    const step=t=>{const p=Math.min(1,(t-start)/dur),eased=1-Math.pow(1-p,3);el.textContent=Math.round(target*eased)+suffix;if(p<1)requestAnimationFrame(step)};requestAnimationFrame(step)};
   if("IntersectionObserver" in window){
    const cio=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){runCounter(e.target);cio.unobserve(e.target)}}),{threshold:.6});
@@ -46,8 +45,6 @@ export default function RuptixFx(){
    if(progressRef.current)progressRef.current.style.transform=`scaleX(${p})`;
    root.classList.toggle("rx-scrolled",scrollY>24)};
   onScroll();on(window,"scroll",onScroll,{passive:true});
-
-  if(reduce)return()=>cleanups.forEach(f=>f());
 
   // Cartões com inclinação e luz interna
   root.querySelectorAll("[data-tilt]").forEach(card=>{
@@ -71,7 +68,7 @@ export default function RuptixFx(){
   const add=(cls,x,y,vars={})=>{const el=document.createElement(cls==="rx-spark"?"i":"span");el.className=cls;el.style.left=x+"px";el.style.top=y+"px";
    for(const k in vars)el.style.setProperty(k,vars[k]);document.body.appendChild(el);el.addEventListener("animationend",()=>el.remove(),{once:true});return el};
   const spark=(x,y,big,angle,dist,hue)=>{const a=angle??Math.random()*Math.PI*2,d=dist??((big?26:12)+Math.random()*(big?30:18));
-   const el=add("rx-spark",x,y,{"--dx":`${Math.cos(a)*d}px`,"--dy":`${Math.sin(a)*d}px`,"--hue":String(hue??250+Math.random()*70)});if(big)el.classList.add("rx-spark-big")};
+   const el=add("rx-spark",x,y,{"--dx":`${Math.cos(a)*d}px`,"--dy":`${Math.sin(a)*d}px`,"--hue":String(hue??210+Math.random()*30)});if(big)el.classList.add("rx-spark-big")};
   const ripple=(x,y,n=9)=>{add("rx-ripple",x,y);for(let i=0;i<n;i++)spark(x,y,true)};
   const trail=(x,y,gap)=>{const now=performance.now();if(now-lastSpark>gap){lastSpark=now;spark(x,y,false)}};
   const buzz=pattern=>{try{navigator.vibrate?.(pattern)}catch{}};
@@ -80,10 +77,13 @@ export default function RuptixFx(){
   const net={targets:[],burst(){},push(){}};
   const canvas=canvasRef.current,ctx=canvas?.getContext("2d");
   if(canvas&&ctx){
-   let w=0,h=0,dpr=1,pts=[],praf=0,visible=true;
+   let w=0,h=0,dpr=1,pts=[],stars=[],praf=0,visible=true;
    const resize=()=>{dpr=Math.min(2,devicePixelRatio||1);w=canvas.clientWidth;h=canvas.clientHeight;canvas.width=w*dpr;canvas.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
     const n=Math.round(Math.min(90,Math.max(34,w*h/16000)));
-    pts=Array.from({length:n},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,r:1+Math.random()*1.6}))};
+    pts=Array.from({length:n},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,r:1+Math.random()*1.6}));
+    // Estrelas que piscam, em três profundidades (rolam em velocidades diferentes).
+    stars=Array.from({length:Math.round(Math.min(240,Math.max(90,w*h/4200)))},()=>({x:Math.random()*w,y:Math.random()*h,r:.4+Math.random()*1.3,
+     z:[.04,.1,.18][Math.floor(Math.random()*3)],ph:Math.random()*Math.PI*2,sp:.6+Math.random()*1.8}))};
    resize();on(window,"resize",resize);
    // Empurra as partículas para longe de (x,y): ondas de choque e explosões.
    net.burst=(x,y,force,radius)=>{for(const p of pts){const dx=p.x-x,dy=p.y-y,d=Math.hypot(dx,dy)||1;if(d<radius){const k=force*(1-d/radius);p.vx+=dx/d*k;p.vy+=dy/d*k}}};
@@ -91,16 +91,20 @@ export default function RuptixFx(){
    net.push=(x,y,vx,vy,radius)=>{for(const p of pts){const d=Math.hypot(p.x-x,p.y-y);if(d<radius){const k=1-d/radius;p.vx+=vx*k;p.vy+=vy*k}}};
    const io=new IntersectionObserver(([e])=>{visible=e.isIntersecting});io.observe(canvas);cleanups.push(()=>io.disconnect());
    const draw=()=>{praf=requestAnimationFrame(draw);if(!visible||document.hidden)return;ctx.clearRect(0,0,w,h);const T=net.targets;
+    const now=performance.now()/1000,sy=scrollY;
+    for(const st of stars){const y=((st.y-sy*st.z)%h+h)%h,tw=.5+.5*Math.sin(now*st.sp+st.ph);
+     ctx.fillStyle=`rgba(63,74,99,${.08+tw*.32})`;ctx.beginPath();ctx.arc(st.x,y,st.r*(.75+tw*.35),0,Math.PI*2);ctx.fill();
+     if(st.r>1.4&&tw>.92){ctx.strokeStyle=`rgba(63,74,99,${(tw-.92)*3})`;ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(st.x-4,y);ctx.lineTo(st.x+4,y);ctx.moveTo(st.x,y-4);ctx.lineTo(st.x,y+4);ctx.stroke()}}
     for(const p of pts){for(const m of T){const dx=m.x-p.x,dy=m.y-p.y,dist=Math.hypot(dx,dy)||1;if(dist<180){p.vx+=dx/dist*.02;p.vy+=dy/dist*.02}}
      p.vx*=.975;p.vy*=.975;p.vx+=(Math.random()-.5)*.02;p.vy+=(Math.random()-.5)*.02;p.x+=p.vx;p.y+=p.vy;
      if(p.x<0||p.x>w)p.vx*=-1;if(p.y<0||p.y>h)p.vy*=-1;p.x=Math.max(0,Math.min(w,p.x));p.y=Math.max(0,Math.min(h,p.y))}
     for(let i=0;i<pts.length;i++){const a=pts[i];
      for(let j=i+1;j<pts.length;j++){const b=pts[j],d=Math.hypot(a.x-b.x,a.y-b.y);
-      if(d<130){ctx.strokeStyle=`rgba(107,76,255,${(1-d/130)*.22})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}}
+      if(d<130){ctx.strokeStyle=`rgba(63,74,99,${(1-d/130)*.22})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}}
      let near=false;
      for(const m of T){const md=Math.hypot(a.x-m.x,a.y-m.y);
-      if(md<190){near=true;ctx.strokeStyle=`rgba(34,180,238,${(1-md/190)*.45})`;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(m.x,m.y);ctx.stroke()}}
-     ctx.fillStyle=near?"rgba(34,180,238,.9)":"rgba(107,76,255,.55)";ctx.beginPath();ctx.arc(a.x,a.y,a.r,0,Math.PI*2);ctx.fill()}};
+      if(md<190){near=true;ctx.strokeStyle=`rgba(90,100,125,${(1-md/190)*.45})`;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(m.x,m.y);ctx.stroke()}}
+     ctx.fillStyle=near?"rgba(40,46,62,.85)":"rgba(63,74,99,.45)";ctx.beginPath();ctx.arc(a.x,a.y,a.r,0,Math.PI*2);ctx.fill()}};
    praf=requestAnimationFrame(draw);cleanups.push(()=>cancelAnimationFrame(praf));
   }
 
@@ -117,7 +121,7 @@ export default function RuptixFx(){
   const g={holdStart:0,startX:0,startY:0,lastX:0,lastY:0,lastT:0,vx:0,vy:0,moved:false,holdTimer:0,holding:false,orb:null,beam:null,lastTap:0,lastTapX:0,lastTapY:0};
   const fireworks=(x,y)=>{
    add("rx-ripple rx-ripple-xl",x,y);setTimeout(()=>add("rx-ripple rx-ripple-xl",x,y),130);setTimeout(()=>add("rx-ripple",x,y),260);
-   for(let i=0;i<28;i++){const a=i/28*Math.PI*2;spark(x,y,true,a,60+Math.random()*70,200+(i*13)%140)}
+   for(let i=0;i<28;i++){const a=i/28*Math.PI*2;spark(x,y,true,a,60+Math.random()*70)}
    net.burst(x,y,5,260);buzz([10,40,14]);
   };
   const shockwave=(x,y,power)=>{
