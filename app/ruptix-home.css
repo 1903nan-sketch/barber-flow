@@ -439,3 +439,69 @@ html:not(#rx) .rx.ruptix-site .rp-footer a,html:not(#rx) .rx.ruptix-site .rp-foo
   html:not(#rx) .rx.ruptix-site .rp-nav{border-radius:22px;padding:10px 14px!important}
 }
 .rx-end-card h2{font-size:clamp(30px,3.6vw,50px)}
+
+/* =====================================================================
+   Gestos de toque (celular)
+   ===================================================================== */
+.rx-ripple-xl{width:26px;height:26px;margin:-13px 0 0 -13px;border-width:3px;animation-duration:1.2s}
+/* Esfera de energia ao segurar o dedo */
+.rx-orb{
+  position:fixed;z-index:81;width:90px;height:90px;margin:-45px 0 0 -45px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 35% 30%,#fff 0,rgba(255,255,255,.9) 12%,rgba(139,109,255,.85) 38%,rgba(34,180,238,.55) 62%,rgba(34,180,238,0) 72%);
+  box-shadow:0 0 30px rgba(107,76,255,.6),0 0 70px rgba(34,180,238,.45);
+  animation:rx-orb-grow 1.4s cubic-bezier(.2,.8,.2,1) forwards,rx-orb-pulse .7s ease-in-out 1.4s infinite alternate;
+}
+.rx-orb::before,.rx-orb::after{content:"";position:absolute;inset:-14px;border-radius:50%;border:2px dashed rgba(107,76,255,.55);animation:rx-spin 2.2s linear infinite}
+.rx-orb::after{inset:-28px;border-color:rgba(34,180,238,.45);border-style:dotted;animation-duration:3.4s;animation-direction:reverse}
+@keyframes rx-orb-grow{from{transform:scale(.15);opacity:.4}to{transform:scale(1);opacity:1}}
+@keyframes rx-orb-pulse{to{transform:scale(1.12);filter:brightness(1.15) hue-rotate(25deg)}}
+/* Onda de choque ao soltar a esfera */
+.rx-shock{
+  position:fixed;z-index:80;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;pointer-events:none;
+  border:3px solid rgba(107,76,255,.8);box-shadow:0 0 40px rgba(107,76,255,.6),inset 0 0 30px rgba(34,180,238,.5);
+  background:radial-gradient(circle,rgba(255,255,255,.85) 0,rgba(139,109,255,.25) 40%,transparent 70%);
+  animation:rx-shock 1s cubic-bezier(.1,.7,.2,1) forwards;
+}
+@keyframes rx-shock{0%{transform:scale(.3);opacity:1}100%{transform:scale(calc(10 + var(--p,1) * 12));opacity:0}}
+/* Cometa ao deslizar rápido */
+.rx-comet{
+  position:fixed;z-index:80;height:6px;width:var(--len,160px);margin-top:-3px;border-radius:999px;pointer-events:none;transform-origin:100% 50%;
+  translate:calc(var(--len,160px) * -1) 0;rotate:var(--a,0rad);
+  background:linear-gradient(90deg,rgba(34,180,238,0),rgba(139,109,255,.7) 60%,#fff);
+  box-shadow:0 0 18px rgba(107,76,255,.7),0 0 36px rgba(34,180,238,.4);
+  animation:rx-comet .75s ease-out forwards;
+}
+.rx-comet::after{content:"";position:absolute;right:-7px;top:50%;width:16px;height:16px;margin-top:-8px;border-radius:50%;background:#fff;box-shadow:0 0 20px 6px rgba(139,109,255,.9)}
+@keyframes rx-comet{0%{opacity:1;scale:.4 1}35%{scale:1 1}100%{opacity:0;scale:1.2 .4}}
+/* Feixe de luz entre dois dedos */
+.rx-beam{
+  position:fixed;z-index:80;height:4px;margin-top:-2px;border-radius:999px;pointer-events:none;transform-origin:0 50%;
+  background:linear-gradient(90deg,hsl(var(--hue,250) 95% 65%),#fff 50%,hsl(calc(var(--hue,250) + 60) 95% 62%));
+  box-shadow:0 0 16px hsl(var(--hue,250) 95% 65% / .9),0 0 40px rgba(34,180,238,.5);
+  animation:rx-beam-flicker .18s steps(2) infinite;transition:opacity .3s ease;
+}
+.rx-beam::before,.rx-beam::after{content:"";position:absolute;top:50%;width:34px;height:34px;margin-top:-17px;border-radius:50%;
+  background:radial-gradient(circle,#fff 0,hsl(var(--hue,250) 95% 70% / .8) 35%,transparent 70%)}
+.rx-beam::before{left:-17px}.rx-beam::after{right:-17px}
+.rx-beam-out{opacity:0}
+@keyframes rx-beam-flicker{50%{filter:brightness(1.35)}}
+/* Cartão pressionado com o dedo */
+.rx-pressed{scale:.98}
+/* Paralaxe ao inclinar o aparelho */
+.rx-tilting .rx-aurora{transform:translate3d(calc(var(--tilt-x,0) * 26px),calc(var(--tilt-y,0) * 26px),0);transition:transform .2s linear}
+.rx-tilting .rx-grid{transform:translate3d(calc(var(--tilt-x,0) * -12px),calc(var(--tilt-y,0) * -12px),0)}
+.rx-tilting .rx-hero-stage,.rx-tilting .rp-product,.rx-tilting .rx-cards{translate:calc(var(--tilt-x,0) * 14px) calc(var(--tilt-y,0) * 10px)}
+.rx-tilting .rx-float-a{translate:calc(var(--tilt-x,0) * -18px) calc(var(--tilt-y,0) * -14px)}
+.rx-tilting .rx-float-b{translate:calc(var(--tilt-x,0) * 18px) calc(var(--tilt-y,0) * 14px)}
+/* Dica de gestos */
+.rx-hint{
+  position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));z-index:90;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);
+  padding:11px 16px;border-radius:999px;font:600 12.5px/1.35 Inter,system-ui,sans-serif;color:#0f1222;text-align:center;
+  background:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.8);box-shadow:0 12px 34px rgba(40,30,110,.18);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+  animation:rx-hint-in .5s cubic-bezier(.2,.8,.2,1) both;transition:opacity .45s ease,translate .45s ease;
+}
+.rx-hint b{color:#6b4cff;margin-right:4px}
+.rx-hint.out{opacity:0;translate:0 12px}
+@keyframes rx-hint-in{from{opacity:0;translate:0 16px}}
+@media(prefers-reduced-motion:reduce){.rx-orb,.rx-shock,.rx-comet,.rx-beam,.rx-hint{display:none!important}}
