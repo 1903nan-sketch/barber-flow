@@ -61,7 +61,7 @@ function NewMemberForm({tenant}){
 
   <label className="check-line" style={{marginTop:12}}>
    <input type="checkbox" checked={!starter&&provider} disabled={starter} onChange={e=>setProvider(e.target.checked)}/>
-   <span><strong>Atende clientes e aparece na agenda</strong><small style={{display:"block"}}>{starter?"O Starter não inclui agendamento.":provider?"Este perfil será um profissional agendável.":"Este perfil terá acesso ao sistema, mas não aparecerá para agendamento."}</small></span>
+   <span><strong>Trabalha em atendimentos?</strong><small style={{display:"block"}}>{starter?"O Starter não inclui agendamento.":provider?"Sim: pode ser vinculado a serviços e aparece como profissional no agendamento.":"Não: terá acesso ao sistema, mas não aparece na página pública nem na escolha de profissional."}</small></span>
   </label>
 
   <fieldset className="permissions"><legend>Permissões no sistema</legend>{permissions.map(([value,label])=><label key={value}><input type="checkbox" name="permissions" value={value} defaultChecked={starter?["clients","sales","reports"].includes(value):["agenda","booking","clients"].includes(value)}/>{label}</label>)}</fieldset>

@@ -2,6 +2,8 @@ import {timingSafeEqual} from "node:crypto";
 import {NextResponse} from "next/server";
 import {getEvolutionWebhookSecret,normalizeEvolutionState,sendEvolutionList,sendEvolutionText,setEvolutionWebhook,tenantIdFromEvolutionInstance} from "../../../../../lib/evolution";
 import {whatsappAdmin} from "../../../../../lib/whatsapp-server";
+import {ensureDepositCharge,loadDepositContext} from "../../../../../lib/deposits";
+import {loadAppointmentInfo} from "../../../../../lib/appointment-info";
 
 const DEFAULT_TZ="America/Sao_Paulo";
 const syncedWebhookInstances=new Set();
@@ -219,13 +221,13 @@ async function availableSlots(db,slug,unit,service,barbers,date){
 }
 async function findEmployee(db,tenantId,phone){
   const [{data:members},{data:professionals}]=await Promise.all([
-    db.from("memberships").select("tenant_id,user_id,name,role,active,whatsapp").eq("tenant_id",tenantId).eq("active",true),
+    db.from("memberships").select("tenant_id,user_id,name,role,permissions,active,whatsapp").eq("tenant_id",tenantId).eq("active",true),
     db.from("professionals").select("id,barbershop_id,unit_id,user_id,name,phone,active").eq("barbershop_id",tenantId).eq("active",true)
   ]);
   const matches=new Map();
   for(const m of members||[]){
     if(!samePhone(m.whatsapp,phone))continue;
-    matches.set("user:"+m.user_id,{user_id:m.user_id,name:m.name,role:m.role,unit_id:"",source:"membership"});
+    matches.set("user:"+m.user_id,{user_id:m.user_id,name:m.name,role:m.role,permissions:m.permissions||[],unit_id:"",source:"membership"});
   }
   for(const p of professionals||[]){
     if(!samePhone(p.phone,phone))continue;
@@ -297,6 +299,148 @@ function nextClientText(rows,tz){
     next.service_name+" · "+statusLabel(next.status);
 }
 
+async function shopAgenda(db,tenantId,date,tz){
+  const start=shiftDateKey(date,-1)+"T00:00:00.000Z",end=shiftDateKey(date,2)+"T00:00:00.000Z";
+  const {data,error}=await db.from("appointments").select("id,starts_at,status,client_id,service_id,barber_id")
+    .eq("tenant_id",tenantId).gte("starts_at",start).lt("starts_at",end).neq("status","cancelled").order("starts_at");
+  if(error)throw error;
+  const rows=(data||[]).filter(x=>dateKeyForInstant(x.starts_at,tz)===date);
+  const ids=k=>[...new Set(rows.map(x=>x[k]).filter(Boolean))];
+  const [c,s,b]=await Promise.all([
+    ids("client_id").length?db.from("clients").select("id,name").eq("tenant_id",tenantId).in("id",ids("client_id")):Promise.resolve({data:[]}),
+    ids("service_id").length?db.from("services").select("id,name").eq("tenant_id",tenantId).in("id",ids("service_id")):Promise.resolve({data:[]}),
+    ids("barber_id").length?db.from("barbers").select("id,name").eq("tenant_id",tenantId).in("id",ids("barber_id")):Promise.resolve({data:[]})
+  ]);
+  const name=(list,id,fallback)=>textLabel((list.data||[]).find(x=>x.id===id)?.name||fallback);
+  const label=new Date(date+"T12:00:00Z").toLocaleDateString("pt-BR",{timeZone:"UTC",day:"2-digit",month:"2-digit",year:"numeric"});
+  if(!rows.length)return "📅 *Agenda geral · "+label+"*\n\nNenhum atendimento marcado.";
+  const groups=new Map();
+  for(const x of rows){const k=name(b,x.barber_id,"Profissional");if(!groups.has(k))groups.set(k,[]);groups.get(k).push(x)}
+  return "📅 *Agenda geral · "+label+"*\n\n"+[...groups.entries()].map(([barber,list])=>
+    "👤 *"+barber+"*\n"+list.map(x=>fmtTime(x.starts_at,tz)+" — "+name(c,x.client_id,"Cliente")+" · "+name(s,x.service_id,"Atendimento")+" · "+statusLabel(x.status)).join("\n")
+  ).join("\n\n")+"\n\n_"+rows.length+" atendimento"+(rows.length===1?"":"s")+" no dia._";
+}
+
+const APPT_STATES=new Set(["appt_confirm","appt_cancel_confirm","appt_reschedule_date","appt_reschedule_slot"]);
+async function pendingAppointmentId(db,tenantId,phone){
+  const {data}=await db.from("appointment_notifications").select("appointment_id,phone")
+    .eq("tenant_id",tenantId).in("kind",["confirmation","reminder"]).eq("status","sent").is("response",null)
+    .gte("sent_at",new Date(Date.now()-8*86400000).toISOString()).order("sent_at",{ascending:false}).limit(25);
+  return (data||[]).find(x=>samePhone(x.phone,phone))?.appointment_id||null;
+}
+function rescheduleSlotOptions(d){
+  const slots=d.slots||[],page=Math.max(0,Number(d.slotPage||0)),start=page*9;
+  const options=slots.slice(start,start+9).map(x=>fmtTime(x,d.timezone));
+  if(page>0)options.push("Horários anteriores");
+  if(start+9<slots.length)options.push("Mais horários");
+  options.push("Falar com atendente");
+  return options;
+}
+// Respostas do cliente às mensagens automáticas: confirmar, reagendar (somente horários
+// realmente livres) ou cancelar. Retorna null quando a mensagem não é sobre isso.
+async function handleAppointmentFlow({db,tenantId,instance,phone,text,t,state,d}){
+  const inFlow=APPT_STATES.has(state);
+  const confirmWord=/\b(confirmar|confirmo|confirmado|confirmada|confirmar presenca)\b/.test(t)||(inFlow&&/^(1|sim|s|ok|vou|estarei)\b/.test(t));
+  const rescheduleWord=/\b(reagendar|remarcar|outro horario|mudar horario|trocar horario)\b/.test(t)||(state==="appt_confirm"&&/^2\b/.test(t));
+  const cancelWord=/\b(cancelar|desmarcar|cancela)\b/.test(t)||(state==="appt_confirm"&&/^3\b/.test(t));
+  let appointmentId=inFlow?d.appointment_id:null;
+  if(!inFlow){
+    // Durante um agendamento em andamento, "Confirmar" pertence ao fluxo de reserva.
+    if(state!=="start")return null;
+    if(!(confirmWord||rescheduleWord||cancelWord))return null;
+    appointmentId=await pendingAppointmentId(db,tenantId,phone);
+    if(!appointmentId)return null;
+  }
+  const info=await loadAppointmentInfo(db,tenantId,appointmentId);
+  const a=info?.appointment;
+  const keep={last_message_id:d.last_message_id};
+  if(!a||!["scheduled","present"].includes(a.status)||new Date(a.starts_at).getTime()<Date.now()){
+    await saveSession(db,tenantId,phone,"start",keep);
+    if(!inFlow)return null;
+    await reply(db,tenantId,instance,phone,"Esse agendamento não está mais ativo. Para marcar um novo horário, envie *MENU*.");
+    return {ok:true,appointment:"inactive"};
+  }
+  const tz=info.timezone,base={...keep,appointment_id:a.id,timezone:tz};
+  const action=async kind=>{const {error}=await db.rpc("server_client_appointment_action",{p_tenant:tenantId,p_appointment:a.id,p_action:kind,p_phone:phone});if(error)throw error};
+  const when=fmtDate(a.starts_at,tz)+" às "+fmtTime(a.starts_at,tz);
+  const askDate=async intro=>{
+    await saveSession(db,tenantId,phone,"appt_reschedule_date",base);
+    await replyChoice(db,tenantId,instance,phone,"📅 Escolha a nova data",[...dateChoiceOptions(tz),"Falar com atendente"],intro+"\n\nEnvie *HOJE*, *AMANHÃ* ou uma data como *25/09*.");
+    return {ok:true,reschedule:"date"};
+  };
+
+  if(state==="appt_cancel_confirm"){
+    if(/^(sim|s|1)\b/.test(t)||/\b(pode cancelar|sim cancelar|cancelar)\b/.test(t)){
+      await action("cancel");
+      await saveSession(db,tenantId,phone,"start",keep);
+      await reply(db,tenantId,instance,phone,"❌ *Agendamento cancelado*\n\n"+textLabel(info.services)+" · "+when+"\n\nSe quiser marcar outro horário, é só enviar *MENU*.");
+      return {ok:true,cancelled:true};
+    }
+    if(/^(nao|n|2|manter)\b/.test(t)||/\bmanter\b/.test(t)){
+      await saveSession(db,tenantId,phone,"start",keep);
+      await reply(db,tenantId,instance,phone,"👍 Combinado! Seu horário continua em *"+when+"*.");
+      return {ok:true,kept:true};
+    }
+    await replyChoice(db,tenantId,instance,phone,"Cancelar o agendamento?",["Sim, cancelar","Não, manter"],"Responda *SIM* para cancelar ou *NÃO* para manter o horário de "+when+".");
+    return {ok:true,cancel:"ask"};
+  }
+
+  if(state==="appt_reschedule_date"){
+    const date=parseRequestedDate(text,tz);
+    if(!date)return await askDate("*Não entendi a data.*");
+    const {data:rows,error}=await db.rpc("server_reschedule_slots",{p_tenant:tenantId,p_appointment:a.id,p_date:date});
+    const slots=(rows||[]).map(x=>x?.starts_at||x).filter(Boolean).slice(0,36);
+    if(error||!slots.length)return await askDate("⏰ *Sem horários livres em "+date.split("-").reverse().join("/")+"* com o mesmo profissional.");
+    const next={...base,date,slots,slotPage:0};
+    await saveSession(db,tenantId,phone,"appt_reschedule_slot",next);
+    await replyChoice(db,tenantId,instance,phone,"⏰ Horários livres · "+date.split("-").reverse().join("/"),rescheduleSlotOptions(next),
+      "⏰ *Horários livres · "+date.split("-").reverse().join("/")+"*\n\n"+slots.map((x,i)=>"*"+(i+1)+" — "+fmtTime(x,tz)+"*").join("\n")+"\n\n_Envie o número do horário._");
+    return {ok:true,reschedule:"slot"};
+  }
+
+  if(state==="appt_reschedule_slot"){
+    if(/\bmais horarios\b/.test(t)||/\bhorarios anteriores\b/.test(t)){
+      const max=Math.max(0,Math.ceil((d.slots||[]).length/9)-1),page=Math.min(max,Math.max(0,Number(d.slotPage||0)+(/\bmais\b/.test(t)?1:-1)));
+      const next={...d,slotPage:page};
+      await saveSession(db,tenantId,phone,state,next);
+      await replyChoice(db,tenantId,instance,phone,"⏰ Horários livres",rescheduleSlotOptions(next),"Envie o horário que prefere.");
+      return {ok:true,reschedule:"page"};
+    }
+    let slot=pick((d.slots||[]).map(x=>({starts_at:x})),text,x=>fmtTime(x.starts_at,tz))?.starts_at;
+    if(!slot){
+      const hm=t.match(/\b(\d{1,2})(?::|h)(\d{2})?\b/);
+      if(hm){const wanted=String(Number(hm[1])).padStart(2,"0")+":"+String(Number(hm[2]||0)).padStart(2,"0");slot=(d.slots||[]).find(x=>fmtTime(x,tz)===wanted)}
+    }
+    if(!slot){
+      await replyChoice(db,tenantId,instance,phone,"⏰ Escolha um horário",rescheduleSlotOptions(d),"Escolha um dos horários da lista ou envie outra data.");
+      return {ok:true,reschedule:"retry"};
+    }
+    const {error}=await db.rpc("server_confirm_reschedule",{p_tenant:tenantId,p_appointment:a.id,p_starts_at:slot});
+    if(error)return await askDate("⏰ *Esse horário acabou de ser ocupado.*");
+    await action("rescheduled");
+    await saveSession(db,tenantId,phone,"start",keep);
+    await reply(db,tenantId,instance,phone,"✅ *Horário remarcado!*\n\n✂️ "+textLabel(info.services)+"\n👤 "+textLabel(info.barber?.name||"")+"\n📅 "+fmtDate(slot,tz)+" às "+fmtTime(slot,tz)+"\n📍 "+textLabel(info.unit?.name||"")+"\n\nTe esperamos!");
+    return {ok:true,rescheduled:true};
+  }
+
+  if(confirmWord&&!cancelWord){
+    await action("confirm");
+    await saveSession(db,tenantId,phone,"start",keep);
+    await reply(db,tenantId,instance,phone,"✅ *Presença confirmada!*\n\n"+textLabel(info.services)+" · "+when+"\n\nObrigado, até lá!");
+    return {ok:true,confirmed:true};
+  }
+  if(rescheduleWord){
+    await action("reschedule_requested");
+    return await askDate("📅 *Vamos remarcar.* Seu horário atual é "+when+" e continua reservado até você escolher outro.");
+  }
+  if(cancelWord){
+    await saveSession(db,tenantId,phone,"appt_cancel_confirm",base);
+    await replyChoice(db,tenantId,instance,phone,"Cancelar o agendamento?",["Sim, cancelar","Não, manter"],"Tem certeza que deseja cancelar o horário de *"+when+"*?\n\nResponda *SIM* para cancelar ou *NÃO* para manter.");
+    return {ok:true,cancel:"ask"};
+  }
+  return null;
+}
+
 export async function POST(req){
   if(!(await safeSecret(req)))return NextResponse.json({error:"Webhook não autorizado."},{status:401});
   let body;try{body=await req.json()}catch{return NextResponse.json({error:"JSON inválido."},{status:400})}
@@ -357,6 +501,18 @@ export async function POST(req){
     if(employee.ambiguous){
       await reply(db,tenantId,instance,phone,"👤 *Não consegui abrir sua agenda*\n\nEste WhatsApp aparece em mais de um cadastro ativo. Revise os números na área *Equipe* e tente novamente.");
       return NextResponse.json({ok:true,employee:true,ambiguous:true});
+    }
+    const canSeeShop=employee.employee?.role==="owner"||(employee.employee?.permissions||[]).includes("agenda");
+    const tzShop=DEFAULT_TZ,tShop=clean(text);
+    if(canSeeShop&&(employee.unlinked||/\b(geral|todos|barbearia)\b/.test(tShop))){
+      try{
+        const date=parseDateText(text,tzShop,{allowPast:true})||localDate(0,tzShop);
+        await reply(db,tenantId,instance,phone,await shopAgenda(db,tenantId,date,tzShop));
+        return NextResponse.json({ok:true,employee:true,shop:true,date});
+      }catch{
+        await reply(db,tenantId,instance,phone,"Não consegui carregar a agenda agora. Tente novamente daqui a pouco.");
+        return NextResponse.json({ok:true,employee:true,agenda_error:true});
+      }
     }
     if(employee.unlinked){
       await reply(db,tenantId,instance,phone,"👤 *Seu número foi reconhecido*\n\nFalta apenas vincular seu usuário a uma agenda ativa. Faça o ajuste em *Equipe* para consultar seus horários pelo WhatsApp.");
@@ -441,6 +597,12 @@ export async function POST(req){
       "Responda *CONFIRMAR* para aceitar o novo horário ou *MANTER* para continuar com o horário atual."
     );
     return NextResponse.json({ok:true,reschedule:true,pending:true});
+  }
+
+  if(state!=="human"){
+    const handled=await handleAppointmentFlow({db,tenantId,instance,phone,text,t,state,d});
+    if(handled)return NextResponse.json(handled);
+    if(APPT_STATES.has(state)){state="start";d={last_message_id:d.last_message_id}}
   }
 
   const wantsCancelOrReschedule=/\b(cancelar|cancelamento|desmarcar|remarcar|remarcacao)\b/.test(t);
@@ -729,6 +891,26 @@ export async function POST(req){
       state="date";d={...d,slots:[],slot:null};await saveSession(db,tenantId,phone,state,d);
       await reply(db,tenantId,instance,phone,"⏰ *Esse horário acabou de ser reservado*\n\nEnvie outra data e eu mostro as próximas opções disponíveis.");
       return NextResponse.json({ok:true,booking:false});
+    }
+    if(confirmation?.deposit_required){
+      await saveSession(db,tenantId,phone,"start",{last_message_id:d.last_message_id});
+      const link=origin+"/agendar/"+tenant.slug+"/sinal/"+confirmation.id;
+      let pix="";
+      try{
+        const ctx=await loadDepositContext(db,confirmation.id,tenant.slug);
+        const result=ctx?await ensureDepositCharge(db,ctx):null;
+        if(result&&!result.needs_document)pix=result.ctx?.deposit?.pix_payload||"";
+      }catch(depositError){console.error("bot deposit",depositError?.message||depositError)}
+      const minutes=Math.max(1,Math.round((new Date(confirmation.hold_expires_at).getTime()-Date.now())/60000));
+      await reply(db,tenantId,instance,phone,
+        "⏳ *Horário reservado!*\n\n"+
+        "*"+textLabel(d.service.name)+"* com "+textLabel(d.slot.barber_name)+"\n"+
+        fmtDate(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+" · "+fmtTime(d.slot.starts_at,d.unit?.timezone||DEFAULT_TZ)+"\n\n"+
+        "Para confirmar, pague o sinal de *"+money(confirmation.deposit_cents)+"* em até *"+minutes+" minutos*. Depois desse prazo o horário é liberado.\n\n"+
+        (pix?"Use o *PIX Copia e Cola* da próxima mensagem ou pague pelo link:\n":"Pague pelo link:\n")+link
+      );
+      if(pix)await reply(db,tenantId,instance,phone,pix);
+      return NextResponse.json({ok:true,booking:true,deposit:true,confirmation});
     }
     await saveSession(db,tenantId,phone,"start",{last_message_id:d.last_message_id});
     await reply(db,tenantId,instance,phone,

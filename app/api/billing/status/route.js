@@ -13,7 +13,13 @@ export async function GET(request){
    try{pix=await getSubscriptionPix(ctx.tenant.asaas_subscription_id)}
    catch(err){pixError=err.message||"Não foi possível carregar o PIX atual."}
   }
+  const {data:history}=await ctx.admin.from("billing_payments")
+   .select("provider,state,method,billing_type,value_cents,due_date,paid_at,invoice_url,created_at")
+   .eq("tenant_id",ctx.tenant.id).order("created_at",{ascending:false}).limit(12);
   return NextResponse.json({
+   history:history||[],
+   trial_ends_at:ctx.tenant.trial_ends_at||null,
+   grace_days:ctx.tenant.grace_days,
    configured:asaasConfigured(),
    tenant_id:ctx.tenant.id,
    amount_cents:amountCents,

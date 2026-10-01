@@ -1,7 +1,6 @@
 import {timingSafeEqual} from "crypto";
 import {NextResponse} from "next/server";
 import {serverSupabase} from "../../../../lib/billing-server";
-import {addMonth} from "../../../../lib/asaas";
 
 function validToken(actual,expected){
  if(!actual||!expected)return false;
@@ -30,6 +29,16 @@ async function locateTenant(admin,body){
   ||null;
 }
 
+const METHOD={PIX:"pix",CREDIT_CARD:"credit_card",BOLETO:"boleto",UNDEFINED:""};
+function paymentState(event,status){
+ const e=String(event||""),st=String(status||"").toUpperCase();
+ if(["PAYMENT_RECEIVED","PAYMENT_CONFIRMED","PAYMENT_RECEIVED_IN_CASH"].includes(e)||["RECEIVED","CONFIRMED","RECEIVED_IN_CASH"].includes(st))return "paid";
+ if(e==="PAYMENT_OVERDUE"||st==="OVERDUE")return "overdue";
+ if(e.includes("REFUND")||e.includes("CHARGEBACK")||st.includes("REFUND"))return "refunded";
+ if(e==="PAYMENT_DELETED"||st==="DELETED")return "cancelled";
+ return "pending";
+}
+
 export async function POST(request){
  const expected=process.env.ASAAS_WEBHOOK_TOKEN||"";
  if(expected.length<32)return NextResponse.json({error:"Webhook Asaas não configurado."},{status:503});
@@ -45,7 +54,7 @@ export async function POST(request){
   if(known?.processed_at)return NextResponse.json({ok:true,duplicate:true});
   if(!known){
    const {error:insertError}=await admin.from("billing_webhook_events").insert({
-    event_id:eventId,event_type:event,resource_id:body.payment?.id||body.subscription?.id||body.checkout?.id||null
+    event_id:eventId,event_type:event,resource_id:body.payment?.id||body.subscription?.id||body.checkout?.id||null,payload:body
    });
    if(insertError&&insertError.code!=="23505")throw insertError;
   }
@@ -77,33 +86,26 @@ export async function POST(request){
    if(payment.customer)patch.asaas_customer_id=payment.customer;
    if(payment.billingType)patch.billing_method=payment.billingType;
    patch.asaas_last_payment_id=payment.id;
-   const paidAt=payment.paymentDate||payment.confirmedDate||payment.clientPaymentDate||null;
-   await admin.from("billing_payments").upsert({
-    tenant_id:tenant.id,
-    provider:"asaas",
-    provider_payment_id:payment.id,
-    provider_subscription_id:payment.subscription||null,
-    status:payment.status||event,
-    billing_type:payment.billingType||"",
-    value_cents:Math.max(0,Math.round(Number(payment.value||0)*100)),
-    due_date:payment.dueDate||null,
-    paid_at:paidAt?new Date(paidAt).toISOString():null,
-    invoice_url:payment.invoiceUrl||null,
-    bank_slip_url:payment.bankSlipUrl||null,
-    updated_at:new Date().toISOString()
-   },{onConflict:"provider,provider_payment_id"});
-
-   if(event==="PAYMENT_RECEIVED"||event==="PAYMENT_CONFIRMED"){
-    patch.status="active";
-    patch.last_paid_at=new Date().toISOString();
-    if(payment.dueDate)patch.billing_due_date=addMonth(String(payment.dueDate).slice(0,10));
-   }else if(event==="PAYMENT_OVERDUE"){
-    patch.status="overdue";
-    if(payment.dueDate)patch.billing_due_date=String(payment.dueDate).slice(0,10);
-   }
   }
 
   await admin.from("tenants").update(patch).eq("id",tenant.id);
+
+  // Registro normalizado e independente do gateway: ativa a assinatura, atualiza o
+  // vencimento e grava o histórico quando o pagamento é confirmado.
+  if(event.startsWith("PAYMENT_")&&payment.id){
+   const paidAt=payment.paymentDate||payment.confirmedDate||payment.clientPaymentDate||null;
+   const {error:recordError}=await admin.rpc("billing_record_payment",{p:{
+    tenant_id:tenant.id,provider:"asaas",external_id:payment.id,subscription_id:payment.subscription||null,
+    state:paymentState(event,payment.status),raw_status:payment.status||event,billing_type:payment.billingType||"",
+    method:METHOD[payment.billingType]||"",amount_cents:Math.max(0,Math.round(Number(payment.value||0)*100)),
+    due_date:payment.dueDate||null,paid_at:paidAt?new Date(paidAt).toISOString():null,
+    invoice_url:payment.invoiceUrl||null,bank_slip_url:payment.bankSlipUrl||null,
+    external_reference:payment.externalReference||null,kind:"subscription",
+    raw:{event,status:payment.status,id:payment.id,netValue:payment.netValue}
+   }});
+   if(recordError)throw recordError;
+  }
+
   await admin.rpc("sync_tenant_billing_status",{p_tenant:tenant.id});
   await admin.from("billing_webhook_events").update({tenant_id:tenant.id,processed_at:new Date().toISOString()}).eq("event_id",eventId);
   return NextResponse.json({ok:true});

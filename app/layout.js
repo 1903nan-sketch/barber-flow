@@ -4,7 +4,9 @@ import "./admin.css";
 import "./public-booking.css";
 import "./settings.css";
 import "./sidebar-motion.css";
+import "./growth.css";
 import GlobalNotice from "./_components/GlobalNotice";
+import AcquisitionTracker from "./_components/AcquisitionTracker";
 
 export const metadata={
  title:"Ruptix | BarberTix",
@@ -21,5 +23,5 @@ export const metadata={
 export const viewport={themeColor:"#050505"};
 
 export default function RootLayout({children}){
- return <html lang="pt-BR"><body>{children}<GlobalNotice/></body></html>
+ return <html lang="pt-BR"><body>{children}<GlobalNotice/><AcquisitionTracker/></body></html>
 }

@@ -4,6 +4,7 @@ import QRCode from "qrcode";
 import ModuleShell from "../_components/ModuleShell";
 import {Check,CircleDollarSign,Copy,CreditCard,RefreshCw,ShieldCheck} from "lucide-react";
 import {supabase} from "../../../lib/supabase";
+import {statusLabel,subscriptionInfo} from "../../../lib/plans";
 
 const FALLBACK_PIX_KEY="sonorag4@hotmail.com";
 const field=(id,v)=>id+String(v.length).padStart(2,"0")+v;
@@ -93,7 +94,60 @@ function BillingContent({workspace}){
     </>}
    </div>
   </section>
+  <PlanPicker tenant={tenant} onChanged={()=>window.location.reload()}/>
+  <BillingHistory items={info?.history||[]}/>
  </div>
+}
+
+const STATE_LABEL={paid:["Pago","green"],pending:["Em aberto","amber"],overdue:["Vencido","red"],cancelled:["Cancelado","gray"],refunded:["Estornado","gray"]};
+const FEATURES={
+ "Starter":["Sistema interno completo","Proprietário + 1 perfil","Vendas, estoque, financeiro e comissões","Sem agendamento público","Sem robô de WhatsApp"],
+ "Pro":["Todos os recursos","Proprietário + até 10 perfis","Agendamento público","Confirmações e lembretes automáticos","Robô de WhatsApp e campanhas"],
+ "Pro + Filiais":["Tudo do Pro","Múltiplas unidades","R$ 49,90 por unidade adicional"]
+};
+
+function PlanPicker({tenant,onChanged}){
+ const [plans,setPlans]=useState([]),[busy,setBusy]=useState(""),[error,setError]=useState("");
+ const info=subscriptionInfo(tenant);
+ useEffect(()=>{supabase.from("plans").select("id,name,monthly_cents,extra_unit_cents,sort_order,public_signup").eq("public_signup",true).order("sort_order").then(({data})=>setPlans(data||[]))},[]);
+ async function choose(plan){
+  if(!confirm(`Mudar para o plano ${plan.name} (${money(plan.monthly_cents)}/mês)?`))return;
+  setBusy(plan.id);setError("");
+  try{
+   const token=await accessToken(),r=await fetch("/api/billing/plan",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+token},body:JSON.stringify({tenant_id:tenant.id,plan_id:plan.id})}),j=await r.json();
+   if(!r.ok)throw new Error(j.error||"Não foi possível trocar o plano.");
+   onChanged();
+  }catch(e){setError(e.message)}finally{setBusy("")}
+ }
+ return <section className="gx-card gx-stack" style={{marginTop:18}}>
+  <div className="gx-between"><div><span className="gx-eyebrow">Planos</span><h2>{info.inTrial?"Escolha o plano para quando o teste acabar":"Seu plano"}</h2>
+   <p>Status: <b style={{color:"#fff"}}>{statusLabel[tenant?.status]||tenant?.status}</b>{info.inTrial&&info.trialDaysLeft!==null?` · teste grátis termina em ${info.trialDaysLeft} ${info.trialDaysLeft===1?"dia":"dias"}`:""}{info.due&&!info.inTrial?` · vencimento ${info.due.toLocaleDateString("pt-BR")}`:""}</p></div></div>
+  {error&&<div className="gx-alert error">{error}</div>}
+  <div className="gx-plans">{plans.map(p=>{const current=p.id===tenant?.plan_id;return <div className={"gx-plan "+(current?"current":"")} key={p.id}>
+   <div className="gx-between"><b>{p.name}</b>{current&&<span className="gx-badge green">Plano atual</span>}</div>
+   <strong>{money(p.monthly_cents)}<small>/mês</small></strong>
+   <ul>{(FEATURES[p.name]||[]).map(f=><li key={f}>{f}</li>)}</ul>
+   {!current&&<button type="button" className="gx-btn block" disabled={Boolean(busy)} onClick={()=>choose(p)}>{busy===p.id?"Alterando...":(p.monthly_cents>(tenant?.plans?.monthly_cents||0)?"Fazer upgrade":"Mudar para este plano")}</button>}
+  </div>})}</div>
+  <p>Após escolher o plano, ative o pagamento acima (cartão recorrente ou PIX mensal). Pagamentos confirmados liberam o acesso automaticamente.</p>
+ </section>;
+}
+
+function BillingHistory({items}){
+ if(!items.length)return null;
+ return <section className="gx-card gx-stack" style={{marginTop:18}}>
+  <div><span className="gx-eyebrow">Histórico</span><h2>Cobranças e pagamentos</h2></div>
+  <div className="gx-table-wrap"><table className="gx-table cards"><thead><tr><th>Vencimento</th><th>Status</th><th>Forma</th><th className="num">Valor</th><th>Pago em</th><th></th></tr></thead><tbody>
+   {items.map((x,i)=>{const [label,tone]=STATE_LABEL[x.state]||[x.state,"gray"];return <tr key={i}>
+    <td data-label="Vencimento">{ptDate(x.due_date)}</td>
+    <td data-label="Status"><span className={"gx-badge "+tone}>{label}</span></td>
+    <td data-label="Forma">{x.method==="manual"?"Baixa manual":x.billing_type==="CREDIT_CARD"?"Cartão":x.billing_type==="PIX"?"PIX":x.billing_type||x.method||"—"}</td>
+    <td data-label="Valor" className="num">{money(x.value_cents)}</td>
+    <td data-label="Pago em">{x.paid_at?new Date(x.paid_at).toLocaleDateString("pt-BR"):"—"}</td>
+    <td data-label="">{x.invoice_url&&x.state!=="paid"?<a className="gx-btn small" href={x.invoice_url} target="_blank" rel="noreferrer">Pagar</a>:null}</td>
+   </tr>})}
+  </tbody></table></div>
+ </section>;
 }
 
 export default function Mensalidade(){
