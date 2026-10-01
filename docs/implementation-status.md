@@ -2,6 +2,11 @@
 
 ## Delivered in this iteration
 
+- Self-service onboarding: authenticated owners can create a trial tenant, choose a commercial plan and slug, create the initial unit, owner professional, service and weekly schedule without master-panel intervention. Provisioning is atomic, idempotent and tenant-scoped.
+- Validation pipeline: ESLint and JavaScript/TypeScript compiler scripts are now explicit; production builds no longer suppress lint or type errors through Next.js configuration.
+- Billing safety: removed the hard-coded fallback PIX recipient. When Asaas is unavailable, the UI now reports that online billing is not configured instead of generating an untracked payment.
+- WhatsApp: fixed the year rollover mutation used when interpreting customer dates and aligned interactive-message branding with BarberTix.
+
 - Inventory: per-unit product catalog; SKU, supplier, category, cost, price, minimum quantity, active state and product commission rate.
 - Audited stock entry, exit, loss and counted-balance adjustment. Negative quantities and unauthorized tenant access are rejected. Requests use idempotency keys.
 - Atomic product sale with stock deduction and existing quick-sales financial records. Cancellation restores stock exactly once. Original cost, price and commission percentage are retained.
@@ -22,6 +27,7 @@ All fixtures run inside a transaction and roll back. No real customer bookings o
 - `tests/finance-regression.sql`: 19 assertions.
 - `tests/orders-regression.sql`: 30 assertions.
 - `tests/app-flows-regression.sql`: 40 assertions — public multi-service booking, service editing/deactivation, quick-sale cart, client account settlement, appointment status flow, weekly schedule and owner sale corrections (140 total across five suites).
+- `tests/onboarding-regression.sql`: 10 assertions — atomic provisioning, idempotency, slug collision and cross-tenant isolation.
 - 2026-09-30: all 140 assertions pass against a schema-only copy of production (no customer data). The four original suites were updated for the `auto_link_new_service_to_barbers` trigger, which now creates barber/service links automatically.
 - Next.js production build succeeds after merging current upstream WhatsApp and agenda changes.
 - Authenticated UI workflows and real mobile-device verification remain outstanding; database tests and a successful build are not substitutes for those checks.

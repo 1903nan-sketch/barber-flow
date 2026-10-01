@@ -85,7 +85,8 @@ function parseDateText(text,tz=DEFAULT_TZ,{allowPast=false}={}){
   const m=t.match(/\b(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?\b/);
   if(!m)return "";
   const now=new Date(new Date().toLocaleString("en-US",{timeZone:tz||DEFAULT_TZ}));
-  const y=m[3]?Number(m[3].length===2?"20"+m[3]:m[3]):now.getFullYear(),mo=Number(m[2]),day=Number(m[1]);
+  let y=m[3]?Number(m[3].length===2?"20"+m[3]:m[3]):now.getFullYear();
+  const mo=Number(m[2]),day=Number(m[1]);
   const d=new Date(Date.UTC(y,mo-1,day));
   if(d.getUTCFullYear()!==y||d.getUTCMonth()!==mo-1||d.getUTCDate()!==day)return "";
   let out=y+"-"+String(mo).padStart(2,"0")+"-"+String(day).padStart(2,"0");

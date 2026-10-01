@@ -22,6 +22,7 @@ export default function LoginPage(){
    const result=mode==='signup'?await supabase.auth.signUp({email,password}):await supabase.auth.signInWithPassword({email,password});
    if(result.error)throw result.error;
    if(mode==='signup'&&!result.data.session){setMessage('Conta criada. Confirme seu e-mail para entrar.');return}
+   if(mode==='signup'){router.replace('/onboarding');router.refresh();return}
    await goToPanel(result.data.user?.id||result.data.session?.user?.id);
   }catch(e){const text=e?.message||'';setError(text==='Invalid login credentials'?'E-mail, usuário ou senha incorretos.':text==='Email not confirmed'?'Confirme seu e-mail antes de entrar.':/fetch|network/i.test(text)?'Não foi possível conectar. Confira sua internet e tente novamente.':text||'Não foi possível concluir. Tente novamente.')}finally{pending.current=false;setLoading(false)}
  }
