@@ -43,3 +43,11 @@ All fixtures run inside a transaction and roll back. No real customer bookings o
 - Instagram and WhatsApp integrations need their own live-provider validation; sending customer messages is outside these regression tests.
 
 Do not treat this list as a claim that the full commercial SaaS scope is complete.
+
+## Delivered 2026-10-02
+
+- Commission report (`/dashboard/comissoes`) per professional and period: appointments, order items and quick sales; CSV/print. Public bookings now store the service commission (previously 0); quick-sale cart stores `commission_cents`.
+- Cash register (`/dashboard/caixa`): open with starting change, withdrawals/deposits with reason, live totals by payment method, expected cash, close with counted amount and difference, history. One open register per unit; writes only through RPCs.
+- Security step 1: username login via `staff_login_email()`; workspace queries no longer load owner/manager documents; master admin reads them via `admin_tenant_documents()`.
+- Pending: apply `20261002140000_private_tenant_documents_step2.sql` once the step-1 frontend is live (removes anonymous read of `staff_logins` and member access to owner/manager documents).
+- Validation: 180 assertions across eight SQL suites pass on a schema-only copy of production.
