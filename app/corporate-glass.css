@@ -1,0 +1,71 @@
+/* Corporate theme + frosted glass panels. Loaded last so it wins over the legacy layers. */
+:root{
+ --corp-navy:#0a1424;
+ --corp-blue:#2f6fe0;
+ --corp-blue-strong:#1f55b8;
+ --corp-gold:#c9a54a;
+ --glass-bg:linear-gradient(150deg,rgba(26,38,58,.58),rgba(12,20,34,.46));
+ --glass-bg-strong:linear-gradient(150deg,rgba(24,36,56,.82),rgba(11,19,32,.78));
+ --glass-border:rgba(160,190,235,.14);
+ --glass-highlight:inset 0 1px 0 rgba(255,255,255,.07);
+ --glass-shadow:0 18px 44px rgba(2,8,20,.38);
+ --glass-blur:blur(20px) saturate(150%);
+}
+
+/* Backdrop: soft navy/blue/gold glows so the frosted panels have something to blur. */
+.dashboard-shell,.admin-layout,.admin-layout .admin-content{background-color:#060c17!important}
+.dashboard-shell .content,.admin-layout .admin-content.admin-content{
+ background:
+  radial-gradient(900px 520px at 85% -8%,rgba(47,111,224,.22),transparent 60%),
+  radial-gradient(700px 480px at 8% 35%,rgba(31,85,184,.16),transparent 62%),
+  radial-gradient(620px 420px at 70% 95%,rgba(201,165,74,.08),transparent 60%),
+  linear-gradient(180deg,#07101e,#060c17)!important;
+ background-attachment:fixed!important;
+}
+
+/* Sidebar */
+.dashboard-shell .sidebar,.admin-layout .admin-sidebar{
+ background:linear-gradient(180deg,rgba(13,22,38,.78),rgba(7,13,24,.72))!important;
+ -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+ border-right:1px solid var(--glass-border)!important;
+}
+
+/* Panels */
+.dashboard-shell :is(.box,.stat,.metric-card,.inventory-card,.social-card,.upgrade-card,.profile-card,.monthly-card,.agenda-panel,.premium-panel,.pix-box,.network-box,.upload-box,.dash-welcome,.report-cards>*,.finance-cards>*),
+.admin-layout .admin-content :is(.box,.admin-register-head,.admin-register-section,.report-lock,.admin-stats article,.data-list>article){
+ background:var(--glass-bg)!important;
+ -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+ border:1px solid var(--glass-border)!important;
+ box-shadow:var(--glass-highlight),var(--glass-shadow)!important;
+}
+.dashboard-shell .dash-welcome{border-radius:20px;padding:24px 26px}
+.dashboard-shell .stat:hover{border-color:rgba(120,165,240,.32)!important}
+
+/* Popovers and modals: more opaque glass for readability */
+.dashboard-shell .workspace-menu,
+:is(.checkout-modal,.quick-sale-modal,.inventory-modal,.reschedule-modal,.client-edit-modal,.client-account-modal){
+ background:var(--glass-bg-strong)!important;
+ -webkit-backdrop-filter:blur(26px) saturate(160%);backdrop-filter:blur(26px) saturate(160%);
+ border:1px solid var(--glass-border)!important;
+ box-shadow:var(--glass-highlight),0 30px 70px rgba(2,8,20,.55)!important;
+}
+.checkout-backdrop{background:rgba(4,10,20,.55)!important;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+
+/* Highlight card */
+.dashboard-shell .sell-hero{
+ background:
+  radial-gradient(circle at 92% 10%,rgba(255,255,255,.14),transparent 30%),
+  linear-gradient(120deg,rgba(24,64,140,.92),rgba(47,111,224,.86))!important;
+ -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+ border:1px solid rgba(150,190,255,.22)!important;
+ box-shadow:var(--glass-highlight),0 18px 44px rgba(16,50,120,.35)!important;
+}
+
+/* Corporate touches: primary buttons in solid blue, gold eyebrow labels */
+.dashboard-shell .primary,.admin-layout .admin-content .primary{background:linear-gradient(180deg,var(--corp-blue),var(--corp-blue-strong))!important;color:#fff!important;border:1px solid rgba(150,190,255,.25)!important;box-shadow:0 8px 22px rgba(31,85,184,.35)!important}
+.dashboard-shell .content .topbar .eyebrow,.dashboard-shell .dash-welcome>div:first-child>span,.admin-layout .admin-content .eyebrow{color:var(--corp-gold)!important;letter-spacing:.14em}
+
+/* Browsers without backdrop-filter: fall back to solid panels */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+ .dashboard-shell :is(.box,.stat,.metric-card,.dash-welcome),.dashboard-shell .sidebar,.admin-layout .box{background:#0f1a2b!important}
+}

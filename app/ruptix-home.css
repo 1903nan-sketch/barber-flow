@@ -493,6 +493,6 @@ html:not(#rx) .rx.ruptix-site .rp-footer a,html:not(#rx) .rx.ruptix-site .rp-foo
   -webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
   animation:rx-hint-in .5s cubic-bezier(.2,.8,.2,1) both;transition:opacity .45s ease,translate .45s ease;
 }
-.rx-hint b{color:#6b4cff;margin-right:4px}
+.rx-hint b{color:#2b74f1;margin-right:4px}
 .rx-hint.out{opacity:0;translate:0 12px}
 @keyframes rx-hint-in{from{opacity:0;translate:0 16px}}
