@@ -97,7 +97,7 @@ export async function POST(request){
     provider:"asaas",
     provider_payment_id:payment.id,
     provider_subscription_id:payment.subscription||null,
-    status:payment.status||event,
+    status:event==="PAYMENT_DELETED"?"DELETED":event==="PAYMENT_REFUNDED"?"REFUNDED":(payment.status||event),
     billing_type:payment.billingType||"",
     value_cents:Math.max(0,Math.round(Number(payment.value||0)*100)),
     due_date:payment.dueDate||null,
