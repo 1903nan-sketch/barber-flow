@@ -15,6 +15,19 @@ export async function POST(request){
   const due=effectiveDueDate(ctx.tenant.billing_due_date);
   const currentMethod=String(ctx.tenant.billing_method||"").toUpperCase();
 
+  // Recurring card checkout requires the customer's address on Asaas.
+  // Checked before any subscription is cancelled when switching from Pix.
+  const addr=body.address||null,needsCardCheckout=method==="CREDIT_CARD"&&!(ctx.tenant.asaas_subscription_id&&currentMethod==="CREDIT_CARD");
+  if(needsCardCheckout&&addr){
+   const postalCode=String(addr.postalCode||"").replace(/\D/g,""),address=String(addr.address||"").trim(),addressNumber=String(addr.addressNumber||"").trim(),province=String(addr.province||"").trim();
+   if(postalCode.length!==8||!address||!addressNumber||!province)return NextResponse.json({error:"Preencha CEP, rua, número e bairro.",code:"address_required"},{status:400});
+   await asaasRequest("/customers/"+encodeURIComponent(customer),{method:"PUT",body:{postalCode,address,addressNumber,complement:String(addr.complement||"").trim()||undefined,province}});
+  }else if(needsCardCheckout){
+   const c=await asaasRequest("/customers/"+encodeURIComponent(customer));
+   if(!c?.postalCode||!c?.address||!c?.addressNumber||!c?.province)return NextResponse.json({error:"Para pagar com cartão, o Asaas pede o endereço do responsável.",code:"address_required"},{status:400});
+  }
+
+
   // Switching method: cancel the old subscription (Asaas removes its pending charges;
   // paid ones stay) and continue below to create the new one.
   if(ctx.tenant.asaas_subscription_id&&currentMethod!==method){

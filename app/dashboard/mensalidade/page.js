@@ -29,7 +29,7 @@ function PixBox({pix}){
 }
 
 function BillingContent({workspace}){
- const [info,setInfo]=useState(null),[loading,setLoading]=useState(true),[busy,setBusy]=useState(""),[error,setError]=useState(""),[message,setMessage]=useState(""),[taxId,setTaxId]=useState("");
+ const [info,setInfo]=useState(null),[loading,setLoading]=useState(true),[busy,setBusy]=useState(""),[error,setError]=useState(""),[message,setMessage]=useState(""),[taxId,setTaxId]=useState(""),[addr,setAddr]=useState(null);
  const tenant=workspace.tenant;
  const fallbackAmount=useMemo(()=>{
   const base=tenant?.plans?.monthly_cents||0,surcharge=Number(tenant?.no_commitment_surcharge_pct||0),discount=Number(tenant?.discount_pct||0),months=Number(tenant?.discount_months||0),started=tenant?.discount_started_at?new Date(tenant.discount_started_at+"T12:00:00"):null,end=started?new Date(started.getFullYear(),started.getMonth()+months,started.getDate()):null,active=discount>0&&months>0&&end&&new Date()<end;
@@ -51,8 +51,8 @@ function BillingContent({workspace}){
   if(switching&&!window.confirm(method==="PIX"?"Trocar a mensalidade do cartão para Pix? A cobrança recorrente no cartão será cancelada e as próximas virão por Pix.":"Trocar a mensalidade do Pix para cartão? A cobrança Pix em aberto será cancelada e você cadastrará o cartão no Asaas."))return;
   setBusy(method);setError("");setMessage("");
   try{
-   const token=await accessToken(),r=await fetch("/api/billing/checkout",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+token},body:JSON.stringify({tenant_id:tenant.id,method,tax_id:info?.needs_tax_id?taxId:undefined})}),j=await r.json();
-   if(!r.ok){if(j.code==="tax_id_required")setInfo(v=>({...v,needs_tax_id:true}));throw new Error(j.error||"Não foi possível iniciar o pagamento.")}
+   const token=await accessToken(),r=await fetch("/api/billing/checkout",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+token},body:JSON.stringify({tenant_id:tenant.id,method,tax_id:info?.needs_tax_id?taxId:undefined,address:method==="CREDIT_CARD"&&addr?.open?addr:undefined})}),j=await r.json();
+   if(!r.ok){if(j.code==="tax_id_required")setInfo(v=>({...v,needs_tax_id:true}));if(j.code==="address_required"&&!addr?.open){setAddr({open:true,postalCode:"",address:"",addressNumber:"",complement:"",province:"",city:""});setMessage("Informe o endereço do responsável e clique em Pagar com cartão de novo.");return}throw new Error(j.error||"Não foi possível iniciar o pagamento.")}
    if(j.kind==="redirect"&&j.url){window.location.href=j.url;return}
    if(j.kind==="active")setMessage(j.message||"Cobrança recorrente já configurada.");
    if(j.kind==="pix")setInfo(v=>({...v,pix:j.pix,billing_method:"PIX",has_subscription:true,amount_cents:j.amount_cents||v?.amount_cents}));
@@ -78,6 +78,13 @@ function BillingContent({workspace}){
     <h3>{online?"Pagamento online":"Pagamento indisponível"}</h3>
     {loading?<p>Carregando cobrança...</p>:online?<>
      <p>Escolha como deseja manter sua mensalidade. No cartão, as próximas cobranças são recorrentes. No PIX, cada cobrança mensal fica disponível nesta tela.</p>
+     {addr?.open&&!cardActive&&<div className="monthly-address"><b>Endereço do responsável (exigido pelo Asaas para cartão)</b>
+      <label>CEP<input value={addr.postalCode} inputMode="numeric" placeholder="00000-000" onChange={e=>{const v=e.target.value;setAddr(a=>({...a,postalCode:v}));const d=v.replace(/\D/g,"");if(d.length===8)fetch("https://viacep.com.br/ws/"+d+"/json/").then(r=>r.json()).then(x=>{if(!x.erro)setAddr(a=>({...a,address:x.logradouro||a.address,province:x.bairro||a.province,city:x.localidade?x.localidade+"/"+x.uf:a.city}))}).catch(()=>{})}}/></label>
+      <label className="wide">Rua<input value={addr.address} onChange={e=>setAddr(a=>({...a,address:e.target.value}))}/></label>
+      <label>Número<input value={addr.addressNumber} onChange={e=>setAddr(a=>({...a,addressNumber:e.target.value}))}/></label>
+      <label>Complemento<input value={addr.complement} onChange={e=>setAddr(a=>({...a,complement:e.target.value}))}/></label>
+      <label>Bairro<input value={addr.province} onChange={e=>setAddr(a=>({...a,province:e.target.value}))}/></label>
+      <label>Cidade<input value={addr.city} readOnly placeholder="Preenchida pelo CEP"/></label></div>}
      {info?.needs_tax_id&&!cardActive&&<label className="monthly-taxid">CPF ou CNPJ do responsável<input value={taxId} onChange={e=>setTaxId(e.target.value)} inputMode="numeric" autoComplete="off" placeholder="000.000.000-00"/><small>Exigido pelo Asaas para emitir a cobrança. Informado uma única vez.</small></label>}
      {info?.has_subscription&&<p className="monthly-current">Forma atual: <b>{info.billing_method==="CREDIT_CARD"?"Cartão de crédito (recorrente)":"Pix (cobrança mensal)"}</b></p>}
      {cardActive?<><div className="form-alert success"><CreditCard size={17}/><strong> Cartão configurado.</strong> As próximas cobranças serão processadas pelo Asaas.</div><div style={{display:"flex",gap:10,flexWrap:"wrap",margin:"12px 0"}}><button className="secondary-action" type="button" disabled={Boolean(busy)} onClick={()=>pay("PIX")}><CircleDollarSign size={17}/>{busy==="PIX"?"Trocando...":"Trocar para Pix"}</button></div></>:<div style={{display:"flex",gap:10,flexWrap:"wrap",margin:"16px 0"}}>

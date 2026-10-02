@@ -144,3 +144,9 @@
 .dashboard-shell .monthly-taxid small{font-weight:500;color:var(--muted)}
 .dashboard-shell .monthly-invoice{display:inline-flex;margin-top:10px}
 .dashboard-shell .monthly-current{margin:10px 0 0;font-size:13px;color:var(--muted)}.dashboard-shell .monthly-current b{color:var(--text)}
+.dashboard-shell .monthly-address{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px;padding:14px;border:1px solid var(--line);border-radius:14px;text-align:left}
+.dashboard-shell .monthly-address b{grid-column:1/-1;font-size:12px}
+.dashboard-shell .monthly-address label{display:grid;gap:5px;font-size:11px;font-weight:700}
+.dashboard-shell .monthly-address label.wide{grid-column:1/-1}
+.dashboard-shell .monthly-address input{min-height:40px}
+@media(max-width:600px){.dashboard-shell .monthly-address{grid-template-columns:1fr}}
