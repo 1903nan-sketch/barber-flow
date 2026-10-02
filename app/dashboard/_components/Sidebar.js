@@ -15,6 +15,7 @@ import {
   Sparkles,
   CreditCard,
   Package,
+  Percent,
   ShoppingBag,
   Users,
   UserRound,
@@ -34,6 +35,7 @@ const items = [
   { label: "Comandas", href: "/dashboard/comandas", icon: ClipboardList },
   { label: "Vendas", href: "/dashboard/vendas", icon: ShoppingBag },
   { label: "Relatórios", href: "/dashboard/relatorios", icon: BarChart3 },
+  { label: "Comissões", href: "/dashboard/comissoes", icon: Percent, permission: "finance" },
   { label: "Mensalidade", href: "/dashboard/mensalidade", icon: CreditCard, ownerOnly: true },
   { label: "WhatsApp", href: "/dashboard/whatsapp", icon: MessageCircle, ownerOnly: true },
   { label: "Site, Instagram e WhatsApp", href: "/dashboard/configuracoes", icon: Settings, ownerOnly: true },
@@ -53,7 +55,7 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
   useEffect(()=>{try{if(!sessionStorage.getItem("barbertix_sidebar_intro")){sessionStorage.setItem("barbertix_sidebar_intro","1");setIntro(true)}}catch{}},[]);
   useEffect(()=>{if(!workspaceOpen)return;const close=e=>{if(e.type==="keydown"?e.key==="Escape":!switcherRef.current?.contains(e.target))setWorkspaceOpen(false)};document.addEventListener("mousedown",close);document.addEventListener("keydown",close);return()=>{document.removeEventListener("mousedown",close);document.removeEventListener("keydown",close)}},[workspaceOpen]);
   const starter=String(workspace?.tenant?.plans?.name||"").toLowerCase()==="starter";
-  const starterRoutes=new Set(["/dashboard","/dashboard/clientes","/dashboard/barbeiros","/dashboard/servicos","/dashboard/financeiro","/dashboard/estoque","/dashboard/comandas","/dashboard/vendas","/dashboard/relatorios","/dashboard/mensalidade"]);
+  const starterRoutes=new Set(["/dashboard","/dashboard/clientes","/dashboard/barbeiros","/dashboard/servicos","/dashboard/financeiro","/dashboard/estoque","/dashboard/comandas","/dashboard/vendas","/dashboard/relatorios","/dashboard/comissoes","/dashboard/mensalidade"]);
   async function changeWorkspace(tenantId){localStorage.setItem("barberflow_workspace",tenantId);setWorkspaceOpen(false);window.location.href="/dashboard"}
   async function changeAccount(){localStorage.removeItem("barberflow_workspace");await supabase?.auth.signOut();window.location.href="/login"}
   async function signOut(){if(!window.confirm("Deseja sair do BarberTix?"))return;await supabase?.auth.signOut();window.location.href="/login"}

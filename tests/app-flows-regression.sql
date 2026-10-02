@@ -54,6 +54,7 @@ SELECT pg_temp.ok(NOT EXISTS(SELECT 1 FROM public.public_available_slots_multi('
 SELECT pg_temp.denied('select * from public.appointments','Anonymous still cannot read appointments');
 RESET ROLE;
 SELECT pg_temp.ok((SELECT ends_at-starts_at=interval '50 minutes' AND price_cents=8000 AND source='public' FROM public.appointments WHERE id=current_setting('audit.pub')::uuid),'Public booking sums duration and price');
+SELECT pg_temp.ok((SELECT commission_bps=4000 FROM public.appointments WHERE id=current_setting('audit.pub')::uuid),'Public booking stores service commission');
 SELECT pg_temp.ok((SELECT count(*)=2 FROM public.appointment_services WHERE appointment_id=current_setting('audit.pub')::uuid),'Public booking records each service');
 SELECT pg_temp.ok((SELECT count(*)=1 FROM public.clients WHERE tenant_id=current_setting('audit.t')::uuid AND phone='(11) 97777-6666'),'Public booking creates the client');
 

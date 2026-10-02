@@ -107,3 +107,19 @@
 .bt-loader-mark::after{background:linear-gradient(0deg,#9a7cff 0%,#f5f7fb 50%,transparent 50%);background-size:100% 200%;background-position:0 0;animation:bt-fill 1.4s ease-in-out infinite}
 @keyframes bt-fill{0%{background-position:0 0}60%,100%{background-position:0 100%}}
 @media(prefers-reduced-motion:reduce){.bt-loader-mark::after{animation:none}}
+
+/* Comissões */
+.dashboard-shell .commission-list{display:grid;gap:10px}
+.dashboard-shell .commission-card{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.015);transition:border-color .25s}
+.dashboard-shell .commission-card.open{border-color:rgba(154,124,255,.45)}
+.dashboard-shell .commission-head{width:100%;display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:14px;padding:14px 16px;background:transparent;border:0;color:inherit;text-align:left;cursor:pointer}
+.dashboard-shell .commission-head:hover{background:rgba(128,92,255,.06)}
+.dashboard-shell .commission-who strong,.dashboard-shell .commission-total strong{display:block}
+.dashboard-shell .commission-who small,.dashboard-shell .commission-total small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.dashboard-shell .commission-total{text-align:right}
+.dashboard-shell .commission-total strong{font-size:18px;color:#55dda4}
+.dashboard-shell .commission-chevron{color:var(--muted);transition:transform .3s var(--bt-ease)}
+.dashboard-shell .commission-card.open .commission-chevron{transform:rotate(180deg)}
+.dashboard-shell .commission-card .sales-report-table-wrap{border-top:1px solid var(--line);animation:bt-fade .3s ease-out}
+.dashboard-shell .commission-note{display:flex;gap:8px;align-items:flex-start}
+@media(max-width:760px){.dashboard-shell .commission-head{grid-template-columns:auto 1fr auto;gap:10px}.dashboard-shell .commission-chevron{display:none}}
