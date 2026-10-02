@@ -11,7 +11,7 @@ export async function GET(request){
   let pix=null,pixError="";
   if(asaasConfigured()&&ctx.tenant.billing_method==="PIX"&&ctx.tenant.asaas_subscription_id){
    try{pix=await getSubscriptionPix(ctx.tenant.asaas_subscription_id)}
-   catch(err){pixError=err.message||"Não foi possível carregar o PIX atual."}
+   catch(err){pixError="Não foi possível consultar a cobrança no Asaas"+(err.status?" (HTTP "+err.status+")":"")+". Resposta do Asaas: "+(err.message||"sem detalhes")}
   }
   return NextResponse.json({
    configured:asaasConfigured(),
