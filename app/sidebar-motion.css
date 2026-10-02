@@ -142,3 +142,4 @@
 .dashboard-shell .monthly-taxid{display:grid;gap:6px;margin:14px 0 4px;font-size:12px;font-weight:700}
 .dashboard-shell .monthly-taxid input{min-height:44px}
 .dashboard-shell .monthly-taxid small{font-weight:500;color:var(--muted)}
+.dashboard-shell .monthly-invoice{display:inline-flex;margin-top:10px}

@@ -17,11 +17,13 @@ function PixBox({pix}){
   if(pix?.encoded_image){setQr("data:image/png;base64,"+pix.encoded_image);return}
   if(payload)QRCode.toDataURL(payload,{width:240,margin:1}).then(setQr).catch(()=>setQr(""));
  },[payload,pix?.encoded_image]);
- if(!payload&&!qr)return <div className="form-alert">A cobrança PIX foi criada. Atualize esta tela em alguns segundos para carregar o QR Code.</div>;
+ const invoice=pix?.invoice_url?<a className="secondary-action monthly-invoice" href={pix.invoice_url} target="_blank" rel="noreferrer">Abrir fatura no Asaas</a>:null;
+ if(!payload&&!qr)return pix?.qr_error||pix?.invoice_url?<div className="form-alert"><p>{pix.qr_error||"O QR Code ainda não está disponível."}</p>{invoice}</div>:<div className="form-alert">A cobrança PIX foi criada. Atualize esta tela em alguns segundos para carregar o QR Code.</div>;
  return <div className="monthly-pix">
   <div className="monthly-qr">{qr&&<img src={qr} alt="QR Code PIX" width="220" height="220"/>}</div>
   <p>Escaneie o QR Code ou use o PIX Copia e Cola.</p>
   {payload&&<button className="monthly-copy" type="button" onClick={async()=>{await navigator.clipboard.writeText(payload);setCopied(true);setTimeout(()=>setCopied(false),1800)}}>{copied?<><Check size={17}/> PIX copiado</>:<><Copy size={17}/> Copiar código PIX</>}</button>}
+  {invoice}
   <small><ShieldCheck size={14}/> Cobrança vinculada à mensalidade BarberTix</small>
  </div>
 }
