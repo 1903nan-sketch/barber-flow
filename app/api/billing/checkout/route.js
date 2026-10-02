@@ -11,7 +11,7 @@ export async function POST(request){
   const units=await activeUnitCount(ctx.admin,ctx.tenant.id);
   const amountCents=calculateBillingAmount(ctx.tenant,ctx.plan,units);
   if(amountCents<=0)return NextResponse.json({error:"O valor da assinatura precisa ser maior que zero."},{status:400});
-  const customer=await ensureAsaasCustomer(ctx);
+  const customer=await ensureAsaasCustomer(ctx,body.tax_id);
   const due=effectiveDueDate(ctx.tenant.billing_due_date);
   const currentMethod=String(ctx.tenant.billing_method||"").toUpperCase();
 
@@ -81,6 +81,6 @@ export async function POST(request){
   return NextResponse.json({kind:"redirect",url:asaasCheckoutUrl(checkout.id),checkout_id:checkout.id});
  }catch(err){
   console.error("billing checkout",err);
-  return NextResponse.json({error:err.message||"Não foi possível iniciar o pagamento."},{status:err.status||500});
+  return NextResponse.json({error:err.message||"Não foi possível iniciar o pagamento.",code:err.code||undefined},{status:err.status||500});
  }
 }

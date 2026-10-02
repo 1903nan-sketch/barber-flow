@@ -137,3 +137,8 @@
 .dashboard-shell .cash-over{color:#55dda4;font-weight:700}
 .dashboard-shell .cash-short{color:#ff8a8a;font-weight:700}
 .dashboard-shell .inventory-header-actions select{min-height:42px;border-radius:11px}
+
+/* Mensalidade: CPF/CNPJ exigido pelo Asaas */
+.dashboard-shell .monthly-taxid{display:grid;gap:6px;margin:14px 0 4px;font-size:12px;font-weight:700}
+.dashboard-shell .monthly-taxid input{min-height:44px}
+.dashboard-shell .monthly-taxid small{font-weight:500;color:var(--muted)}

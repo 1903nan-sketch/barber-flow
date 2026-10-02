@@ -1,6 +1,6 @@
 import {NextResponse} from "next/server";
 import {activeUnitCount,requireTenantOwner} from "../../../../lib/billing-server";
-import {asaasConfigured,calculateBillingAmount,getSubscriptionPix} from "../../../../lib/asaas";
+import {asaasConfigured,calculateBillingAmount,getSubscriptionPix,validTaxId} from "../../../../lib/asaas";
 
 export async function GET(request){
  try{
@@ -23,6 +23,7 @@ export async function GET(request){
    billing_method:ctx.tenant.billing_method||"",
    provider_status:ctx.tenant.billing_provider_status||"",
    has_subscription:Boolean(ctx.tenant.asaas_subscription_id),
+   needs_tax_id:!ctx.tenant.asaas_customer_id&&!validTaxId(ctx.tenant.owner_document),
    pix,
    pix_error:pixError
   });

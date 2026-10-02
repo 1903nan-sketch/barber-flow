@@ -27,7 +27,7 @@ function PixBox({pix}){
 }
 
 function BillingContent({workspace}){
- const [info,setInfo]=useState(null),[loading,setLoading]=useState(true),[busy,setBusy]=useState(""),[error,setError]=useState(""),[message,setMessage]=useState("");
+ const [info,setInfo]=useState(null),[loading,setLoading]=useState(true),[busy,setBusy]=useState(""),[error,setError]=useState(""),[message,setMessage]=useState(""),[taxId,setTaxId]=useState("");
  const tenant=workspace.tenant;
  const fallbackAmount=useMemo(()=>{
   const base=tenant?.plans?.monthly_cents||0,surcharge=Number(tenant?.no_commitment_surcharge_pct||0),discount=Number(tenant?.discount_pct||0),months=Number(tenant?.discount_months||0),started=tenant?.discount_started_at?new Date(tenant.discount_started_at+"T12:00:00"):null,end=started?new Date(started.getFullYear(),started.getMonth()+months,started.getDate()):null,active=discount>0&&months>0&&end&&new Date()<end;
@@ -47,8 +47,8 @@ function BillingContent({workspace}){
  async function pay(method){
   setBusy(method);setError("");setMessage("");
   try{
-   const token=await accessToken(),r=await fetch("/api/billing/checkout",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+token},body:JSON.stringify({tenant_id:tenant.id,method})}),j=await r.json();
-   if(!r.ok)throw new Error(j.error||"Não foi possível iniciar o pagamento.");
+   const token=await accessToken(),r=await fetch("/api/billing/checkout",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+token},body:JSON.stringify({tenant_id:tenant.id,method,tax_id:info?.needs_tax_id?taxId:undefined})}),j=await r.json();
+   if(!r.ok){if(j.code==="tax_id_required")setInfo(v=>({...v,needs_tax_id:true}));throw new Error(j.error||"Não foi possível iniciar o pagamento.")}
    if(j.kind==="redirect"&&j.url){window.location.href=j.url;return}
    if(j.kind==="active")setMessage(j.message||"Cobrança recorrente já configurada.");
    if(j.kind==="pix")setInfo(v=>({...v,pix:j.pix,billing_method:"PIX",has_subscription:true,amount_cents:j.amount_cents||v?.amount_cents}));
@@ -74,6 +74,7 @@ function BillingContent({workspace}){
     <h3>{online?"Pagamento online":"Pagamento indisponível"}</h3>
     {loading?<p>Carregando cobrança...</p>:online?<>
      <p>Escolha como deseja manter sua mensalidade. No cartão, as próximas cobranças são recorrentes. No PIX, cada cobrança mensal fica disponível nesta tela.</p>
+     {info?.needs_tax_id&&!cardActive&&<label className="monthly-taxid">CPF ou CNPJ do responsável<input value={taxId} onChange={e=>setTaxId(e.target.value)} inputMode="numeric" autoComplete="off" placeholder="000.000.000-00"/><small>Exigido pelo Asaas para emitir a cobrança. Informado uma única vez.</small></label>}
      {cardActive?<div className="form-alert success"><CreditCard size={17}/><strong> Cartão configurado.</strong> As próximas cobranças serão processadas pelo Asaas.</div>:<div style={{display:"flex",gap:10,flexWrap:"wrap",margin:"16px 0"}}>
       <button className="primary" type="button" disabled={Boolean(busy)} onClick={()=>pay("CREDIT_CARD")}><CreditCard size={17}/>{busy==="CREDIT_CARD"?"Abrindo...":"Pagar com cartão"}</button>
       <button className="secondary-action" type="button" disabled={Boolean(busy)} onClick={()=>pay("PIX")}><CircleDollarSign size={17}/>{busy==="PIX"?"Gerando...":"Gerar PIX"}</button>
