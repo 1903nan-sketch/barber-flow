@@ -19,11 +19,10 @@ export async function POST(request){
   if(!allowed||allowed.access_role!=="full")return NextResponse.json({error:"Acesso restrito ao administrador mestre."},{status:403});
 
   const body=await request.json();
-  const name=String(body.name||"").trim(),ownerName=String(body.owner_name||"").trim(),email=String(body.owner_email||"").trim().toLowerCase(),password=String(body.password||"");
+  const name=String(body.name||"").trim(),ownerName=String(body.owner_name||"").trim(),email=String(body.owner_email||"").trim().toLowerCase();
   let slug=cleanSlug(body.slug||name);
 
   if(!name||!ownerName||!email||!slug||!body.plan_id)return NextResponse.json({error:"Preencha os dados obrigatórios da barbearia, proprietário e plano."},{status:400});
-  if(password.length<8)return NextResponse.json({error:"A senha precisa ter pelo menos 8 caracteres."},{status:400});
 
   const {data:plan,error:planError}=await admin.from("plans").select("id,name,monthly_cents,default_grace_days").eq("id",body.plan_id).maybeSingle();
   if(planError||!plan||!["Starter","Pro","Pro + Filiais"].includes(plan.name))return NextResponse.json({error:"Selecione um plano válido."},{status:400});
@@ -37,11 +36,17 @@ export async function POST(request){
    if(suffix>99)return NextResponse.json({error:"Não foi possível gerar uma URL única para esta barbearia."},{status:400});
   }
 
-  const {data:created,error:createError}=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{name:ownerName}});
+  const redirectTo="https://barbertix.3ruptix.com/login?setup=password";
+  const {data:created,error:createError}=await admin.auth.admin.inviteUserByEmail(email,{
+   redirectTo,
+   data:{full_name:ownerName,tenant_name:name,product:"BarberTix"}
+  });
   if(createError){
-   const duplicate=/already|registered|exists/i.test(createError.message||"");
-   return NextResponse.json({error:duplicate?"Este e-mail já possui uma conta. Se você acabou de cadastrar esta barbearia, confira a lista de Barbearias.":createError.message},{status:400});
+   const duplicate=/already|registered|exists|user.*exists/i.test(createError.message||"");
+   const rate=/rate|limit|too many/i.test(createError.message||"");
+   return NextResponse.json({error:duplicate?"Este e-mail já possui uma conta. Confira os acessos existentes antes de cadastrar novamente.":rate?"O serviço de e-mail atingiu o limite temporário de envios. Aguarde alguns minutos e tente novamente.":createError.message},{status:400});
   }
+  if(!created?.user?.id)return NextResponse.json({error:"O convite não retornou um usuário válido. Tente novamente."},{status:500});
 
   const {data:tenantId,error:provisionError}=await admin.rpc("admin_provision_tenant",{p_admin:user.id,p_owner:created.user.id,p:{name,slug,phone:String(body.phone||"").trim(),plan_id:plan.id,owner_name:ownerName}});
   if(provisionError){
@@ -86,7 +91,7 @@ export async function POST(request){
    if(services.data?.length)await admin.from("barber_services").upsert(services.data.map(x=>({tenant_id:tenantId,barber_id:barber.id,service_id:x.id})),{onConflict:"tenant_id,barber_id,service_id"});
   }
 
-  return NextResponse.json({id:tenantId,slug,name,plan:plan.name,owner_is_provider:ownerIsProvider});
+  return NextResponse.json({id:tenantId,slug,name,plan:plan.name,owner_is_provider:ownerIsProvider,invite_sent:true,owner_email:email});
  }catch(error){
   console.error("Create tenant route failed",error?.message||error);
   return NextResponse.json({error:error.message||"Não foi possível criar a barbearia."},{status:500});
