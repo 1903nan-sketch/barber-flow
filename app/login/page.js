@@ -16,7 +16,7 @@ export default function LoginPage(){
   const form=new FormData(event.currentTarget);let email=String(form.get('email')||'').trim();const password=String(form.get('password')||'');
   try{
    if(!supabase)throw new Error('Conexão indisponível. Tente novamente em instantes.');
-   if(mode==='login'&&(email.startsWith('@')||!email.includes('@'))){const {data:matches,error:lookupError}=await supabase.from('staff_logins').select('login_email').eq('username',email.replace(/^@/,'').toLowerCase()).limit(2);if(lookupError||matches?.length!==1)throw new Error('E-mail, usuário ou senha incorretos.');email=matches[0].login_email}
+   if(mode==='login'&&(email.startsWith('@')||!email.includes('@'))){const {data:loginEmail,error:lookupError}=await supabase.rpc('staff_login_email',{p_username:email});if(lookupError||!loginEmail)throw new Error('E-mail, usuário ou senha incorretos.');email=loginEmail}
    if(mode==='reset'){const {error:resetError}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/login'});if(resetError)throw resetError;setMessage('Se este e-mail estiver cadastrado, você receberá um link para recuperar a senha. Confira também o spam.');return}
    if(mode==='new-password'){const {error:updateError}=await supabase.auth.updateUser({password});if(updateError)throw updateError;setMessage('Senha alterada. Abrindo seu painel...');const {data:{user}}=await supabase.auth.getUser();await goToPanel(user?.id);return}
    const result=mode==='signup'?await supabase.auth.signUp({email,password}):await supabase.auth.signInWithPassword({email,password});
