@@ -32,8 +32,8 @@ INSERT INTO public.services(id,tenant_id,name,duration,price_cents,commission_bp
  ('b5000000-0000-4000-8000-000000000002','b2000000-0000-4000-8000-000000000001','Barba',20,3000,4000);
 INSERT INTO public.clients(id,tenant_id,name,phone) VALUES
  ('b6000000-0000-4000-8000-000000000001','b2000000-0000-4000-8000-000000000001','Cliente Flow','11988887777');
-INSERT INTO public.products(id,barbershop_id,unit_id,name,sale_price,cost_price,stock_quantity) VALUES
- ('b7000000-0000-4000-8000-000000000001','b2000000-0000-4000-8000-000000000001','b3000000-0000-4000-8000-000000000001','Pomada',35,15,5);
+INSERT INTO public.products(id,barbershop_id,unit_id,name,sale_price,cost_price,stock_quantity,commission_pct) VALUES
+ ('b7000000-0000-4000-8000-000000000001','b2000000-0000-4000-8000-000000000001','b3000000-0000-4000-8000-000000000001','Pomada',35,15,5,10);
 INSERT INTO public.barber_units SELECT 'b2000000-0000-4000-8000-000000000001',id,'b3000000-0000-4000-8000-000000000001' FROM public.barbers WHERE tenant_id='b2000000-0000-4000-8000-000000000001';
 INSERT INTO public.barber_services SELECT b.tenant_id,b.id,s.id FROM public.barbers b JOIN public.services s ON s.tenant_id=b.tenant_id WHERE b.tenant_id='b2000000-0000-4000-8000-000000000001' ON CONFLICT DO NOTHING;
 INSERT INTO public.weekly_windows(tenant_id,barber_id,unit_id,weekday,start_min,end_min,step_min) SELECT b.tenant_id,b.id,'b3000000-0000-4000-8000-000000000001',d,lo,hi,15 FROM public.barbers b CROSS JOIN generate_series(0,6) d CROSS JOIN (VALUES(540,720),(840,1080)) w(lo,hi) WHERE b.tenant_id='b2000000-0000-4000-8000-000000000001';
@@ -77,6 +77,7 @@ SELECT pg_temp.ok(public.quick_client(current_setting('audit.t')::uuid,'Walk In'
 SELECT set_config('audit.sale',public.quick_sale_cart(current_setting('audit.t')::uuid,jsonb_build_object('client_id',current_setting('audit.qc'),'barber_id',current_setting('audit.b'),'method','account'),jsonb_build_array(jsonb_build_object('kind','service','id',current_setting('audit.s1'),'qty',1),jsonb_build_object('kind','product','id',current_setting('audit.p'),'qty',2)))::text,true);
 SELECT pg_temp.ok((SELECT amount_cents=12000 AND status='open' FROM public.quick_sales WHERE id=current_setting('audit.sale')::uuid),'Cart total and account status correct');
 SELECT pg_temp.ok((SELECT stock_quantity=3 FROM public.products WHERE id=current_setting('audit.p')::uuid),'Cart deducts product stock');
+SELECT pg_temp.ok((SELECT commission_cents=2700 FROM public.quick_sales WHERE id=current_setting('audit.sale')::uuid),'Cart stores service and product commission');
 SELECT pg_temp.denied($q$select public.quick_sale_cart(current_setting('audit.t')::uuid,'{"method":"cash"}',jsonb_build_array(jsonb_build_object('kind','product','id',current_setting('audit.p'),'qty',99)))$q$,'Cart rejects oversold product');
 SELECT public.settle_sale(current_setting('audit.t')::uuid,current_setting('audit.sale')::uuid,'quick','pix');
 SELECT pg_temp.ok((SELECT status='paid' AND method='pix' AND paid_at IS NOT NULL FROM public.quick_sales WHERE id=current_setting('audit.sale')::uuid),'Client account balance settled');

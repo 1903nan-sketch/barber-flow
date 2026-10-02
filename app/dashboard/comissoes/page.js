@@ -31,7 +31,7 @@ function Commissions({workspace}){
     supabase.from("services").select("id,name,commission_bps").eq("tenant_id",t),
     range(supabase.from("appointment_payments").select("id,appointment_id,barber_id,service_id,amount_cents,status,created_at").eq("tenant_id",t).neq("status","cancelled")),
     supabase.from("order_tabs").select("id,barber_id,appointment_id,closed_at").eq("tenant_id",t).eq("status","closed").gte("closed_at",st.toISOString()).lt("closed_at",en.toISOString()),
-    range(supabase.from("quick_sales").select("id,barber_id,status,created_at").eq("tenant_id",t).is("order_id",null).neq("status","cancelled").not("barber_id","is",null))
+    range(supabase.from("quick_sales").select("id,barber_id,status,created_at,description,amount_cents,commission_cents").eq("tenant_id",t).is("order_id",null).neq("status","cancelled").not("barber_id","is",null))
    ]);
    const fail=[b,s,pay,orders,quick].find(r=>r.error)?.error;if(fail)throw fail;
    const services=byId(s.data),payments=pay.data||[],tabs=orders.data||[],quickSales=quick.data||[];
@@ -51,7 +51,10 @@ function Commissions({workspace}){
    for(const it of items.data||[]){const o=tabById[it.order_id];if(!o)continue;const base=Number(it.quantity)*Number(it.unit_price_cents);
     if(it.kind==="appointment"){const a=appts[o.appointment_id],c=appointmentCommission(a,base,apptLines[o.appointment_id]||[],services);out.push({barber_id:o.barber_id,date:o.closed_at,kind:"Comanda",label:"Atendimento agendado",base,...c})}
     else out.push({barber_id:o.barber_id,date:o.closed_at,kind:it.kind==="product"?"Produto (comanda)":"Serviço (comanda)",label:`${it.quantity}× ${it.name}`,base,bps:Number(it.commission_bps||0),value:Math.round(base*Number(it.commission_bps||0)/10000),estimated:false})}
-   const quickById=byId(quickSales);
+   // Sales with a commission snapshot (Caixa Rápido after 2026-10-02) count once as a whole;
+   // older ones only have product commission via their stock movements.
+   for(const q of quickSales){if(q.commission_cents==null)continue;const base=Number(q.amount_cents||0),value=Number(q.commission_cents||0);out.push({barber_id:q.barber_id,date:q.created_at,kind:"Venda rápida",label:q.description||"Venda",base,bps:base?Math.round(value*10000/base):0,value,estimated:false})}
+   const quickById=byId(quickSales.filter(q=>q.commission_cents==null));
    for(const mv of moves.data||[]){const q=quickById[mv.sale_id];if(!q)continue;const qty=Math.abs(Number(mv.quantity||0)),base=Math.round(qty*Number(mv.unit_price||0)*100),bps=Math.round(Number(mv.commission_pct||0)*100);
     out.push({barber_id:q.barber_id,date:q.created_at,kind:"Produto (venda rápida)",label:`${qty}× produto`,base,bps,value:Math.round(base*bps/10000),estimated:false})}
    setBarbers(b.data||[]);setRows(out.sort((x,y)=>new Date(y.date)-new Date(x.date)));
@@ -77,7 +80,7 @@ function Commissions({workspace}){
    <button type="button" className="commission-head" onClick={()=>setOpen(o=>o===g.barber_id?null:g.barber_id)} aria-expanded={open===g.barber_id}><span className="client-avatar"><UserRound size={16}/></span><span className="commission-who"><strong>{g.name}</strong><small>{g.count} {g.count===1?"lançamento":"lançamentos"} · vendeu {money(g.base)}</small></span><span className="commission-total"><small>A receber</small><strong>{money(g.value)}</strong></span><ChevronDown size={18} className="commission-chevron"/></button>
    {open===g.barber_id&&<div className="sales-report-table-wrap"><table className="sales-report-table"><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Base</th><th>%</th><th>Comissão</th></tr></thead><tbody>{g.rows.map((r,i)=><tr key={i}><td>{new Date(r.date).toLocaleDateString("pt-BR")}</td><td>{r.kind}</td><td>{r.label}</td><td>{money(r.base)}</td><td>{pct(r.bps)}{r.estimated?" *":""}</td><td>{money(r.value)}</td></tr>)}</tbody></table></div>}
   </article>)}</div>}</section>
-  <p className="form-hint">Valores para conferência e pagamento da equipe. Vendas canceladas não entram. Vendas do Caixa Rápido só entram quando têm um profissional selecionado; serviços vendidos pelo Caixa Rápido ainda não registram comissão — use Comandas para isso.</p>
+  <p className="form-hint">Valores para conferência e pagamento da equipe. Vendas canceladas não entram. Vendas do Caixa Rápido só entram quando têm um profissional selecionado. Vendas rápidas anteriores a 02/10/2026 contam apenas a comissão dos produtos.</p>
  </>;
 }
 export default function CommissionsPage(){return <ModuleShell title="Comissões" eyebrow="Equipe e pagamentos">{workspace=><Commissions workspace={workspace}/>}</ModuleShell>}
