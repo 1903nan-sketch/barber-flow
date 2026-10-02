@@ -5,19 +5,14 @@ import ModuleShell from "../_components/ModuleShell";
 import {Check,CircleDollarSign,Copy,CreditCard,RefreshCw,ShieldCheck} from "lucide-react";
 import {supabase} from "../../../lib/supabase";
 
-const FALLBACK_PIX_KEY="sonorag4@hotmail.com";
-const field=(id,v)=>id+String(v.length).padStart(2,"0")+v;
-const clean=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9 ]/g,"").toUpperCase();
-function crc16(s){let c=65535;for(let i=0;i<s.length;i++){c^=s.charCodeAt(i)<<8;for(let j=0;j<8;j++)c=(c&32768)?(c<<1)^4129:c<<1;c&=65535}return c.toString(16).toUpperCase().padStart(4,"0")}
-function fallbackPayload(name,cents){const d=("BARBERTIX "+clean(name)).slice(0,72),m=field("00","BR.GOV.BCB.PIX")+field("01",FALLBACK_PIX_KEY)+field("02",d),a=(Number(cents||0)/100).toFixed(2),b=field("00","01")+field("26",m)+field("52","0000")+field("53","986")+field("54",a)+field("58","BR")+field("59","BARBERTIX")+field("60","SAO PAULO")+field("62",field("05","***"))+"6304";return b+crc16(b)}
 const money=cents=>(Number(cents||0)/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const ptDate=v=>v?new Date(v+"T12:00:00").toLocaleDateString("pt-BR"):"—";
 
 async function accessToken(){return (await supabase.auth.getSession()).data.session?.access_token||""}
 
-function PixBox({pix,fallback}){
+function PixBox({pix}){
  const [copied,setCopied]=useState(false),[qr,setQr]=useState("");
- const payload=pix?.payload||fallback||"";
+ const payload=pix?.payload||"";
  useEffect(()=>{
   if(pix?.encoded_image){setQr("data:image/png;base64,"+pix.encoded_image);return}
   if(payload)QRCode.toDataURL(payload,{width:240,margin:1}).then(setQr).catch(()=>setQr(""));
@@ -61,7 +56,6 @@ function BillingContent({workspace}){
   }catch(e){setError(e.message)}finally{setBusy("")}
  }
  const amount=info?.amount_cents??fallbackAmount,due=info?.due_date||tenant?.billing_due_date,online=Boolean(info?.configured),cardActive=info?.billing_method==="CREDIT_CARD"&&info?.has_subscription;
- const fallbackPix=useMemo(()=>fallbackPayload(tenant?.name,amount),[tenant?.name,amount]);
  return <div className="monthly-wrap">
   {error&&<div className="form-alert error">{error}</div>}
   {message&&<div className="form-alert success">{message}</div>}
@@ -77,7 +71,7 @@ function BillingContent({workspace}){
    </div>
    <div className="monthly-payment">
     <span className="monthly-label">PAGAR MENSALIDADE</span>
-    <h3>{online?"Pagamento online":"Pagamento por PIX"}</h3>
+    <h3>{online?"Pagamento online":"Pagamento indisponível"}</h3>
     {loading?<p>Carregando cobrança...</p>:online?<>
      <p>Escolha como deseja manter sua mensalidade. No cartão, as próximas cobranças são recorrentes. No PIX, cada cobrança mensal fica disponível nesta tela.</p>
      {cardActive?<div className="form-alert success"><CreditCard size={17}/><strong> Cartão configurado.</strong> As próximas cobranças serão processadas pelo Asaas.</div>:<div style={{display:"flex",gap:10,flexWrap:"wrap",margin:"16px 0"}}>
@@ -88,8 +82,8 @@ function BillingContent({workspace}){
      {info?.billing_method==="PIX"&&info?.has_subscription&&<PixBox pix={info.pix}/>}
      {info?.pix_error&&<small>{info.pix_error}</small>}
     </>:<>
-     <p>A cobrança online ainda não está ativada. Enquanto isso, o PIX atual continua disponível.</p>
-     <PixBox fallback={fallbackPix}/>
+     <p>A cobrança online ainda não está configurada. Nenhum pagamento será confirmado manualmente ou direcionado para uma chave fixa.</p>
+     <div className="form-alert">Fale com o suporte BarberTix para ativar o provedor de pagamentos.</div>
     </>}
    </div>
   </section>
