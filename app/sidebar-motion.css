@@ -123,3 +123,17 @@
 .dashboard-shell .commission-card .sales-report-table-wrap{border-top:1px solid var(--line);animation:bt-fade .3s ease-out}
 .dashboard-shell .commission-note{display:flex;gap:8px;align-items:flex-start}
 @media(max-width:760px){.dashboard-shell .commission-head{grid-template-columns:auto 1fr auto;gap:10px}.dashboard-shell .commission-chevron{display:none}}
+
+/* Caixa */
+.dashboard-shell .cash-highlight{border-color:rgba(85,221,164,.45)!important;background:linear-gradient(145deg,rgba(20,60,45,.55),#0b121a)!important}
+.dashboard-shell .cash-highlight strong{color:#55dda4}
+.dashboard-shell .cash-date{font-size:16px!important}
+.dashboard-shell .cash-math .cash-total{border-top:1px solid var(--line);margin-top:4px;padding-top:12px}
+.dashboard-shell .cash-math .cash-total strong{color:#55dda4;font-size:18px}
+.dashboard-shell .ranking-list small{color:var(--muted);font-size:11px}
+.dashboard-shell .service-icon.cash-out{background:rgba(255,107,107,.12);color:#ff8a8a}
+.dashboard-shell .service-icon.cash-in{background:rgba(85,221,164,.12);color:#55dda4}
+.dashboard-shell .cash-expected{display:flex;align-items:center;gap:10px;padding:12px 14px;margin:6px 0 4px;border:1px solid rgba(85,221,164,.35);border-radius:12px;background:rgba(85,221,164,.07);color:#cfeee0}
+.dashboard-shell .cash-over{color:#55dda4;font-weight:700}
+.dashboard-shell .cash-short{color:#ff8a8a;font-weight:700}
+.dashboard-shell .inventory-header-actions select{min-height:42px;border-radius:11px}
