@@ -14,14 +14,14 @@ function tenantRef(value){
 }
 async function byField(admin,field,value){
  if(!value)return null;
- const {data}=await admin.from("tenants").select("id,billing_due_date,grace_days").eq(field,value).maybeSingle();
+ const {data}=await admin.from("tenants").select("id,billing_due_date,grace_days,asaas_subscription_id").eq(field,value).maybeSingle();
  return data||null;
 }
 async function locateTenant(admin,body){
  const payment=body.payment||{},subscription=body.subscription||{},checkout=body.checkout||{};
  const ref=tenantRef(checkout.externalReference||subscription.externalReference||payment.externalReference);
  if(ref){
-  const {data}=await admin.from("tenants").select("id,billing_due_date,grace_days").eq("id",ref).maybeSingle();
+  const {data}=await admin.from("tenants").select("id,billing_due_date,grace_days,asaas_subscription_id").eq("id",ref).maybeSingle();
   if(data)return data;
  }
  return await byField(admin,"asaas_checkout_id",checkout.id)
@@ -64,18 +64,30 @@ export async function POST(request){
    if(event==="CHECKOUT_PAID"){patch.status="active";patch.last_paid_at=new Date().toISOString()}
   }
 
+  // When the owner switches payment method the old subscription is deleted; its late
+  // events (SUBSCRIPTION_DELETED, PAYMENT_DELETED...) must not overwrite the new one.
+  const current=tenant.asaas_subscription_id||null,eventSub=subscription.id||payment.subscription||null;
+  const tracked=!eventSub||!current||eventSub===current;
+  const paidEvent=event==="PAYMENT_RECEIVED"||event==="PAYMENT_CONFIRMED";
+
   if(event.startsWith("SUBSCRIPTION_")){
-   if(subscription.id)patch.asaas_subscription_id=subscription.id;
-   if(subscription.customer)patch.asaas_customer_id=subscription.customer;
-   if(subscription.billingType)patch.billing_method=subscription.billingType;
-   if(subscription.value!=null)patch.billing_amount_cents=Math.round(Number(subscription.value)*100);
-   if(subscription.nextDueDate)patch.billing_due_date=String(subscription.nextDueDate).slice(0,10);
+   if(event==="SUBSCRIPTION_DELETED"||event==="SUBSCRIPTION_INACTIVATED"){
+    if(current&&subscription.id===current){patch.asaas_subscription_id=null;patch.billing_method=""}
+   }else if(tracked){
+    if(subscription.id)patch.asaas_subscription_id=subscription.id;
+    if(subscription.customer)patch.asaas_customer_id=subscription.customer;
+    if(subscription.billingType)patch.billing_method=subscription.billingType;
+    if(subscription.value!=null)patch.billing_amount_cents=Math.round(Number(subscription.value)*100);
+    if(subscription.nextDueDate)patch.billing_due_date=String(subscription.nextDueDate).slice(0,10);
+   }
   }
 
   if(event.startsWith("PAYMENT_")&&payment.id){
-   if(payment.subscription)patch.asaas_subscription_id=payment.subscription;
+   if(tracked&&paidEvent){
+    if(payment.subscription&&!current)patch.asaas_subscription_id=payment.subscription;
+    if(payment.billingType)patch.billing_method=payment.billingType;
+   }
    if(payment.customer)patch.asaas_customer_id=payment.customer;
-   if(payment.billingType)patch.billing_method=payment.billingType;
    patch.asaas_last_payment_id=payment.id;
    const paidAt=payment.paymentDate||payment.confirmedDate||payment.clientPaymentDate||null;
    await admin.from("billing_payments").upsert({
@@ -97,7 +109,7 @@ export async function POST(request){
     patch.status="active";
     patch.last_paid_at=new Date().toISOString();
     if(payment.dueDate)patch.billing_due_date=addMonth(String(payment.dueDate).slice(0,10));
-   }else if(event==="PAYMENT_OVERDUE"){
+   }else if(event==="PAYMENT_OVERDUE"&&tracked){
     patch.status="overdue";
     if(payment.dueDate)patch.billing_due_date=String(payment.dueDate).slice(0,10);
    }

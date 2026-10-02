@@ -47,6 +47,8 @@ function BillingContent({workspace}){
  useEffect(()=>{load()},[load]);
  useEffect(()=>{const p=new URLSearchParams(window.location.search).get("pagamento");if(p==="sucesso")setMessage("Dados enviados ao Asaas. A confirmação financeira aparecerá automaticamente após o webhook.");else if(p==="cancelado")setMessage("Checkout cancelado. Nenhuma baixa foi feita.");else if(p==="expirado")setMessage("O checkout expirou. Você pode gerar um novo.")},[]);
  async function pay(method){
+  const switching=info?.has_subscription&&info?.billing_method&&info.billing_method!==method;
+  if(switching&&!window.confirm(method==="PIX"?"Trocar a mensalidade do cartão para Pix? A cobrança recorrente no cartão será cancelada e as próximas virão por Pix.":"Trocar a mensalidade do Pix para cartão? A cobrança Pix em aberto será cancelada e você cadastrará o cartão no Asaas."))return;
   setBusy(method);setError("");setMessage("");
   try{
    const token=await accessToken(),r=await fetch("/api/billing/checkout",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+token},body:JSON.stringify({tenant_id:tenant.id,method,tax_id:info?.needs_tax_id?taxId:undefined})}),j=await r.json();
@@ -77,9 +79,10 @@ function BillingContent({workspace}){
     {loading?<p>Carregando cobrança...</p>:online?<>
      <p>Escolha como deseja manter sua mensalidade. No cartão, as próximas cobranças são recorrentes. No PIX, cada cobrança mensal fica disponível nesta tela.</p>
      {info?.needs_tax_id&&!cardActive&&<label className="monthly-taxid">CPF ou CNPJ do responsável<input value={taxId} onChange={e=>setTaxId(e.target.value)} inputMode="numeric" autoComplete="off" placeholder="000.000.000-00"/><small>Exigido pelo Asaas para emitir a cobrança. Informado uma única vez.</small></label>}
-     {cardActive?<div className="form-alert success"><CreditCard size={17}/><strong> Cartão configurado.</strong> As próximas cobranças serão processadas pelo Asaas.</div>:<div style={{display:"flex",gap:10,flexWrap:"wrap",margin:"16px 0"}}>
-      <button className="primary" type="button" disabled={Boolean(busy)} onClick={()=>pay("CREDIT_CARD")}><CreditCard size={17}/>{busy==="CREDIT_CARD"?"Abrindo...":"Pagar com cartão"}</button>
-      <button className="secondary-action" type="button" disabled={Boolean(busy)} onClick={()=>pay("PIX")}><CircleDollarSign size={17}/>{busy==="PIX"?"Gerando...":"Gerar PIX"}</button>
+     {info?.has_subscription&&<p className="monthly-current">Forma atual: <b>{info.billing_method==="CREDIT_CARD"?"Cartão de crédito (recorrente)":"Pix (cobrança mensal)"}</b></p>}
+     {cardActive?<><div className="form-alert success"><CreditCard size={17}/><strong> Cartão configurado.</strong> As próximas cobranças serão processadas pelo Asaas.</div><div style={{display:"flex",gap:10,flexWrap:"wrap",margin:"12px 0"}}><button className="secondary-action" type="button" disabled={Boolean(busy)} onClick={()=>pay("PIX")}><CircleDollarSign size={17}/>{busy==="PIX"?"Trocando...":"Trocar para Pix"}</button></div></>:<div style={{display:"flex",gap:10,flexWrap:"wrap",margin:"16px 0"}}>
+      <button className="primary" type="button" disabled={Boolean(busy)} onClick={()=>pay("CREDIT_CARD")}><CreditCard size={17}/>{busy==="CREDIT_CARD"?"Abrindo...":info?.billing_method==="PIX"&&info?.has_subscription?"Trocar para cartão":"Pagar com cartão"}</button>
+      <button className="secondary-action" type="button" disabled={Boolean(busy)} onClick={()=>pay("PIX")}><CircleDollarSign size={17}/>{busy==="PIX"?"Gerando...":info?.billing_method==="PIX"&&info?.has_subscription?"Ver PIX do mês":"Pagar com PIX"}</button>
       <button className="secondary-action" type="button" disabled={loading} onClick={load}><RefreshCw size={15}/>Atualizar</button>
      </div>}
      {info?.billing_method==="PIX"&&info?.has_subscription&&<PixBox pix={info.pix}/>}

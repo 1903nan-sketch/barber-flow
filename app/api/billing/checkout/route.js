@@ -15,8 +15,16 @@ export async function POST(request){
   const due=effectiveDueDate(ctx.tenant.billing_due_date);
   const currentMethod=String(ctx.tenant.billing_method||"").toUpperCase();
 
+  // Switching method: cancel the old subscription (Asaas removes its pending charges;
+  // paid ones stay) and continue below to create the new one.
+  if(ctx.tenant.asaas_subscription_id&&currentMethod!==method){
+   try{await asaasRequest("/subscriptions/"+encodeURIComponent(ctx.tenant.asaas_subscription_id),{method:"DELETE"})}
+   catch(err){if(err.status!==404)throw err}
+   await ctx.admin.from("tenants").update({asaas_subscription_id:null,asaas_checkout_id:null,billing_method:"",billing_provider_status:"SWITCHING_METHOD"}).eq("id",ctx.tenant.id);
+   ctx.tenant.asaas_subscription_id=null;ctx.tenant.asaas_checkout_id=null;ctx.tenant.billing_provider_status="SWITCHING_METHOD";
+  }
+
   if(ctx.tenant.asaas_subscription_id){
-   if(currentMethod!==method)return NextResponse.json({error:"Já existe uma assinatura ativa em outra forma de pagamento. Altere a cobrança pelo suporte antes de trocar."},{status:409});
    if(method==="PIX"){
     const pix=await getSubscriptionPix(ctx.tenant.asaas_subscription_id);
     return NextResponse.json({kind:"pix",pix,subscription_id:ctx.tenant.asaas_subscription_id,amount_cents:amountCents});
@@ -42,6 +50,7 @@ export async function POST(request){
     asaas_subscription_id:subscription.id,
     billing_provider:"asaas",
     billing_method:"PIX",
+    asaas_checkout_id:null,
     billing_provider_status:subscription.status||"ACTIVE",
     billing_amount_cents:amountCents
    }).eq("id",ctx.tenant.id);

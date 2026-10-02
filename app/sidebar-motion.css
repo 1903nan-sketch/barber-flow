@@ -143,3 +143,4 @@
 .dashboard-shell .monthly-taxid input{min-height:44px}
 .dashboard-shell .monthly-taxid small{font-weight:500;color:var(--muted)}
 .dashboard-shell .monthly-invoice{display:inline-flex;margin-top:10px}
+.dashboard-shell .monthly-current{margin:10px 0 0;font-size:13px;color:var(--muted)}.dashboard-shell .monthly-current b{color:var(--text)}
