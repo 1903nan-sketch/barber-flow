@@ -56,7 +56,7 @@ export async function POST(request){
    return NextResponse.json({ok:true,ignored:true});
   }
 
-  const patch={billing_provider:"asaas",billing_provider_status:event};
+  const patch={billing_provider:"asaas"};
   const subscription=body.subscription||{},checkout=body.checkout||{},payment=body.payment||{};
 
   if(event.startsWith("CHECKOUT_")){
@@ -69,6 +69,8 @@ export async function POST(request){
   const current=tenant.asaas_subscription_id||null,eventSub=subscription.id||payment.subscription||null;
   const tracked=!eventSub||!current||eventSub===current;
   const paidEvent=event==="PAYMENT_RECEIVED"||event==="PAYMENT_CONFIRMED";
+  // Only events about the subscription we track (or payments received) change the shown status.
+  if(tracked||paidEvent)patch.billing_provider_status=event;
 
   if(event.startsWith("SUBSCRIPTION_")){
    if(event==="SUBSCRIPTION_DELETED"||event==="SUBSCRIPTION_INACTIVATED"){
