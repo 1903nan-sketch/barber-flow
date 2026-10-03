@@ -1,7 +1,9 @@
 import {NextResponse} from "next/server";
-import {connectEvolutionInstance,evolutionConfigured,evolutionConnectionState,evolutionInstanceName,evolutionPhone,extractEvolutionQr,normalizeEvolutionState} from "../../../../../lib/evolution";
+import {connectEvolutionInstance,evolutionConfigured,evolutionConnectionState,evolutionInstanceName,evolutionPhone,extractEvolutionQr,getEvolutionWebhookSecret,normalizeEvolutionState,setEvolutionWebhook} from "../../../../../lib/evolution";
 import {requireWhatsappSettingsAccess} from "../../../../../lib/whatsapp-server";
 import {openaiWhatsappConfigured} from "../../../../../lib/openai-whatsapp-agent";
+
+const syncedWebhooks=new Set();
 
 export async function GET(req){
   const tenant=new URL(req.url).searchParams.get("tenant");
@@ -28,6 +30,24 @@ export async function GET(req){
       if(connectionState==="connected")state="connected";
       else if(qrcode)state="connecting";
     }catch{}
+  }
+
+  // A Vercel deploy changes the deployment URL, while Evolution keeps the old
+  // webhook until it is updated. Re-sync automatically from the stable site
+  // origin whenever the WhatsApp settings page checks a connected instance.
+  if(state==="connected"){
+    const origin=new URL(req.url).origin;
+    const key=instance+"|"+origin;
+    if(!syncedWebhooks.has(key)){
+      try{
+        const webhook=new URL("/api/whatsapp/evolution/webhook",origin);
+        webhook.searchParams.set("secret",await getEvolutionWebhookSecret());
+        await setEvolutionWebhook(instance,webhook.toString());
+        syncedWebhooks.add(key);
+      }catch(error){
+        console.error("Evolution webhook status sync failed",error?.message||error);
+      }
+    }
   }
 
   return NextResponse.json({
