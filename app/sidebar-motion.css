@@ -13,7 +13,7 @@
 .dashboard-shell .sidebar{isolation:isolate;scrollbar-width:thin;scrollbar-color:#253041 transparent}
 .dashboard-shell .sidebar::before{content:"";position:absolute;inset:0 0 auto 0;height:260px;z-index:-1;pointer-events:none;background:radial-gradient(120% 70% at 0% 0%,rgba(56,124,242,.16),transparent 70%);animation:bt-glow 9s ease-in-out infinite alternate}
 .dashboard-shell .sidebar::-webkit-scrollbar{width:6px}
-.dashboard-shell .sidebar::-webkit-scrollbar-thumb{background:#253041;border-radius:6px}
+.dashboard-shell .sidebar::-webkit-scrollbar-thumb{background:#e7e9eb;border-radius:6px}
 
 /* Brand mark: gentle shimmer sweep */
 .dashboard-shell .bf-simple-mark::after{content:"";position:absolute;inset:0;clip-path:polygon(50% 0,100% 100%,84% 100%,50% 30%,16% 100%,0 100%);background:linear-gradient(110deg,transparent 30%,rgba(82,141,244,.95) 50%,transparent 70%);background-size:250% 100%;animation:bt-shimmer 6s ease-in-out infinite}
@@ -28,7 +28,7 @@
    without it the menu links below would paint over the open dropdown. */
 .dashboard-shell .workspace-switcher{z-index:20}
 .dashboard-shell .workspace-card-button{transition:border-color .25s,background .25s,transform .25s var(--bt-ease),box-shadow .25s}
-.dashboard-shell .workspace-card-button:hover{border-color:rgba(82,141,244,.45);box-shadow:0 8px 24px rgba(0,0,0,.25);transform:translateY(-1px)}
+.dashboard-shell .workspace-card-button:hover{border-color:rgba(82,141,244,.45);box-shadow:0 8px 24px rgba(15,23,42,0.075);transform:translateY(-1px)}
 .dashboard-shell .workspace-card-button>svg{transition:transform .3s var(--bt-ease)}
 .dashboard-shell .workspace-card-button.open>svg{transform:rotate(90deg)}
 .dashboard-shell .workspace-avatar{background:linear-gradient(135deg,#4e8bf4,#3069cc);box-shadow:0 6px 16px rgba(58,116,216,.35)}
@@ -38,17 +38,17 @@
 .dashboard-shell .sidebar nav a{position:relative;overflow:hidden;transition:color .22s,background .22s,transform .22s var(--bt-ease)}
 .dashboard-shell .sidebar nav a svg{flex:0 0 auto;transition:transform .3s var(--bt-ease),color .22s,filter .22s}
 .dashboard-shell .sidebar nav a span{transition:transform .25s var(--bt-ease)}
-.dashboard-shell .sidebar nav a::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,transparent 20%,rgba(255,255,255,.07) 50%,transparent 80%);transform:translateX(-120%);transition:transform .6s var(--bt-ease)}
+.dashboard-shell .sidebar nav a::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,transparent 20%,rgba(15,23,42,0.049) 50%,transparent 80%);transform:translateX(-120%);transition:transform .6s var(--bt-ease)}
 .dashboard-shell .sidebar nav a:hover::after{transform:translateX(120%)}
-.dashboard-shell .sidebar nav a:hover svg{transform:scale(1.12) rotate(-4deg);color:#bdd4fb}
+.dashboard-shell .sidebar nav a:hover svg{transform:scale(1.12) rotate(-4deg);color:#131f33}
 .dashboard-shell .sidebar nav a:hover span{transform:translateX(3px)}
 .dashboard-shell .sidebar nav a:active{transform:scale(.98)}
 .dashboard-shell .sidebar nav a:focus-visible,.dashboard-shell .sidebar-footer a:focus-visible,.dashboard-shell .sidebar button:focus-visible{outline:2px solid var(--bt-accent);outline-offset:2px}
 
 /* Active item: glowing accent bar + tinted icon */
-.dashboard-shell .sidebar nav a.active{box-shadow:none;background:linear-gradient(90deg,rgba(56,124,242,.30),rgba(56,124,242,.06));color:#fff}
+.dashboard-shell .sidebar nav a.active{box-shadow:none;background:linear-gradient(90deg,rgba(56,124,242,.30),rgba(56,124,242,.06));color:#171717}
 .dashboard-shell .sidebar nav a.active::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:linear-gradient(180deg,#b6cffa,var(--bt-accent-2));box-shadow:0 0 12px rgba(82,141,244,.85);animation:bt-bar .45s var(--bt-ease) both}
-.dashboard-shell .sidebar nav a.active svg{color:#b6cffa;filter:drop-shadow(0 0 6px rgba(82,141,244,.6))}
+.dashboard-shell .sidebar nav a.active svg{color:#051e49;filter:drop-shadow(0 0 6px rgba(82,141,244,.6))}
 .dashboard-shell .sidebar.collapsed nav a.active{background:linear-gradient(135deg,rgba(56,124,242,.34),rgba(56,124,242,.12))}
 .dashboard-shell .sidebar.collapsed nav a.active::before{top:12px;bottom:12px}
 
@@ -63,13 +63,13 @@
 
 /* Footer: profile + upgrade card */
 .dashboard-shell .profile-card{transition:background .22s}
-.dashboard-shell .profile-card:hover{background:rgba(255,255,255,.03)!important}
+.dashboard-shell .profile-card:hover{background:rgba(15,23,42,0.021)!important}
 .dashboard-shell .profile-card>svg{transition:transform .25s var(--bt-ease),color .22s}
-.dashboard-shell .profile-card:hover>svg{transform:translateX(3px);color:#ff8a8a}
-.dashboard-shell .profile-avatar{background:linear-gradient(135deg,#2a2f45,#1a1f2e);color:#d1e1fc;border:1px solid #333b52}
-.dashboard-shell .sidebar-footer>a.upgrade-card{min-height:0;padding:13px;gap:10px;border-radius:13px;font-size:inherit;font-weight:inherit;color:#6399f5}
+.dashboard-shell .profile-card:hover>svg{transform:translateX(3px);color:#750000}
+.dashboard-shell .profile-avatar{background:linear-gradient(135deg,#e6e7ea,#edeef0);color:#0d1624;border:1px solid #d2d3d8}
+.dashboard-shell .sidebar-footer>a.upgrade-card{min-height:0;padding:13px;gap:10px;border-radius:13px;font-size:inherit;font-weight:inherit;color:#0a409c}
 .dashboard-shell .upgrade-card{position:relative;overflow:hidden;transition:transform .25s var(--bt-ease),box-shadow .25s,border-color .25s}
-.dashboard-shell .upgrade-card::after{content:"";position:absolute;inset:-1px;pointer-events:none;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.12) 50%,transparent 65%);background-size:250% 100%;animation:bt-shimmer 5s ease-in-out infinite}
+.dashboard-shell .upgrade-card::after{content:"";position:absolute;inset:-1px;pointer-events:none;background:linear-gradient(115deg,transparent 35%,rgba(15,23,42,0.06) 50%,transparent 65%);background-size:250% 100%;animation:bt-shimmer 5s ease-in-out infinite}
 .dashboard-shell .upgrade-card>svg{flex:0 0 auto;animation:bt-twinkle 3.2s ease-in-out infinite}
 .dashboard-shell a.upgrade-card:hover{transform:translateY(-2px);border-color:rgba(99,153,245,.7);box-shadow:0 10px 26px rgba(58,116,216,.28);background:linear-gradient(135deg,rgba(53,116,226,.32),rgba(50,79,128,.12))}
 
@@ -100,17 +100,17 @@
 }
 
 /* Dark branded loader between dashboard pages (replaces the white flash) */
-.center-state.bt-loading{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(56,124,242,.14),transparent 40%),#070b11;color:#8d98aa;font-size:13px;font-weight:600;letter-spacing:.02em}
+.center-state.bt-loading{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(56,124,242,.14),transparent 40%),#f6f7f8;color:#556072;font-size:13px;font-weight:600;letter-spacing:.02em}
 .bt-loader-mark{position:relative;width:44px;height:40px;display:block}
 .bt-loader-mark::before,.bt-loader-mark::after{content:"";position:absolute;inset:0;clip-path:polygon(50% 0,100% 100%,84% 100%,50% 30%,16% 100%,0 100%)}
-.bt-loader-mark::before{background:#232c3a}
+.bt-loader-mark::before{background:#e9ebed}
 .bt-loader-mark::after{background:linear-gradient(0deg,#528df4 0%,#f5f7fb 50%,transparent 50%);background-size:100% 200%;background-position:0 0;animation:bt-fill 1.4s ease-in-out infinite}
 @keyframes bt-fill{0%{background-position:0 0}60%,100%{background-position:0 100%}}
 @media(prefers-reduced-motion:reduce){.bt-loader-mark::after{animation:none}}
 
 /* Comissões */
 .dashboard-shell .commission-list{display:grid;gap:10px}
-.dashboard-shell .commission-card{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.015);transition:border-color .25s}
+.dashboard-shell .commission-card{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:rgba(15,23,42,0.01);transition:border-color .25s}
 .dashboard-shell .commission-card.open{border-color:rgba(82,141,244,.45)}
 .dashboard-shell .commission-head{width:100%;display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:14px;padding:14px 16px;background:transparent;border:0;color:inherit;text-align:left;cursor:pointer}
 .dashboard-shell .commission-head:hover{background:rgba(56,124,242,.06)}
@@ -125,17 +125,17 @@
 @media(max-width:760px){.dashboard-shell .commission-head{grid-template-columns:auto 1fr auto;gap:10px}.dashboard-shell .commission-chevron{display:none}}
 
 /* Caixa */
-.dashboard-shell .cash-highlight{border-color:rgba(85,221,164,.45)!important;background:linear-gradient(145deg,rgba(20,60,45,.55),#0b121a)!important}
+.dashboard-shell .cash-highlight{border-color:rgba(85,221,164,.45)!important;background:linear-gradient(145deg,rgba(234,240,238,0.55),#f3f5f6)!important}
 .dashboard-shell .cash-highlight strong{color:#55dda4}
 .dashboard-shell .cash-date{font-size:16px!important}
 .dashboard-shell .cash-math .cash-total{border-top:1px solid var(--line);margin-top:4px;padding-top:12px}
 .dashboard-shell .cash-math .cash-total strong{color:#55dda4;font-size:18px}
 .dashboard-shell .ranking-list small{color:var(--muted);font-size:11px}
-.dashboard-shell .service-icon.cash-out{background:rgba(255,107,107,.12);color:#ff8a8a}
+.dashboard-shell .service-icon.cash-out{background:rgba(255,107,107,.12);color:#750000}
 .dashboard-shell .service-icon.cash-in{background:rgba(85,221,164,.12);color:#55dda4}
-.dashboard-shell .cash-expected{display:flex;align-items:center;gap:10px;padding:12px 14px;margin:6px 0 4px;border:1px solid rgba(85,221,164,.35);border-radius:12px;background:rgba(85,221,164,.07);color:#cfeee0}
+.dashboard-shell .cash-expected{display:flex;align-items:center;gap:10px;padding:12px 14px;margin:6px 0 4px;border:1px solid rgba(85,221,164,.35);border-radius:12px;background:rgba(85,221,164,.07);color:#122f22}
 .dashboard-shell .cash-over{color:#55dda4;font-weight:700}
-.dashboard-shell .cash-short{color:#ff8a8a;font-weight:700}
+.dashboard-shell .cash-short{color:#750000;font-weight:700}
 .dashboard-shell .inventory-header-actions select{min-height:42px;border-radius:11px}
 
 /* Mensalidade: CPF/CNPJ exigido pelo Asaas */

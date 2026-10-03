@@ -1,11 +1,10 @@
 import Link from "next/link";
-import {Scissors} from "lucide-react";
 import {LEGAL_VERSION} from "../../lib/legal";
 
 export default function LegalDoc({title,intro,sections}){
  const updated=new Date(LEGAL_VERSION+"T12:00:00").toLocaleDateString("pt-BR");
  return <main className="legal-page">
-  <header className="legal-top"><Link href="/login" className="legal-brand"><Scissors size={20}/>BarberTix</Link><nav><Link href="/termos">Termos de Uso</Link><Link href="/privacidade">Privacidade</Link></nav></header>
+  <header className="legal-top"><Link href="/login" className="legal-brand"><span className="bt-mark" aria-hidden="true"/>BarberTix</Link><nav><Link href="/termos">Termos de Uso</Link><Link href="/privacidade">Privacidade</Link></nav></header>
   <article className="legal-card">
    <span className="legal-kicker">DOCUMENTO LEGAL · VERSÃO {updated}</span>
    <h1>{title}</h1>

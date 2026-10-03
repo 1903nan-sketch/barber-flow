@@ -55,7 +55,7 @@ export default function OnboardingPage(){
 
  if(loading)return <main className={styles.state} aria-busy="true"><span/><p>Preparando seu BarberTix...</p></main>;
  return <main className={styles.page}>
-  <header className={styles.header}><div className={styles.brand}><Scissors/>BarberTix</div><span>Configuração inicial segura</span></header>
+  <header className={styles.header}><div className={styles.brand}><span className="bt-mark" aria-hidden="true"/>BarberTix</div><span>Configuração inicial segura</span></header>
   <form className={styles.shell} onSubmit={submit}>
    <section className={styles.intro}><span>COMECE SEU TESTE</span><h1>Sua barbearia pronta para agendar.</h1><p>Configure o essencial agora. Você poderá ajustar equipe, serviços, horários e identidade visual no painel.</p><div className={styles.assurance}><ShieldCheck/><span><b>Criação automática e isolada</b><small>Seus dados ficam vinculados somente à sua empresa.</small></span></div></section>
    <div className={styles.form}>
