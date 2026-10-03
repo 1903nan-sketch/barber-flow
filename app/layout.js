@@ -6,6 +6,7 @@ import "./settings.css";
 import "./sidebar-motion.css";
 import "./corporate-glass.css";
 import "./legal.css";
+import "./finance.css";
 import GlobalNotice from "./_components/GlobalNotice";
 
 export const metadata={
