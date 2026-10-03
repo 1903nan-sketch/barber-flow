@@ -19,7 +19,7 @@ alter table public.user_consents enable row level security;
 drop policy if exists user_consents_read_own on public.user_consents;
 create policy user_consents_read_own on public.user_consents
   for select to authenticated
-  using (user_id = auth.uid() or private.is_admin());
+  using (user_id = (select auth.uid()));
 
 revoke all on public.user_consents from anon, authenticated;
 grant select on public.user_consents to authenticated;
