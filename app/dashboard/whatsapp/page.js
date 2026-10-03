@@ -16,7 +16,7 @@ const labels={
 };
 
 function WhatsAppContent({workspace}){
-  const tenant=workspace.tenant,[status,setStatus]=useState("loading"),[qr,setQr]=useState(""),[phone,setPhone]=useState(""),[configured,setConfigured]=useState(true),[aiConfigured,setAiConfigured]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState("");
+  const tenant=workspace.tenant,[status,setStatus]=useState("loading"),[qr,setQr]=useState(""),[phone,setPhone]=useState(""),[configured,setConfigured]=useState(true),[aiConfigured,setAiConfigured]=useState(false),[webhookSynced,setWebhookSynced]=useState(false),[webhookError,setWebhookError]=useState(""),[busy,setBusy]=useState(false),[error,setError]=useState("");
   const qrSrc=useMemo(()=>!qr?"":qr.startsWith("data:image")?qr:"data:image/png;base64,"+qr,[qr]);
 
   const authToken=useCallback(async()=>{
@@ -36,6 +36,8 @@ function WhatsAppContent({workspace}){
       setError("");
       setConfigured(out.configured!==false);
       setAiConfigured(out.ai_configured===true);
+      setWebhookSynced(out.webhook_synced===true);
+      setWebhookError(out.webhook_error||"");
       setStatus(out.status||"disconnected");
       setPhone(out.phone||"");
       if(out.qrcode)setQr(out.qrcode);
@@ -89,6 +91,9 @@ function WhatsAppContent({workspace}){
 
       {!configured&&<div className="form-alert error" style={{marginBottom:16}}>
         A Evolution API ainda precisa ser configurada no servidor do BarberTix. Adicione EVOLUTION_API_URL, EVOLUTION_API_KEY e EVOLUTION_WEBHOOK_SECRET na Vercel.
+      </div>}
+      {configured&&status==="connected"&&!webhookSynced&&<div className="form-alert error" style={{marginBottom:16}}>
+        O WhatsApp está conectado, mas o recebimento de mensagens ainda não foi confirmado pela Evolution.{webhookError?" "+webhookError:""} Clique em <b>Atualizar status</b> para tentar sincronizar novamente.
       </div>}
 
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:12}}>
