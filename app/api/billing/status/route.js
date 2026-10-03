@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {activeUnitCount,requireTenantOwner} from "../../../../lib/billing-server";
+import {activeUnitCount,requireTenantOwner,ensureLiveSubscription} from "../../../../lib/billing-server";
 import {asaasConfigured,calculateBillingAmount,findOpenAdvance,getSubscriptionPix,paymentPix,validTaxId} from "../../../../lib/asaas";
 import {todaySP} from "../../../../lib/legal";
 
@@ -7,6 +7,7 @@ export async function GET(request){
  try{
   const tenantId=new URL(request.url).searchParams.get("tenant_id");
   const ctx=await requireTenantOwner(request,tenantId);
+  if(asaasConfigured())await ensureLiveSubscription(ctx).catch(err=>console.error("asaas subscription check",err.status,err.message));
   const units=await activeUnitCount(ctx.admin,ctx.tenant.id);
   const amountCents=calculateBillingAmount(ctx.tenant,ctx.plan,units);
   let pix=null,pixError="";

@@ -83,6 +83,23 @@
 
 .dashboard-shell .box-head a,.dashboard-shell .stat small,.dashboard-shell .stat small svg,.dashboard-shell .content details summary,.dashboard-shell .content .fin-mini .link{color:var(--c-accent)!important}
 
+/* Theme variables used by legacy rules (they still held dark-theme values) */
+.dashboard-shell{--text:#18181b!important;--muted:#5b5b61!important;--line:rgba(20,20,24,.1)!important;--surface:#fff!important;--bg:#e2e2e4!important;--purple:#d32f2f!important;--purple-soft:rgba(211,47,47,.1)!important}
+
+/* Mensalidade */
+.dashboard-shell .monthly-card{background:var(--c-panel)!important}
+.dashboard-shell .monthly-plan{background:rgba(255,255,255,.35)!important;color:var(--c-text)!important;border-right:1px solid var(--c-line)}
+.dashboard-shell .monthly-plan>span,.dashboard-shell .monthly-label{color:var(--c-accent)!important}
+.dashboard-shell .monthly-plan>p,.dashboard-shell .monthly-due span,.dashboard-shell .monthly-plan small,.dashboard-shell .monthly-payment>p,.dashboard-shell .monthly-pix>p,.dashboard-shell .monthly-pix>small,.dashboard-shell .monthly-current{color:#55555c!important}
+.dashboard-shell .monthly-current b,.dashboard-shell .monthly-due b{color:var(--c-text)!important}
+.dashboard-shell .monthly-payment>p{font-size:12.5px!important;line-height:1.55}
+.dashboard-shell .monthly-payment>div[style]{justify-content:center;align-items:stretch}
+.dashboard-shell .monthly-payment>div[style] :is(button,a){min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 18px;font-size:14px!important;white-space:nowrap}
+.dashboard-shell .advance-box{display:grid;gap:12px;width:100%;text-align:left;background:rgba(255,255,255,.55)!important;border:1px solid var(--c-line)!important}
+.dashboard-shell .advance-box p{margin:0;color:#3f3f46!important;font-size:13px}
+.dashboard-shell .advance-box>button{justify-self:start;min-height:44px;display:inline-flex;align-items:center;gap:8px;padding:0 18px}
+.dashboard-shell .billing-waiting{color:#55555c!important}
+
 /* Panels */
 .dashboard-shell :is(.box,.stat,.metric-card,.inventory-card,.social-card,.upgrade-card,.profile-card,.monthly-card,.agenda-panel,.premium-panel,.pix-box,.network-box,.upload-box,.dash-welcome,.report-cards>*,.finance-cards>*,.fin-kpi){
  background:var(--c-panel)!important;-webkit-backdrop-filter:var(--c-blur);backdrop-filter:var(--c-blur);

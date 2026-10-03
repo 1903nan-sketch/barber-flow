@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {activeUnitCount,ensureAsaasCustomer,requireTenantOwner} from "../../../../lib/billing-server";
+import {activeUnitCount,ensureAsaasCustomer,requireTenantOwner,ensureLiveSubscription} from "../../../../lib/billing-server";
 import {advanceReference,asaasConfigured,asaasRequest,calculateBillingAmount,findOpenAdvance,getSubscriptionPix,paymentPix} from "../../../../lib/asaas";
 import {addDaysISO,todaySP} from "../../../../lib/legal";
 
@@ -10,6 +10,7 @@ export async function POST(request){
   if(!asaasConfigured())return NextResponse.json({error:"Cobrança online ainda não foi ativada."},{status:503});
   const body=await request.json().catch(()=>({})),tenantId=String(body.tenant_id||"");
   const ctx=await requireTenantOwner(request,tenantId);
+  if(asaasConfigured())await ensureLiveSubscription(ctx).catch(err=>console.error("asaas subscription check",err.status,err.message));
   const tenant=ctx.tenant;
   if(String(tenant.billing_method||"").toUpperCase()==="CREDIT_CARD"&&tenant.asaas_subscription_id)
    return NextResponse.json({error:"Sua mensalidade está no cartão recorrente e é cobrada automaticamente no vencimento."},{status:400});

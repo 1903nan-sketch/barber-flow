@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {activeUnitCount,ensureAsaasCustomer,requireTenantOwner} from "../../../../lib/billing-server";
+import {activeUnitCount,ensureAsaasCustomer,requireTenantOwner,ensureLiveSubscription} from "../../../../lib/billing-server";
 import {asaasCheckoutUrl,asaasConfigured,asaasRequest,calculateBillingAmount,effectiveDueDate,getSubscriptionPix} from "../../../../lib/asaas";
 
 export async function POST(request){
@@ -8,6 +8,7 @@ export async function POST(request){
   const body=await request.json(),tenantId=String(body.tenant_id||""),method=String(body.method||"").toUpperCase();
   if(!["PIX","CREDIT_CARD"].includes(method))return NextResponse.json({error:"Forma de pagamento inválida."},{status:400});
   const ctx=await requireTenantOwner(request,tenantId);
+  if(asaasConfigured())await ensureLiveSubscription(ctx).catch(err=>console.error("asaas subscription check",err.status,err.message));
   const units=await activeUnitCount(ctx.admin,ctx.tenant.id);
   const amountCents=calculateBillingAmount(ctx.tenant,ctx.plan,units);
   if(amountCents<=0)return NextResponse.json({error:"O valor da assinatura precisa ser maior que zero."},{status:400});
