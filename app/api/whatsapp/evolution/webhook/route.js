@@ -1,11 +1,10 @@
 import {timingSafeEqual} from "node:crypto";
 import {NextResponse} from "next/server";
-import {getEvolutionWebhookSecret,normalizeEvolutionState,sendEvolutionList,sendEvolutionText,setEvolutionWebhook,tenantIdFromEvolutionInstance} from "../../../../../lib/evolution";
+import {getEvolutionWebhookSecret,normalizeEvolutionState,sendEvolutionList,sendEvolutionText,tenantIdFromEvolutionInstance} from "../../../../../lib/evolution";
 import {whatsappAdmin} from "../../../../../lib/whatsapp-server";
 import {openaiWhatsappConfigured,runOpenAIWhatsappAgent} from "../../../../../lib/openai-whatsapp-agent";
 
 const DEFAULT_TZ="America/Sao_Paulo";
-const syncedWebhookInstances=new Set();
 const digits=v=>String(v||"").replace(/\D/g,"");
 const clean=v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
 const textLabel=v=>String(v||"").trim().replace(/\s+/g," ");
@@ -319,14 +318,6 @@ export async function POST(req){
   const tenantId=tenantIdFromEvolutionInstance(instance);
   if(!tenantId){console.warn("Evolution webhook ignored: unknown instance",{event,instance});return NextResponse.json({ok:true,ignored:"unknown_instance"});}
 
-  if(!syncedWebhookInstances.has(instance)){
-    try{
-      await setEvolutionWebhook(instance,req.url);
-      syncedWebhookInstances.add(instance);
-    }catch(error){
-      console.error("Evolution webhook event sync failed",error?.message||error);
-    }
-  }
   const {data:tenant}=await db.from("tenants")
     .select("id,name,slug,address,whatsapp,status,plans(name)")
     .eq("id",tenantId).maybeSingle();
