@@ -2,6 +2,7 @@ import {timingSafeEqual} from "node:crypto";
 import {NextResponse} from "next/server";
 import {getEvolutionWebhookSecret,normalizeEvolutionState,sendEvolutionList,sendEvolutionText,setEvolutionWebhook,tenantIdFromEvolutionInstance} from "../../../../../lib/evolution";
 import {whatsappAdmin} from "../../../../../lib/whatsapp-server";
+import {openaiWhatsappConfigured,runOpenAIWhatsappAgent} from "../../../../../lib/openai-whatsapp-agent";
 
 const DEFAULT_TZ="America/Sao_Paulo";
 const syncedWebhookInstances=new Set();
@@ -472,6 +473,43 @@ export async function POST(req){
     await saveSession(db,tenantId,phone,state,d);
     await reply(db,tenantId,instance,phone,"📲 *Prefere agendar pelo site?*\n\n"+origin+"/agendar/"+tenant.slug+"\n\n_O link abre direto na agenda da "+shopName+"._");
     return NextResponse.json({ok:true});
+  }
+
+  if((state==="start"||state==="ai")&&openaiWhatsappConfigured()){
+    try{
+      const previousResponseId=state==="ai"?String(d?.ai_response_id||""):"";
+      const ai=await runOpenAIWhatsappAgent({
+        db,
+        tenant,
+        phone,
+        message:text,
+        previousResponseId,
+        origin,
+        timezone:d?.unit?.timezone||DEFAULT_TZ
+      });
+      const previousUsage=d?.ai_usage||{};
+      const aiUsage={
+        input_tokens:Number(previousUsage.input_tokens||0)+Number(ai?.usage?.input_tokens||0),
+        output_tokens:Number(previousUsage.output_tokens||0)+Number(ai?.usage?.output_tokens||0)
+      };
+      const aiData={
+        last_message_id:d.last_message_id,
+        ai_response_id:ai?.responseId||previousResponseId,
+        ai_usage:aiUsage
+      };
+      if(ai?.handoff){
+        await saveSession(db,tenantId,phone,"human",{...aiData,handoff_reason:ai?.handoffReason||"Atendimento humano solicitado."});
+        await reply(db,tenantId,instance,phone,ai?.text||"👤 Vou passar seu atendimento para a equipe. Eles continuam com você por aqui.");
+        return NextResponse.json({ok:true,handoff:true,ai:true});
+      }
+      await saveSession(db,tenantId,phone,"ai",aiData);
+      await reply(db,tenantId,instance,phone,ai?.text||"Posso te ajudar a encontrar um horário. O que você deseja fazer?");
+      return NextResponse.json({ok:true,state:"ai",ai:true,usage:ai?.usage||{}});
+    }catch(error){
+      console.error("OpenAI WhatsApp agent failed",error?.message||error);
+      state="start";
+      d={last_message_id:d.last_message_id};
+    }
   }
 
   if(state==="start"){
