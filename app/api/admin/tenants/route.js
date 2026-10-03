@@ -1,5 +1,6 @@
 import {createClient} from "@supabase/supabase-js";
 import {NextResponse} from "next/server";
+import {TRIAL_DAYS,addDaysISO,todaySP} from "../../../../lib/legal";
 
 const cleanSlug=value=>String(value||"")
  .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
@@ -58,12 +59,17 @@ export async function POST(request){
   const discountPct=Math.min(100,Math.max(0,Number(body.discount_pct||0)));
   const discountMonths=Math.min(60,Math.max(0,Number(body.discount_months||0)));
   const billingMethod=["PIX","CREDIT_CARD"].includes(String(body.billing_method||"").toUpperCase())?String(body.billing_method).toUpperCase():"";
+  // Every new shop starts with a free trial; the first charge is due when it ends
+  // unless the admin set another due date.
+  const trialEnd=addDaysISO(todaySP(),TRIAL_DAYS);
   const patch={
+   status:"trial",
+   trial_ends_at:trialEnd,
    owner_document:String(body.owner_document||"").trim(),
    manager_name:String(body.manager_name||"").trim(),
    manager_document:String(body.manager_document||"").trim(),
    grace_days:Number(plan.default_grace_days||7),
-   billing_due_date:body.billing_due_date||null,
+   billing_due_date:body.billing_due_date||trialEnd,
    billing_provider:billingMethod?"asaas":"",
    billing_method:billingMethod,
    billing_provider_status:billingMethod?"PENDING_SETUP":"",

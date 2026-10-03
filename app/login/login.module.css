@@ -21,3 +21,4 @@
 .page .submit{background:linear-gradient(180deg,#2f6fe0,#1f55b8);border-color:rgba(150,190,255,.3);box-shadow:0 10px 26px rgba(31,85,184,.4)}
 .page .submit:hover{background:linear-gradient(180deg,#3a7aea,#2560c8)}
 .footer{border-top-color:rgba(160,190,235,.12)}
+.legal{margin:10px 0 0;text-align:center;color:#8e97ab;font-size:11.5px;line-height:1.6}.legal a{color:#a9c4f5;text-decoration:underline}

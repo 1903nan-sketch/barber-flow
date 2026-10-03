@@ -1,13 +1,30 @@
 import {timingSafeEqual} from "crypto";
 import {NextResponse} from "next/server";
 import {serverSupabase} from "../../../../lib/billing-server";
-import {addMonth} from "../../../../lib/asaas";
+import {addMonth,asaasRequest,parseAdvanceReference} from "../../../../lib/asaas";
 
 function validToken(actual,expected){
  if(!actual||!expected)return false;
  const a=Buffer.from(actual),b=Buffer.from(expected);
  return a.length===b.length&&timingSafeEqual(a,b);
 }
+const maxDate=(a,b)=>!a?b:!b?a:(String(a)>String(b)?String(a):String(b));
+const paidStatuses=new Set(["RECEIVED","CONFIRMED","RECEIVED_IN_CASH","PAYMENT_RECEIVED","PAYMENT_CONFIRMED"]);
+
+// After an advance payment, drop subscription charges for months it already covers and
+// move the subscription so Asaas next bills the new due date.
+async function shiftSubscription(subscriptionId,newDue){
+ if(!subscriptionId)return;
+ try{
+  const list=await asaasRequest("/subscriptions/"+encodeURIComponent(subscriptionId)+"/payments");
+  for(const p of Array.isArray(list?.data)?list.data:[]){
+   if(String(p.status||"").toUpperCase()==="PENDING"&&String(p.dueDate||"")<newDue)
+    await asaasRequest("/payments/"+encodeURIComponent(p.id),{method:"DELETE"});
+  }
+  await asaasRequest("/subscriptions/"+encodeURIComponent(subscriptionId),{method:"PUT",body:{nextDueDate:newDue,updatePendingPayments:false}});
+ }catch(err){console.error("asaas shift subscription",subscriptionId,newDue,err.status,err.message)}
+}
+
 function tenantRef(value){
  const m=String(value||"").match(/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i);
  return m?.[0]||null;
@@ -57,6 +74,7 @@ export async function POST(request){
   }
 
   const patch={billing_provider:"asaas"};
+  let shiftTo=null;
   const subscription=body.subscription||{},checkout=body.checkout||{},payment=body.payment||{};
 
   if(event.startsWith("CHECKOUT_")){
@@ -92,6 +110,9 @@ export async function POST(request){
    if(payment.customer)patch.asaas_customer_id=payment.customer;
    patch.asaas_last_payment_id=payment.id;
    const paidAt=payment.paymentDate||payment.confirmedDate||payment.clientPaymentDate||null;
+   // CONFIRMED and RECEIVED both arrive for one payment: count each payment only once.
+   const {data:previous}=await admin.from("billing_payments").select("status,paid_at").eq("provider","asaas").eq("provider_payment_id",payment.id).maybeSingle();
+   const alreadyCounted=Boolean(previous&&(previous.paid_at||paidStatuses.has(String(previous.status||"").toUpperCase())));
    await admin.from("billing_payments").upsert({
     tenant_id:tenant.id,
     provider:"asaas",
@@ -110,7 +131,17 @@ export async function POST(request){
    if(event==="PAYMENT_RECEIVED"||event==="PAYMENT_CONFIRMED"){
     patch.status="active";
     patch.last_paid_at=new Date().toISOString();
-    if(payment.dueDate)patch.billing_due_date=addMonth(String(payment.dueDate).slice(0,10));
+    const advance=parseAdvanceReference(payment.externalReference);
+    if(advance&&advance.tenantId===tenant.id){
+     // Each advance payment buys one more month on top of the current due date.
+     if(!alreadyCounted){
+      patch.billing_due_date=addMonth(maxDate(tenant.billing_due_date,advance.coveredDue));
+      shiftTo=patch.billing_due_date;
+     }
+    }else if(payment.dueDate){
+     // Never move the due date backwards (e.g. a late charge paid after months paid ahead).
+     patch.billing_due_date=maxDate(tenant.billing_due_date,addMonth(String(payment.dueDate).slice(0,10)));
+    }
    }else if(event==="PAYMENT_OVERDUE"&&tracked){
     patch.status="overdue";
     if(payment.dueDate)patch.billing_due_date=String(payment.dueDate).slice(0,10);
@@ -118,6 +149,7 @@ export async function POST(request){
   }
 
   await admin.from("tenants").update(patch).eq("id",tenant.id);
+  if(shiftTo)await shiftSubscription(patch.asaas_subscription_id||tenant.asaas_subscription_id,shiftTo);
   await admin.rpc("sync_tenant_billing_status",{p_tenant:tenant.id});
   await admin.from("billing_webhook_events").update({tenant_id:tenant.id,processed_at:new Date().toISOString()}).eq("event_id",eventId);
   return NextResponse.json({ok:true});

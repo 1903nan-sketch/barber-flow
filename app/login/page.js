@@ -33,7 +33,7 @@ export default function LoginPage(){
    {error&&<div className={styles.alert} role="alert">{error}</div>}{message&&<div className={styles.alert+' '+styles.success} role="status">{message}</div>}
    <button className={styles.submit} type="submit" disabled={loading}>{loading?'Aguarde...':mode==='login'?'Entrar':mode==='new-password'?'Criar minha senha':'Enviar link'}<ArrowRight size={18} aria-hidden="true"/></button>
    {mode!=='new-password'&&<div className={styles.links}>{mode==='login'?<button className={styles.link} disabled={loading} type="button" onClick={()=>changeMode('reset')}>Esqueci minha senha</button>:<button className={styles.link} disabled={loading} type="button" onClick={()=>changeMode('login')}>Voltar para entrar</button>}</div>}
-   <p className={styles.footer}>BARBERTIX · BY RUPTIX</p>
+   <p className={styles.footer}>BARBERTIX · BY RUPTIX</p><p className={styles.legal}>Ao entrar, você concorda com os <a href="/termos">Termos de Uso</a> e a <a href="/privacidade">Política de Privacidade</a>.</p>
   </form></section>
  </main>
 }

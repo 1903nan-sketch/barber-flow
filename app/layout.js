@@ -5,6 +5,7 @@ import "./public-booking.css";
 import "./settings.css";
 import "./sidebar-motion.css";
 import "./corporate-glass.css";
+import "./legal.css";
 import GlobalNotice from "./_components/GlobalNotice";
 
 export const metadata={
