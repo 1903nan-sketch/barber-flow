@@ -1,7 +1,7 @@
 "use client";
-import {useCallback,useEffect,useMemo,useState} from "react";
+import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import QRCode from "qrcode";
-import {CalendarPlus,Check,CircleDollarSign,Copy,CreditCard,RefreshCw,ShieldCheck} from "lucide-react";
+import {CalendarPlus,Check,CircleDollarSign,Copy,CreditCard,ShieldCheck} from "lucide-react";
 import {supabase} from "../../../lib/supabase";
 
 const money=cents=>(Number(cents||0)/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
@@ -19,7 +19,7 @@ function PixBox({pix}){
  },[payload,pix?.encoded_image]);
  const invoice=pix?.invoice_url?<a className="secondary-action monthly-invoice" href={pix.invoice_url} target="_blank" rel="noreferrer">Abrir fatura no Asaas</a>:null;
  if(pix?.no_pending){const br=v=>v?new Date(v+"T12:00:00").toLocaleDateString("pt-BR"):"";return <div className="form-alert"><p><strong>Nenhuma cobrança em aberto.</strong> {pix.next_due_date?`O próximo vencimento é ${br(pix.next_due_date)}. O Asaas gera a cobrança PIX 40 dias antes do vencimento, então o QR Code aparece aqui a partir de ${br(pix.available_from)}.`:"O Asaas ainda não gerou a próxima cobrança desta assinatura."}</p></div>}
- if(!payload&&!qr)return pix?.qr_error||pix?.invoice_url?<div className="form-alert"><p>{pix.qr_error||"O QR Code ainda não está disponível."}</p>{invoice}</div>:<div className="form-alert">A cobrança PIX foi criada. Atualize esta tela em alguns segundos para carregar o QR Code.</div>;
+ if(!payload&&!qr)return pix?.qr_error||pix?.invoice_url?<div className="form-alert"><p>{pix.qr_error||"O QR Code ainda não está disponível."}</p>{invoice}</div>:<div className="form-alert billing-waiting"><span className="billing-pulse" aria-hidden="true"/>Gerando o QR Code do PIX...</div>;
  return <div className="monthly-pix">
   <div className="monthly-qr">{qr&&<img src={qr} alt="QR Code PIX" width="220" height="220"/>}</div>
   <p>Escaneie o QR Code ou use o PIX Copia e Cola.</p>
@@ -36,18 +36,56 @@ export default function BillingPanel({workspace,locked=null}){
   const base=tenant?.plans?.monthly_cents||0,surcharge=Number(tenant?.no_commitment_surcharge_pct||0),discount=Number(tenant?.discount_pct||0),months=Number(tenant?.discount_months||0),started=tenant?.discount_started_at?new Date(tenant.discount_started_at+"T12:00:00"):null,end=started?new Date(started.getFullYear(),started.getMonth()+months,started.getDate()):null,active=discount>0&&months>0&&end&&new Date()<end;
   return Math.max(0,Math.round(base*(1+surcharge/100)*(1-(active?discount:0)/100)));
  },[tenant]);
- const load=useCallback(async()=>{
+ // silent: background refresh without swapping the panel for the loading state.
+ const load=useCallback(async({silent=false}={})=>{
   if(!tenant?.id)return;
-  setLoading(true);setError("");
+  if(!silent){setLoading(true);setError("")}
   try{
    const token=await accessToken(),r=await fetch("/api/billing/status?tenant_id="+encodeURIComponent(tenant.id),{headers:{authorization:"Bearer "+token},cache:"no-store"}),j=await r.json();
    if(!r.ok)throw new Error(j.error||"Não foi possível carregar a mensalidade.");
    setInfo(j);
-  }catch(e){setError(e.message)}finally{setLoading(false)}
+  }catch(e){if(!silent)setError(e.message)}finally{if(!silent)setLoading(false)}
  },[tenant?.id]);
  useEffect(()=>{load()},[load]);
  useEffect(()=>{supabase.from("plans").select("id,name,monthly_cents,description,sort_order").in("name",["Starter","Pro","Pro + Filiais"]).order("sort_order").then(({data})=>setPlans(data||[]))},[]);
  async function refresh(){await load();workspace.reload?.()}
+
+ // No "refresh" button: while something is waiting to be paid, watch the shop's billing
+ // fields (cheap, no Asaas call) and reload everything as soon as the webhook lands.
+ const [returnedFromCheckout]=useState(()=>typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("pagamento")==="sucesso");
+ const hasQr=pix=>Boolean(pix&&!pix.no_pending&&(pix.payload||pix.encoded_image||pix.invoice_url));
+ const qrPending=Boolean(info?.pix&&!info.pix.no_pending&&!info.pix.payload&&!info.pix.encoded_image&&!info.pix.qr_error&&!info.pix.invoice_url);
+ const waiting=Boolean(info&&(hasQr(info.pix)||hasQr(info.advance)||returnedFromCheckout||locked));
+ const reloadWorkspace=workspace.reload;
+ const seen=useRef(null);
+ useEffect(()=>{seen.current=info?[info.status,info.due_date,info.last_paid_at].join("|"):null},[info]);
+ useEffect(()=>{
+  if(!waiting||!tenant?.id)return;
+  let stopped=false;const started=Date.now();
+  const tick=async()=>{
+   if(document.hidden||stopped)return;
+   if(Date.now()-started>30*60000){clearInterval(timer);return}
+   const {data}=await supabase.from("tenants").select("status,billing_due_date,last_paid_at").eq("id",tenant.id).maybeSingle();
+   if(stopped||!data||seen.current===null)return;
+   const now=[data.status,data.billing_due_date,data.last_paid_at].join("|");
+   if(now!==seen.current){
+    const paid=String(data.last_paid_at||"")!==String(seen.current.split("|")[2]||"");
+    seen.current=now;
+    if(paid)setMessage(`Pagamento confirmado! Próximo vencimento: ${ptDate(data.billing_due_date)}.`);
+    await load({silent:true});reloadWorkspace?.();
+   }
+  };
+  const timer=setInterval(tick,5000);
+  const onVisible=()=>{if(!document.hidden)tick()};
+  document.addEventListener("visibilitychange",onVisible);
+  return()=>{stopped=true;clearInterval(timer);document.removeEventListener("visibilitychange",onVisible)};
+ },[waiting,tenant?.id,load,reloadWorkspace]);
+ // The Asaas QR Code can take a few seconds after the charge is created: retry quietly.
+ useEffect(()=>{
+  if(!qrPending)return;
+  let tries=0;const timer=setInterval(()=>{if(++tries>8)clearInterval(timer);else load({silent:true})},4000);
+  return()=>clearInterval(timer);
+ },[qrPending,load]);
  async function choosePlan(plan){
   if(busy||plan.id===info?.plan_id)return;
   if(!window.confirm(`Mudar para o plano ${plan.name} (${money(plan.monthly_cents)}/mês)?`))return;
@@ -116,7 +154,6 @@ export default function BillingPanel({workspace,locked=null}){
      {cardActive?<><div className="form-alert success"><CreditCard size={17}/><strong> Cartão configurado.</strong> As próximas cobranças serão processadas pelo Asaas.</div><div style={{display:"flex",gap:10,flexWrap:"wrap",margin:"12px 0"}}><button className="secondary-action" type="button" disabled={Boolean(busy)} onClick={()=>pay("PIX")}><CircleDollarSign size={17}/>{busy==="PIX"?"Trocando...":"Trocar para Pix"}</button></div></>:<div style={{display:"flex",gap:10,flexWrap:"wrap",margin:"16px 0"}}>
       <button className="primary" type="button" disabled={Boolean(busy)} onClick={()=>pay("CREDIT_CARD")}><CreditCard size={17}/>{busy==="CREDIT_CARD"?"Abrindo...":info?.billing_method==="PIX"&&info?.has_subscription?"Trocar para cartão":"Pagar com cartão"}</button>
       <button className="secondary-action" type="button" disabled={Boolean(busy)} onClick={()=>pay("PIX")}><CircleDollarSign size={17}/>{busy==="PIX"?"Gerando...":info?.billing_method==="PIX"&&info?.has_subscription?"Ver PIX do mês":"Pagar com PIX"}</button>
-      <button className="secondary-action" type="button" disabled={loading} onClick={refresh}><RefreshCw size={15}/>Atualizar</button>
      </div>}
      {info?.billing_method==="PIX"&&info?.has_subscription&&<PixBox pix={info.pix}/>}
      {info?.billing_method==="PIX"&&info?.has_subscription&&info?.pix?.no_pending&&<div className="advance-box">
@@ -124,6 +161,7 @@ export default function BillingPanel({workspace,locked=null}){
       {info?.advance?<PixBox pix={info.advance}/>:<button className="primary" type="button" disabled={Boolean(busy)} onClick={payAdvance}><CalendarPlus size={17}/>{busy==="advance"?"Gerando PIX...":"Pagar próximo mês adiantado"}</button>}
      </div>}
      {info?.pix_error&&<small>{info.pix_error}</small>}
+     {waiting&&!qrPending&&<p className="billing-waiting"><span className="billing-pulse" aria-hidden="true"/>Aguardando a confirmação do pagamento. Esta tela atualiza sozinha.</p>}
     </>:<>
      <p>A cobrança online ainda não está configurada. Nenhum pagamento será confirmado manualmente ou direcionado para uma chave fixa.</p>
      <div className="form-alert">Fale com o suporte BarberTix para ativar o provedor de pagamentos.</div>
