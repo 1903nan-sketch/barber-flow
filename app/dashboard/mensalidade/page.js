@@ -18,6 +18,7 @@ function PixBox({pix}){
   if(payload)QRCode.toDataURL(payload,{width:240,margin:1}).then(setQr).catch(()=>setQr(""));
  },[payload,pix?.encoded_image]);
  const invoice=pix?.invoice_url?<a className="secondary-action monthly-invoice" href={pix.invoice_url} target="_blank" rel="noreferrer">Abrir fatura no Asaas</a>:null;
+ if(pix?.no_pending){const br=v=>v?new Date(v+"T12:00:00").toLocaleDateString("pt-BR"):"";return <div className="form-alert"><p><strong>Nenhuma cobrança em aberto.</strong> {pix.next_due_date?`O próximo vencimento é ${br(pix.next_due_date)}. O Asaas gera a cobrança PIX 40 dias antes do vencimento, então o QR Code aparece aqui a partir de ${br(pix.available_from)}.`:"O Asaas ainda não gerou a próxima cobrança desta assinatura."}</p></div>}
  if(!payload&&!qr)return pix?.qr_error||pix?.invoice_url?<div className="form-alert"><p>{pix.qr_error||"O QR Code ainda não está disponível."}</p>{invoice}</div>:<div className="form-alert">A cobrança PIX foi criada. Atualize esta tela em alguns segundos para carregar o QR Code.</div>;
  return <div className="monthly-pix">
   <div className="monthly-qr">{qr&&<img src={qr} alt="QR Code PIX" width="220" height="220"/>}</div>
