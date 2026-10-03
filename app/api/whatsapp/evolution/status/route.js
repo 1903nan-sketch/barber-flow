@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {connectEvolutionInstance,evolutionConfigured,evolutionConnectionState,evolutionInstanceName,evolutionPhone,extractEvolutionQr,getEvolutionWebhookSecret,normalizeEvolutionState,setEvolutionWebhook} from "../../../../../lib/evolution";
+import {connectEvolutionInstance,evolutionConfigured,evolutionConnectionState,evolutionInstanceName,evolutionPhone,extractEvolutionQr,findEvolutionWebhook,getEvolutionWebhookSecret,normalizeEvolutionState,setEvolutionWebhook} from "../../../../../lib/evolution";
 import {requireWhatsappSettingsAccess} from "../../../../../lib/whatsapp-server";
 import {openaiWhatsappConfigured} from "../../../../../lib/openai-whatsapp-agent";
 
@@ -32,21 +32,33 @@ export async function GET(req){
     }catch{}
   }
 
-  // A Vercel deploy changes the deployment URL, while Evolution keeps the old
-  // webhook until it is updated. Re-sync automatically from the stable site
-  // origin whenever the WhatsApp settings page checks a connected instance.
+  let webhookSynced=false,webhookError="";
   if(state==="connected"){
     const origin=new URL(req.url).origin;
-    const key=instance+"|"+origin;
-    if(!syncedWebhooks.has(key)){
-      try{
-        const webhook=new URL("/api/whatsapp/evolution/webhook",origin);
-        webhook.searchParams.set("secret",await getEvolutionWebhookSecret());
-        await setEvolutionWebhook(instance,webhook.toString());
+    const desired=new URL("/api/whatsapp/evolution/webhook",origin);
+    desired.searchParams.set("secret",await getEvolutionWebhookSecret());
+    const desiredUrl=desired.toString();
+    const key=instance+"|"+desiredUrl;
+    try{
+      let found=null;
+      try{found=await findEvolutionWebhook(instance)}catch{}
+      const current=found?.webhook?.webhook||found?.webhook||found||{};
+      const currentUrl=String(current?.url||"");
+      const events=Array.isArray(current?.events)?current.events:[];
+      const enabled=current?.enabled!==false;
+      const hasMessages=events.includes("MESSAGES_UPSERT");
+      if(currentUrl!==desiredUrl||!enabled||!hasMessages||!syncedWebhooks.has(key)){
+        await setEvolutionWebhook(instance,desiredUrl);
         syncedWebhooks.add(key);
-      }catch(error){
-        console.error("Evolution webhook status sync failed",error?.message||error);
+        try{found=await findEvolutionWebhook(instance)}catch{}
       }
+      const after=found?.webhook?.webhook||found?.webhook||found||{};
+      const afterEvents=Array.isArray(after?.events)?after.events:[];
+      webhookSynced=String(after?.url||"")===desiredUrl&&after?.enabled!==false&&afterEvents.includes("MESSAGES_UPSERT");
+      if(!webhookSynced)webhookError="O Evolution não confirmou o webhook de mensagens.";
+    }catch(error){
+      webhookError=error?.message||"Não foi possível verificar o webhook.";
+      console.error("Evolution webhook status sync failed",webhookError);
     }
   }
 
@@ -57,6 +69,8 @@ export async function GET(req){
     phone,
     qrcode:state==="connecting"?qrcode:"",
     instance,
-    ai_configured:openaiWhatsappConfigured()
+    ai_configured:openaiWhatsappConfigured(),
+    webhook_synced:webhookSynced,
+    webhook_error:webhookError
   });
 }
