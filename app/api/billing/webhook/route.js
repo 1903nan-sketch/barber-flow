@@ -78,7 +78,7 @@ export async function POST(request){
    }else if(tracked){
     if(subscription.id)patch.asaas_subscription_id=subscription.id;
     if(subscription.customer)patch.asaas_customer_id=subscription.customer;
-    if(subscription.billingType)patch.billing_method=subscription.billingType;
+    if(subscription.billingType)patch.billing_method=subscription.billingType==="BOLETO"?"PIX":subscription.billingType;
     if(subscription.value!=null)patch.billing_amount_cents=Math.round(Number(subscription.value)*100);
     if(subscription.nextDueDate)patch.billing_due_date=String(subscription.nextDueDate).slice(0,10);
    }
@@ -87,7 +87,7 @@ export async function POST(request){
   if(event.startsWith("PAYMENT_")&&payment.id){
    if(tracked&&paidEvent){
     if(payment.subscription&&!current)patch.asaas_subscription_id=payment.subscription;
-    if(payment.billingType)patch.billing_method=payment.billingType;
+    if(payment.billingType)patch.billing_method=payment.billingType==="BOLETO"?"PIX":payment.billingType;
    }
    if(payment.customer)patch.asaas_customer_id=payment.customer;
    patch.asaas_last_payment_id=payment.id;

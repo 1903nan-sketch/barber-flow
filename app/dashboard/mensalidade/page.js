@@ -77,7 +77,7 @@ function BillingContent({workspace}){
     <span className="monthly-label">PAGAR MENSALIDADE</span>
     <h3>{online?"Pagamento online":"Pagamento indisponível"}</h3>
     {loading?<p>Carregando cobrança...</p>:online?<>
-     <p>Escolha como deseja manter sua mensalidade. No cartão, as próximas cobranças são recorrentes. No PIX, cada cobrança mensal fica disponível nesta tela.</p>
+     <p>Escolha como deseja manter sua mensalidade. No cartão, as próximas cobranças são recorrentes. No PIX, o Asaas gera a cobrança mensal com QR Code Pix nesta tela.</p>
      {addr?.open&&!cardActive&&<div className="monthly-address"><b>Endereço do responsável (exigido pelo Asaas para cartão)</b>
       <label>CEP<input value={addr.postalCode} inputMode="numeric" placeholder="00000-000" onChange={e=>{const v=e.target.value;setAddr(a=>({...a,postalCode:v}));const d=v.replace(/\D/g,"");if(d.length===8)fetch("https://viacep.com.br/ws/"+d+"/json/").then(r=>r.json()).then(x=>{if(!x.erro)setAddr(a=>({...a,address:x.logradouro||a.address,province:x.bairro||a.province,city:x.localidade?x.localidade+"/"+x.uf:a.city}))}).catch(()=>{})}}/></label>
       <label className="wide">Rua<input value={addr.address} onChange={e=>setAddr(a=>({...a,address:e.target.value}))}/></label>

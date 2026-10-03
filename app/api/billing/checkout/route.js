@@ -52,7 +52,9 @@ export async function POST(request){
   if(method==="PIX"){
    const subscription=await asaasRequest("/subscriptions",{method:"POST",body:{
     customer,
-    billingType:"PIX",
+    // Asaas subscriptions do not support PIX directly. BOLETO subscriptions
+    // generate a monthly charge that also exposes a Pix QR Code.
+    billingType:"BOLETO",
     value:amountCents/100,
     nextDueDate:due,
     cycle:"MONTHLY",
