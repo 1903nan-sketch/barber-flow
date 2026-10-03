@@ -21,7 +21,7 @@ export const metadata={
  }
 };
 
-export const viewport={themeColor:"#eceef2"};
+export const viewport={themeColor:"#efe8de"};
 
 export default function RootLayout({children}){
  return <html lang="pt-BR"><body>{children}<GlobalNotice/></body></html>
