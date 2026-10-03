@@ -19,7 +19,7 @@ function PixBox({pix}){
  },[payload,pix?.encoded_image]);
  const invoice=pix?.invoice_url?<a className="secondary-action monthly-invoice" href={pix.invoice_url} target="_blank" rel="noreferrer">Abrir fatura no Asaas</a>:null;
  if(pix?.no_pending){const br=v=>v?new Date(v+"T12:00:00").toLocaleDateString("pt-BR"):"";return <div className="form-alert"><p><strong>Nenhuma cobrança em aberto.</strong> {pix.next_due_date?`O próximo vencimento é ${br(pix.next_due_date)}. O Asaas gera a cobrança PIX 40 dias antes do vencimento, então o QR Code aparece aqui a partir de ${br(pix.available_from)}.`:"O Asaas ainda não gerou a próxima cobrança desta assinatura."}</p></div>}
- if(!payload&&!qr)return pix?.qr_error||pix?.invoice_url?<div className="form-alert"><p>{pix.qr_error||"O QR Code ainda não está disponível."}</p>{invoice}</div>:<div className="form-alert billing-waiting"><span className="billing-pulse" aria-hidden="true"/>Gerando o QR Code do PIX...</div>;
+ if(!payload&&!qr)return pix?.qr_error||pix?.invoice_url?<div className="form-alert"><p>{pix.qr_retryable?"O QR Code do Pix ainda está sendo preparado pelo Asaas. Vou tentar novamente automaticamente.":(pix.qr_error||"O QR Code ainda não está disponível.")}</p>{invoice}</div>:<div className="form-alert billing-waiting"><span className="billing-pulse" aria-hidden="true"/>Gerando o QR Code do PIX...</div>;
  return <div className="monthly-pix">
   <div className="monthly-qr">{qr&&<img src={qr} alt="QR Code PIX" width="220" height="220"/>}</div>
   <p>Escaneie o QR Code ou use o PIX Copia e Cola.</p>
@@ -54,7 +54,7 @@ export default function BillingPanel({workspace,locked=null}){
  // fields (cheap, no Asaas call) and reload everything as soon as the webhook lands.
  const [returnedFromCheckout]=useState(()=>typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("pagamento")==="sucesso");
  const hasQr=pix=>Boolean(pix&&!pix.no_pending&&(pix.payload||pix.encoded_image||pix.invoice_url));
- const qrPending=Boolean(info?.pix&&!info.pix.no_pending&&!info.pix.payload&&!info.pix.encoded_image&&!info.pix.qr_error&&!info.pix.invoice_url);
+ const qrPending=Boolean(info?.pix&&!info.pix.no_pending&&!info.pix.payload&&!info.pix.encoded_image&&(!info.pix.qr_error||info.pix.qr_retryable));
  const waiting=Boolean(info&&(hasQr(info.pix)||hasQr(info.advance)||returnedFromCheckout||locked));
  const reloadWorkspace=workspace.reload;
  const seen=useRef(null);
