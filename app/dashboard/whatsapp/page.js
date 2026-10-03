@@ -16,7 +16,7 @@ const labels={
 };
 
 function WhatsAppContent({workspace}){
-  const tenant=workspace.tenant,[status,setStatus]=useState("loading"),[qr,setQr]=useState(""),[phone,setPhone]=useState(""),[configured,setConfigured]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState("");
+  const tenant=workspace.tenant,[status,setStatus]=useState("loading"),[qr,setQr]=useState(""),[phone,setPhone]=useState(""),[configured,setConfigured]=useState(true),[aiConfigured,setAiConfigured]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState("");
   const qrSrc=useMemo(()=>!qr?"":qr.startsWith("data:image")?qr:"data:image/png;base64,"+qr,[qr]);
 
   const authToken=useCallback(async()=>{
@@ -35,6 +35,7 @@ function WhatsAppContent({workspace}){
       if(!res.ok)throw new Error(out.error||"Não foi possível consultar o WhatsApp.");
       setError("");
       setConfigured(out.configured!==false);
+      setAiConfigured(out.ai_configured===true);
       setStatus(out.status||"disconnected");
       setPhone(out.phone||"");
       if(out.qrcode)setQr(out.qrcode);
@@ -78,7 +79,7 @@ function WhatsAppContent({workspace}){
       <div className="box-head">
         <div>
           <h2>WhatsApp da barbearia</h2>
-          <p>Conecte o próprio número da barbearia por QR Code. O robô usa a agenda real do BarberTix.</p>
+          <p>Conecte o próprio número da barbearia por QR Code. O agente de IA usa a agenda real do BarberTix.</p>
         </div>
         <span style={{display:"inline-flex",alignItems:"center",gap:7,fontSize:12,fontWeight:800,padding:"8px 11px",border:"1px solid var(--line)",borderRadius:999}}>
           {status==="connected"?<CheckCircle2 size={16}/>:<MessageCircle size={16}/>}
@@ -92,7 +93,7 @@ function WhatsAppContent({workspace}){
 
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:12}}>
         <div className="appointment"><span className="quick-icon green"><Smartphone size={18}/></span><div className="appointment-main"><b>Número conectado</b><p>{phone?("+"+phone):status==="connected"?"WhatsApp conectado":"Nenhum número conectado"}</p></div></div>
-        <div className="appointment"><span className="quick-icon purple"><Bot size={18}/></span><div className="appointment-main"><b>Robô de agendamento</b><p>Serviço → profissional → data → horário → confirmação.</p></div></div>
+        <div className="appointment"><span className="quick-icon purple"><Bot size={18}/></span><div className="appointment-main"><b>Agente de IA</b><p>{aiConfigured?"OpenAI ativa · entende linguagem natural e consulta a agenda real.":"Aguardando OPENAI_API_KEY no servidor."}</p></div></div>
         <div className="appointment"><span className="quick-icon blue"><UserRound size={18}/></span><div className="appointment-main"><b>Atendimento humano</b><p>“Atendente”, “cancelar” ou “remarcar” pausa a automação.</p></div></div>
       </div>
 
@@ -115,9 +116,9 @@ function WhatsAppContent({workspace}){
     <section className="box">
       <div className="box-head"><div><h2>Como o atendimento funciona</h2><p>O WhatsApp e o site continuam usando a mesma agenda do BarberTix.</p></div></div>
       <div style={{display:"grid",gap:12}}>
-        <div className="appointment"><span className="quick-icon green">1</span><div className="appointment-main"><b>Cliente envia uma mensagem</b><p>Ex.: “Quero cortar amanhã” ou simplesmente “Oi”.</p></div></div>
-        <div className="appointment"><span className="quick-icon purple">2</span><div className="appointment-main"><b>BarberTix consulta dados reais</b><p>Serviços, profissionais, unidades e horários vêm do Supabase.</p></div></div>
-        <div className="appointment"><span className="quick-icon blue">3</span><div className="appointment-main"><b>Confirmação antes de gravar</b><p>O horário só é criado depois que o cliente responde SIM e a disponibilidade é validada novamente.</p></div></div>
+        <div className="appointment"><span className="quick-icon green">1</span><div className="appointment-main"><b>Cliente fala normalmente</b><p>Ex.: “Quero corte sexta depois das 18h com qualquer barbeiro”.</p></div></div>
+        <div className="appointment"><span className="quick-icon purple">2</span><div className="appointment-main"><b>IA usa ferramentas do BarberTix</b><p>Serviços, profissionais, unidades e horários são consultados no Supabase; a IA não inventa disponibilidade.</p></div></div>
+        <div className="appointment"><span className="quick-icon blue">3</span><div className="appointment-main"><b>Confirmação antes de gravar</b><p>O agente mostra o resumo e só cria o horário depois de uma confirmação explícita do cliente e nova validação da vaga.</p></div></div>
       </div>
       <div style={{marginTop:18,padding:16,border:"1px solid var(--line)",borderRadius:12}}>
         <strong style={{fontSize:12,display:"flex",alignItems:"center",gap:7}}><ShieldCheck size={17}/> Integração não oficial</strong>
