@@ -50,7 +50,7 @@
 @media(prefers-reduced-motion:reduce){.billing-pulse{animation:none}}
 
 /* Clean light finish */
-.legal-page,.consent-screen{background:radial-gradient(900px 620px at 78% 18%,rgba(214,170,166,.3),transparent 62%),radial-gradient(760px 560px at 12% 92%,rgba(228,206,203,.36),transparent 60%),linear-gradient(135deg,#fbf7f6,#efe6e4)!important;color:#1d1415}
+.legal-page,.consent-screen{background:radial-gradient(900px 620px at 78% 18%,rgba(176,120,114,.3),transparent 62%),radial-gradient(760px 560px at 12% 92%,rgba(198,160,154,.36),transparent 60%),linear-gradient(135deg,#e9dfdd,#d6c8c5)!important;color:#1d1415}
 .legal-kicker,.consent-card>span{color:#776a69!important}
 .legal-brand,.legal-brand .bt-mark{color:#c62828}
 .legal-card,.consent-card{background:rgba(255,255,255,.66)!important;border-color:rgba(255,255,255,.8)!important;box-shadow:0 1px 2px rgba(60,22,22,.04),0 24px 60px rgba(60,22,22,.08)!important}

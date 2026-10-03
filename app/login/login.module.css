@@ -24,7 +24,7 @@
 .legal{margin:10px 0 0;text-align:center;color:#545d71;font-size:11.5px;line-height:1.6}.legal a{color:#0a2556;text-decoration:underline}
 /* Clean light finish: graphite actions, closed-triangle mark */
 .mark{width:26px;height:24px;flex:0 0 26px;background:#c62828;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 36'%3E%3Cpath d='M20 4 L36 32 L4 32 Z' fill='none' stroke='%23000' stroke-width='4.2' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 36'%3E%3Cpath d='M20 4 L36 32 L4 32 Z' fill='none' stroke='%23000' stroke-width='4.2' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
-.page{background:radial-gradient(900px 620px at 78% 18%,rgba(214,170,166,.3),transparent 62%),radial-gradient(760px 560px at 12% 92%,rgba(228,206,203,.36),transparent 60%),linear-gradient(135deg,#fbf7f6,#efe6e4)}
+.page{background:radial-gradient(900px 620px at 78% 18%,rgba(176,120,114,.3),transparent 62%),radial-gradient(760px 560px at 12% 92%,rgba(198,160,154,.36),transparent 60%),linear-gradient(135deg,#e9dfdd,#d6c8c5)}
 .brand{background:transparent;border-right-color:rgba(60,22,22,.08)}
 .brand h1 em{color:#5e5352}
 .kicker,.welcome{color:#776a69}

@@ -1,7 +1,7 @@
 /* Clean light theme: soft gray backdrop, white frosted panels, graphite actions,
    subtle motion. Loaded after the legacy layers so it wins the cascade. */
 :root{
- --c-bg:#f3ecea;
+ --c-bg:#e2d7d5;
  --c-panel:rgba(255,255,255,.62);
  --c-panel-strong:rgba(255,255,255,.9);
  --c-line:rgba(60,22,22,.08);
@@ -21,10 +21,10 @@
 /* Backdrop behind everything, like a frosted desk */
 .dashboard-shell{
  background:
-  radial-gradient(900px 620px at 78% 18%,rgba(214,170,166,.32),transparent 62%),
-  radial-gradient(760px 560px at 12% 92%,rgba(228,206,203,.38),transparent 60%),
+  radial-gradient(900px 620px at 78% 18%,rgba(176,120,114,.32),transparent 62%),
+  radial-gradient(760px 560px at 12% 92%,rgba(198,160,154,.38),transparent 60%),
   radial-gradient(620px 460px at 95% 95%,rgba(255,255,255,.7),transparent 60%),
-  linear-gradient(135deg,#fbf7f6,#efe6e4)!important;
+  linear-gradient(135deg,#e9dfdd,#d6c8c5)!important;
  background-attachment:fixed!important;color:var(--c-text)!important;
 }
 .dashboard-shell .content{background:transparent!important;color:var(--c-text)!important}
@@ -61,7 +61,7 @@
 .dashboard-shell .brand{background:linear-gradient(90deg,#1d1415 0%,#1d1415 40%,#e57373 50%,#1d1415 60%,#1d1415 100%)!important;background-size:250% 100%!important}
 .bt-loader-mark::before{background:#ead6d4!important}
 .bt-loader-mark::after{background:linear-gradient(0deg,var(--c-ink) 0%,var(--c-ink) 50%,transparent 50%)!important;background-size:100% 200%!important}
-.center-state,.bt-loading{background:linear-gradient(135deg,#fbf7f6,#efe6e4)!important;color:var(--c-muted)!important}
+.center-state,.bt-loading{background:linear-gradient(135deg,#e9dfdd,#d6c8c5)!important;color:var(--c-muted)!important}
 
 .dashboard-shell .brand{background:linear-gradient(90deg,var(--c-ink) 0%,var(--c-ink) 40%,#e57373 50%,var(--c-ink) 60%,var(--c-ink) 100%)!important;background-size:250% 100%!important;-webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important}
 .dashboard-shell .bf-simple-mark::after{background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.95) 50%,transparent 70%)!important;background-size:250% 100%!important}
