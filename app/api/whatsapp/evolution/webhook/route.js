@@ -27,7 +27,18 @@ async function safeSecret(req){
   if(!expected||!got||expected.length!==got.length)return false;
   return timingSafeEqual(Buffer.from(expected),Buffer.from(got));
 }
-function eventName(body){return String(body?.event||body?.type||"").replace(/[.\-]/g,"_").toUpperCase()}
+function eventName(body){return String(body?.event||body?.type||body?.data?.event||"").replace(/[.\-]/g,"_").toUpperCase()}
+function extractInstanceName(body){
+  const candidates=[body?.instanceName,body?.instance,body?.data?.instanceName,body?.data?.instance,body?.server_url&&body?.instance];
+  for(const value of candidates){
+    if(typeof value==="string"&&value.trim())return value.trim();
+    if(value&&typeof value==="object"){
+      const nested=value.instanceName||value.instance||value.name||value.id;
+      if(typeof nested==="string"&&nested.trim())return nested.trim();
+    }
+  }
+  return "";
+}
 function payloadData(body){return body?.data||body}
 function extractKey(body){
   const d=payloadData(body),candidate=Array.isArray(d)?d[0]:d;
@@ -302,11 +313,11 @@ function nextClientText(rows,tz){
 export async function POST(req){
   if(!(await safeSecret(req)))return NextResponse.json({error:"Webhook não autorizado."},{status:401});
   let body;try{body=await req.json()}catch{return NextResponse.json({error:"JSON inválido."},{status:400})}
-  const db=whatsappAdmin(),event=eventName(body),instance=String(body?.instance||body?.instanceName||body?.data?.instance||"");
-  if(!instance)return NextResponse.json({ok:true,ignored:"missing_instance"});
+  const db=whatsappAdmin(),event=eventName(body),instance=extractInstanceName(body);
+  if(!instance){console.warn("Evolution webhook ignored: missing instance",{event,keys:Object.keys(body||{})});return NextResponse.json({ok:true,ignored:"missing_instance"});}
 
   const tenantId=tenantIdFromEvolutionInstance(instance);
-  if(!tenantId)return NextResponse.json({ok:true,ignored:"unknown_instance"});
+  if(!tenantId){console.warn("Evolution webhook ignored: unknown instance",{event,instance});return NextResponse.json({ok:true,ignored:"unknown_instance"});}
 
   if(!syncedWebhookInstances.has(instance)){
     try{
@@ -345,9 +356,9 @@ export async function POST(req){
     text=extractText(message);
     messageId=String(key?.id||"");
   }
-  if(!jid||jid.includes("@g.us")||jid.includes("status@broadcast"))return NextResponse.json({ok:true,ignored:"non_direct"});
+  if(!jid||jid.includes("@g.us")||jid.includes("status@broadcast")){console.warn("Evolution webhook ignored: non direct",{event,instance,jid});return NextResponse.json({ok:true,ignored:"non_direct"});}
   const phone=digits(jid.split("@")[0]);
-  if(!phone||!text)return NextResponse.json({ok:true,ignored:"empty"});
+  if(!phone||!text){console.warn("Evolution webhook ignored: empty message",{event,instance,jid,hasText:Boolean(text)});return NextResponse.json({ok:true,ignored:"empty"});}
 
   const employee=await findEmployee(db,tenantId,phone);
   if(employee.matched){
