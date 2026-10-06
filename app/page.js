@@ -2,7 +2,7 @@ import Link from "next/link";
 import {headers} from "next/headers";
 import {redirect} from "next/navigation";
 import {createClient} from "@supabase/supabase-js";
-import {ArrowUpRight,Bot,Check,Code2,Cpu,GitBranch,Layers,Mail,Scissors,ShieldCheck,Sparkles,Workflow,Zap} from "lucide-react";
+import {ArrowUpRight,Check,Code2,Cpu,GitBranch,Mail,Scissors,ShieldCheck,Sparkles,Workflow,Zap} from "lucide-react";
 import RuptixFx from "./_components/RuptixFx";
 import "./ruptix-home.css";
 
@@ -46,7 +46,7 @@ export default async function HomePage(){
    <div className="rx-nav-links"><a href="#sob-medida">Software sob medida</a><a href="#produtos">Produtos</a><a href="#sobre">Sobre</a><a href="#contato">Contato</a></div>
    <div className="rx-nav-right">
     <span className="rx-status"><i/> ONLINE{activeUsers>0&&<b>· {activeUsers} usuários</b>}</span>
-    <a href={mail("Software personalizado")} className="rx-btn rx-btn-dark rx-btn-sm" data-magnetic>Criar um sistema <ArrowUpRight/></a>
+    <a href={mail("Software personalizado")} className="rx-btn rx-btn-dark rx-btn-sm">Criar um sistema <ArrowUpRight/></a>
    </div>
   </nav>
 
@@ -60,29 +60,10 @@ export default async function HomePage(){
     </h1>
     <p data-reveal style={{"--d":".5s"}}>A Ruptix desenvolve <strong>softwares personalizados</strong> para empresas que precisam organizar operações, automatizar processos e transformar uma necessidade real em um sistema próprio.</p>
     <div className="rx-actions" data-reveal style={{"--d":".65s"}}>
-     <a className="rx-btn rx-btn-primary" href={mail("Quero um software personalizado")} data-magnetic>Quero um software personalizado <ArrowUpRight/></a>
-     <a className="rx-btn rx-btn-glass" href="#produtos" data-magnetic>Ver produtos Ruptix</a>
+     <a className="rx-btn rx-btn-primary" href={mail("Quero um software personalizado")}>Quero um software personalizado <ArrowUpRight/></a>
+     <a className="rx-btn rx-btn-glass" href="#produtos">Ver produtos Ruptix</a>
     </div>
     <div className="rx-trust" data-reveal style={{"--d":".8s"}}><span><ShieldCheck/>Código próprio</span><span><Zap/>Entrega contínua</span><span><Cpu/>Nuvem e IA</span></div>
-   </div>
-
-   <div className="rx-hero-stage" data-reveal style={{"--d":".35s"}}>
-    <div className="rx-orbit" aria-hidden="true"><i/><i/><i/></div>
-    <div className="rx-glass rx-console" data-tilt>
-     <header><span><i/><i/><i/></span><b>ruptix ~ build</b><small>v2026</small></header>
-     <div className="rx-code" aria-hidden="true">
-      <p><em>$</em> ruptix new <u>seu-negocio</u></p>
-      <p className="ok">✓ mapeando processos</p>
-      <p className="ok">✓ modelando dados</p>
-      <p className="ok">✓ telas e permissões</p>
-      <p className="ok">✓ integrações e pagamentos</p>
-      <p className="run"><em>›</em> deploy em produção<span className="rx-caret"/></p>
-     </div>
-     <div className="rx-meter" aria-hidden="true"><span/></div>
-     <div className="rx-console-foot"><b>BUILD<br/>FOR YOUR<br/>BUSINESS.</b><Sparkles/></div>
-    </div>
-    <div className="rx-float rx-float-a rx-glass" aria-hidden="true"><Bot/><span>Automação<small>rodando 24/7</small></span></div>
-    <div className="rx-float rx-float-b rx-glass" aria-hidden="true"><Layers/><span>Sob medida<small>do jeito da sua empresa</small></span></div>
    </div>
   </section>
 
@@ -100,21 +81,21 @@ export default async function HomePage(){
      <li><Check/> Integrações com serviços que você já usa</li>
      <li><Check/> Estrutura pronta para crescer com a empresa</li>
     </ul>
-    <a className="rx-btn rx-btn-primary" href={mail("Quero apresentar meu projeto")} data-magnetic>Apresentar meu projeto <ArrowUpRight/></a>
+    <a className="rx-btn rx-btn-primary" href={mail("Quero apresentar meu projeto")}>Apresentar meu projeto <ArrowUpRight/></a>
    </div>
    <div className="rx-flow" data-reveal style={{"--d":".15s"}}>
     {[["01","Entender","processos e gargalos",Workflow],["02","Construir","sistema sob medida",Code2],["03","Integrar","APIs, pagamentos e automações",GitBranch],["04","Evoluir","novas funções conforme o negócio cresce",Sparkles]].map(([n,t,s,Icon],i)=>
-     <article className="rx-glass rx-step" data-tilt style={{"--s":i}} key={n}><span className="rx-step-n">{n}</span><div className="rx-step-icon"><Icon/></div><b>{t}</b><small>{s}</small><i className="rx-step-bar"/></article>)}
+     <article className="rx-glass rx-step" style={{"--s":i}} key={n}><span className="rx-step-n">{n}</span><div className="rx-step-icon"><Icon/></div><b>{t}</b><small>{s}</small><i className="rx-step-bar"/></article>)}
    </div>
   </section>
 
   <section className="rx-stats" aria-label="Números da Ruptix">
-   <div className="rx-glass rx-stat" data-reveal data-tilt><b data-count="100" data-suffix="%">0%</b><span>código próprio, sem software de prateleira</span></div>
-   <div className="rx-glass rx-stat" data-reveal data-tilt style={{"--d":".1s"}}><b data-count="24" data-suffix="/7">0/7</b><span>sistemas e automações em operação</span></div>
-   <div className="rx-glass rx-stat" data-reveal data-tilt style={{"--d":".2s"}}><b data-count="2">0</b><span>produtos próprios na linha beleza</span></div>
+   <div className="rx-glass rx-stat" data-reveal><b data-count="100" data-suffix="%">0%</b><span>código próprio, sem software de prateleira</span></div>
+   <div className="rx-glass rx-stat" data-reveal style={{"--d":".1s"}}><b data-count="24" data-suffix="/7">0/7</b><span>sistemas e automações em operação</span></div>
+   <div className="rx-glass rx-stat" data-reveal style={{"--d":".2s"}}><b data-count="2">0</b><span>produtos próprios na linha beleza</span></div>
    {activeUsers>0
-    ?<div className="rx-glass rx-stat" data-reveal data-tilt style={{"--d":".3s"}}><b data-count={activeUsers}>0</b><span>usuários ativos agora nas plataformas</span></div>
-    :<div className="rx-glass rx-stat" data-reveal data-tilt style={{"--d":".3s"}}><b data-count="4">0</b><span>etapas do problema ao produto em produção</span></div>}
+    ?<div className="rx-glass rx-stat" data-reveal style={{"--d":".3s"}}><b data-count={activeUsers}>0</b><span>usuários ativos agora nas plataformas</span></div>
+    :<div className="rx-glass rx-stat" data-reveal style={{"--d":".3s"}}><b data-count="4">0</b><span>etapas do problema ao produto em produção</span></div>}
   </section>
 
   <section className="rx-section rx-products" id="produtos">
@@ -125,7 +106,7 @@ export default async function HomePage(){
    </div>
    <div className="rx-line-head" data-reveal><span>LINHA 01</span><h3>Beleza.</h3><p>Soluções digitais para barbearias, salões, estética e outros negócios do setor de beleza.</p></div>
    <div className="rx-cards">
-    <Link href="/produtos/barber-flow" className="rx-glass rx-product" data-tilt data-reveal>
+    <Link href="/produtos/barber-flow" className="rx-glass rx-product" data-reveal>
      <div className="rx-product-head"><span className="rx-live"><i/> PRODUTO ATIVO</span><span>01</span></div>
      <div className="rx-product-icon"><Scissors/></div>
      <span className="rx-product-tag">BARBEARIAS · LINHA BELEZA</span>
@@ -133,7 +114,7 @@ export default async function HomePage(){
      <p>Plataforma completa para agenda, clientes, equipe, vendas e crescimento da barbearia.</p>
      <b>Explorar produto <ArrowUpRight/></b>
     </Link>
-    <Link href="/produtos/beautytix" className="rx-glass rx-product rx-product-beauty" data-tilt data-reveal style={{"--d":".12s"}}>
+    <Link href="/produtos/beautytix" className="rx-glass rx-product rx-product-beauty" data-reveal style={{"--d":".12s"}}>
      <div className="rx-product-head"><span className="rx-live"><i/> PRODUTO ATIVO</span><span>02</span></div>
      <div className="rx-product-icon"><Sparkles/></div>
      <span className="rx-product-tag">SALÕES & ESTÉTICA · LINHA BELEZA</span>
@@ -151,15 +132,15 @@ export default async function HomePage(){
   </section>
 
   <section className="rx-end" id="contato">
-   <div className="rx-glass rx-end-card" data-tilt data-reveal>
+   <div className="rx-glass rx-end-card" data-reveal>
     <div>
      <span className="rx-kicker">SOFTWARE SOB MEDIDA · RUPTIX®</span>
      <h2>Tem um processo que ainda depende de planilha e improviso?</h2>
      <p>Conte o que sua empresa precisa. Respondemos pelo e-mail <a href={`mailto:${EMAIL}`}>{EMAIL}</a>.</p>
     </div>
     <div className="rx-end-actions">
-     <a className="rx-btn rx-btn-primary rx-btn-lg" href={mail("Quero transformar um processo em software")} data-magnetic>Vamos transformar em software <ArrowUpRight/></a>
-     <a className="rx-btn rx-btn-glass" href={`mailto:${EMAIL}`} data-magnetic><Mail/> {EMAIL}</a>
+     <a className="rx-btn rx-btn-primary rx-btn-lg" href={mail("Quero transformar um processo em software")}>Vamos transformar em software <ArrowUpRight/></a>
+     <a className="rx-btn rx-btn-glass" href={`mailto:${EMAIL}`}><Mail/> {EMAIL}</a>
     </div>
    </div>
   </section>
