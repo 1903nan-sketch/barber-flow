@@ -56,7 +56,8 @@ export async function POST(request){
    return NextResponse.json({ok:true,ignored:true});
   }
   if(tenant.product_slug!=="beautytix"){
-   await admin.from("billing_webhook_events").update({processed_at:new Date().toISOString()}).eq("event_id",eventId);
+   // Leave processed_at empty so the BarberTix webhook can process the same Asaas event
+   // when both products share the same Supabase and Asaas account.
    return NextResponse.json({ok:true,ignored_product:true});
   }
 
