@@ -81,7 +81,6 @@
   transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s ease,background .25s ease;
 }
 .rx-btn svg{width:17px;height:17px;transition:transform .25s ease}
-.rx-btn:hover svg{transform:translate(2px,-2px)}
 .rx-btn-primary{
   color:#fff;background:var(--rx-ink);
   box-shadow:0 8px 22px rgba(15,18,34,.22),inset 0 1px 0 rgba(255,255,255,.18);
@@ -196,14 +195,12 @@
 .rx-product::before{content:"";position:absolute;width:320px;height:320px;right:-90px;top:-110px;border-radius:50%;filter:blur(30px);opacity:.55;pointer-events:none;
   background:radial-gradient(circle,rgba(63,74,99,.45),transparent 70%);transition:transform .6s ease}
 .rx-product-beauty::before{background:radial-gradient(circle,rgba(170,150,160,.45),transparent 70%)}
-.rx-product:hover::before{transform:scale(1.25) translate(-20px,20px)}
 .rx-product-head{display:flex;justify-content:space-between;align-items:center;font:700 12px ui-monospace,monospace;color:var(--rx-muted)}
 .rx-live{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;background:rgba(46,180,110,.1);color:#1d8a52;font-size:10.5px;letter-spacing:.12em}
 .rx-live i{width:7px;height:7px;border-radius:50%;background:#2ec27e;animation:rx-pulse 1.8s ease-out infinite}
 .rx-product-icon{width:64px;height:64px;margin:40px 0 26px;display:grid;place-items:center;border-radius:20px;color:#fff;
   background:linear-gradient(135deg,var(--rx-violet),#232a3b);box-shadow:0 14px 30px rgba(63,74,99,.32);transition:transform .4s cubic-bezier(.2,.8,.2,1)}
 .rx-product-beauty .rx-product-icon{background:linear-gradient(135deg,#b48a9d,#7a5567);box-shadow:0 14px 30px rgba(122,85,103,.22)}
-.rx-product:hover .rx-product-icon{transform:rotate(-8deg) scale(1.08)}
 .rx-product-icon svg{width:28px;height:28px}
 .rx-product-tag{font-size:11px;font-weight:800;letter-spacing:.16em;color:var(--rx-muted)}
 .rx-product h3{margin:10px 0 12px;font-size:clamp(44px,5vw,64px);line-height:.92;letter-spacing:-.06em;font-weight:900}
@@ -211,7 +208,6 @@
 .rx-product>b{margin-top:auto;padding-top:26px;display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:750;color:var(--rx-violet)}
 .rx-product-beauty>b{color:#7a5567}
 .rx-product>b svg{width:16px;transition:transform .25s ease}
-.rx-product:hover>b svg{transform:translate(3px,-3px)}
 
 .rx-manifesto{text-align:center}
 .rx-manifesto>p{max-width:980px;margin:18px auto 0;font-size:clamp(30px,4.4vw,58px)!important;line-height:1.1!important;letter-spacing:-.045em;font-weight:800;color:var(--rx-ink)!important}
@@ -219,7 +215,7 @@
 .rx-pills{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:36px}
 .rx-pills b{padding:11px 18px;border-radius:999px;background:var(--rx-glass);border:1px solid var(--rx-edge);box-shadow:var(--rx-shadow);font-size:13px;font-weight:650;color:var(--rx-ink-2);
   -webkit-backdrop-filter:var(--rx-blur);backdrop-filter:var(--rx-blur);transition:transform .25s ease,color .25s ease}
-.rx-pills b:hover{transform:translateY(-3px);color:var(--rx-violet)}
+.rx-pills b:hover{color:var(--rx-violet)}
 
 .rx-end{width:min(1240px,calc(100% - 40px));margin:0 auto 70px}
 .rx-end-card{display:flex;align-items:center;justify-content:space-between;gap:30px;padding:54px;overflow:hidden;
@@ -346,7 +342,6 @@ html:not(#rx) .rx.ruptix-site .rp-showcase{
   background:var(--rx-glass)!important;border:1px solid var(--rx-edge)!important;box-shadow:var(--rx-shadow)!important;color:var(--rx-ink)!important;
   -webkit-backdrop-filter:var(--rx-blur);backdrop-filter:var(--rx-blur);transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s ease;
 }
-html:not(#rx) .rx.ruptix-site .rp-features article:hover{transform:translateY(-6px);box-shadow:var(--rx-shadow),0 30px 60px rgba(30,34,48,.14)!important}
 html:not(#rx) .rx.ruptix-site .rp-plan-grid article.featured{
   background:linear-gradient(160deg,rgba(255,255,255,.75),rgba(232,234,240,.6))!important;border-color:color-mix(in srgb,var(--acc) 40%,white)!important;
 }
