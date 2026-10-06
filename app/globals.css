@@ -1312,3 +1312,14 @@ body{background:linear-gradient(135deg,#f8f0f4 0%,#f2e8f4 55%,#f8eee9 100%);colo
   border-color:#5b425a!important;
   color:#fff!important;
 }
+
+/* BeautyTix Asaas billing */
+.monthly-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:16px 0;width:100%}
+.monthly-current{font-size:11px;color:#6f7480;margin:8px 0 2px}
+.monthly-taxid{width:100%;display:grid;gap:7px;text-align:left;font-size:11px;font-weight:750;margin:10px 0 4px}
+.monthly-taxid input,.monthly-address input{width:100%;border:1px solid #e3e5eb;background:#fff;color:#262a33;border-radius:10px;padding:11px 12px;outline:none}
+.monthly-taxid small{font-weight:500;color:#8b92a2}
+.monthly-address{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;text-align:left;margin:12px 0;padding:14px;border:1px solid #ebe7f6;background:#fbfaff;border-radius:14px}
+.monthly-address>b{grid-column:1/-1;font-size:11px}.monthly-address label{font-size:10px;font-weight:750;display:grid;gap:5px}.monthly-address .wide{grid-column:1/-1}
+.monthly-invoice{margin-top:10px}
+@media(max-width:640px){.monthly-address{grid-template-columns:1fr}.monthly-address .wide,.monthly-address>b{grid-column:auto}}

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="pt-BR">
+  <body style="margin:0;padding:0;background:#fff7fb;font-family:Arial,Helvetica,sans-serif;color:#2b2430;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#fff7fb;padding:32px 16px;">
+      <tr><td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border:1px solid #f0ddea;border-radius:18px;overflow:hidden;">
+          <tr><td style="padding:28px 32px;background:#2a2030;color:#ffffff;">
+            <div style="font-size:22px;font-weight:700;letter-spacing:-0.4px;">BeautyTix</div>
+            <div style="font-size:13px;color:#e4cfe0;margin-top:4px;">Gestão inteligente para seu espaço · by Ruptix</div>
+          </td></tr>
+          <tr><td style="padding:32px;">
+            <div style="font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#a44f8c;">Acesso criado</div>
+            <h1 style="font-size:24px;line-height:1.25;margin:10px 0 12px;color:#2b2430;">Crie sua senha para acessar o BeautyTix</h1>
+            <p style="font-size:15px;line-height:1.65;color:#665b69;margin:0 0 22px;">Olá{{ if .Data.full_name }}, {{ .Data.full_name }}{{ end }}. Seu acesso{{ if .Data.tenant_name }} ao espaço {{ .Data.tenant_name }}{{ end }} foi criado no BeautyTix. Use o botão abaixo para confirmar o convite e definir sua senha.</p>
+            <table role="presentation" cellspacing="0" cellpadding="0"><tr><td style="border-radius:10px;background:#a44f8c;"><a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 22px;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;">Criar minha senha</a></td></tr></table>
+            <p style="font-size:13px;line-height:1.55;color:#8f8291;margin:24px 0 0;">Este convite é pessoal. Se você não esperava esta mensagem, ignore o e-mail e não compartilhe o link.</p>
+          </td></tr>
+        </table>
+        <p style="font-size:12px;color:#a496a6;margin:16px 0 0;">BeautyTix • Ruptix • acesso exclusivo do seu espaço</p>
+      </td></tr>
+    </table>
+  </body>
+</html>

@@ -19,13 +19,12 @@ export async function POST(request){
   if(!allowed||allowed.access_role!=="full")return NextResponse.json({error:"Acesso restrito ao administrador mestre."},{status:403});
 
   const body=await request.json();
-  const name=String(body.name||"").trim(),ownerName=String(body.owner_name||"").trim(),email=String(body.owner_email||"").trim().toLowerCase(),password=String(body.password||"");
+  const name=String(body.name||"").trim(),ownerName=String(body.owner_name||"").trim(),email=String(body.owner_email||"").trim().toLowerCase();
   let slug=cleanSlug(body.slug||name);
 
-  if(!name||!ownerName||!email||!slug||!body.plan_id)return NextResponse.json({error:"Preencha os dados obrigatórios da negócio, proprietário e plano."},{status:400});
-  if(password.length<8)return NextResponse.json({error:"A senha precisa ter pelo menos 8 caracteres."},{status:400});
+  if(!name||!ownerName||!email||!slug||!body.plan_id)return NextResponse.json({error:"Preencha os dados obrigatórios do espaço, proprietária e plano."},{status:400});
 
-  const {data:plan,error:planError}=await admin.from("plans").select("id,name,monthly_cents").eq("id",body.plan_id).maybeSingle();
+  const {data:plan,error:planError}=await admin.from("plans").select("id,name,monthly_cents,default_grace_days").eq("id",body.plan_id).maybeSingle();
   if(planError||!plan||!["Starter","Pro","Premium"].includes(plan.name))return NextResponse.json({error:"Selecione um plano válido."},{status:400});
 
   const baseSlug=slug;
@@ -37,11 +36,17 @@ export async function POST(request){
    if(suffix>99)return NextResponse.json({error:"Não foi possível gerar uma URL única para esta negócio."},{status:400});
   }
 
-  const {data:created,error:createError}=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{name:ownerName}});
+  const redirectTo="https://beautytix.3ruptix.com/login?setup=password";
+  const {data:created,error:createError}=await admin.auth.admin.inviteUserByEmail(email,{
+   redirectTo,
+   data:{full_name:ownerName,tenant_name:name,product:"BeautyTix"}
+  });
   if(createError){
-   const duplicate=/already|registered|exists/i.test(createError.message||"");
-   return NextResponse.json({error:duplicate?"Este e-mail já possui uma conta. Se você acabou de cadastrar esta negócio, confira a lista de Negócios.":createError.message},{status:400});
+   const duplicate=/already|registered|exists|user.*exists/i.test(createError.message||"");
+   const rate=/rate|limit|too many/i.test(createError.message||"");
+   return NextResponse.json({error:duplicate?"Este e-mail já possui uma conta. Confira os acessos existentes antes de cadastrar novamente.":rate?"O serviço de e-mail atingiu o limite temporário de envios. Aguarde alguns minutos e tente novamente.":createError.message},{status:400});
   }
+  if(!created?.user?.id)return NextResponse.json({error:"O convite não retornou um usuário válido. Tente novamente."},{status:500});
 
   const {data:tenantId,error:provisionError}=await admin.rpc("admin_provision_tenant",{p_admin:user.id,p_owner:created.user.id,p:{name,slug,phone:String(body.phone||"").trim(),plan_id:plan.id,owner_name:ownerName}});
   if(provisionError){
@@ -52,13 +57,17 @@ export async function POST(request){
 
   const discountPct=Math.min(100,Math.max(0,Number(body.discount_pct||0)));
   const discountMonths=Math.min(60,Math.max(0,Number(body.discount_months||0)));
+  const billingMethod=["PIX","CREDIT_CARD"].includes(String(body.billing_method||"").toUpperCase())?String(body.billing_method).toUpperCase():"";
   const patch={
    product_slug:"beautytix",
    owner_document:String(body.owner_document||"").trim(),
    manager_name:String(body.manager_name||"").trim(),
    manager_document:String(body.manager_document||"").trim(),
-   grace_days:0,
+   grace_days:Number(plan.default_grace_days||7),
    billing_due_date:body.billing_due_date||null,
+   billing_provider:billingMethod?"asaas":"",
+   billing_method:billingMethod,
+   billing_provider_status:billingMethod?"PENDING_SETUP":"",
    commitment_months:body.commitment_mode==="flex"?0:12,
    no_commitment_surcharge_pct:body.commitment_mode==="flex"?15:0,
    discount_pct:discountPct,
@@ -71,7 +80,7 @@ export async function POST(request){
    return NextResponse.json({error:"A negócio foi criada, mas houve erro ao salvar a assinatura. Atualize a página e revise o cadastro em Negócios."},{status:500});
   }
 
-  return NextResponse.json({id:tenantId,slug,name,plan:plan.name});
+  return NextResponse.json({id:tenantId,slug,name,plan:plan.name,invite_sent:true,owner_email:email});
  }catch(error){
   console.error("Create tenant route failed",error?.message||error);
   return NextResponse.json({error:error.message||"Não foi possível criar a negócio."},{status:500});
