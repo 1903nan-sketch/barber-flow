@@ -2,19 +2,17 @@
 import {useEffect,useRef} from "react";
 
 /* Efeitos da página institucional da Ruptix:
-   - céu de estrelas que piscam + rede de partículas que reage ao ponteiro;
-   - rastro de faíscas atrás do mouse;
+   - céu de estrelas que piscam + rede de partículas que reage ao toque;
    - gestos no celular: toque (onda), toque duplo (fogos), segurar (esfera de
      energia que explode ao soltar), arrastar (rastro), deslizar rápido
      (cometa), dois dedos (feixe de luz) e inclinar o aparelho (paralaxe);
-   - cartões com inclinação 3D e luz interna (data-tilt);
-   - botões magnéticos (data-magnetic);
    - entrada animada ao rolar (data-reveal) e contadores (data-count);
    - barra de progresso da rolagem e menu que encolhe ao rolar.
+   O mouse não dispara efeitos: nada segue o cursor nem reage ao clique.
    As animações ficam ligadas mesmo com "reduzir movimento" no sistema, que
    vem ativo em muitos celulares e deixava a página parada. */
 export default function RuptixFx(){
- const canvasRef=useRef(null),glowRef=useRef(null),progressRef=useRef(null);
+ const canvasRef=useRef(null),progressRef=useRef(null);
 
  useEffect(()=>{
   const root=document.querySelector(".rx");
@@ -46,25 +44,8 @@ export default function RuptixFx(){
    root.classList.toggle("rx-scrolled",scrollY>24)};
   onScroll();on(window,"scroll",onScroll,{passive:true});
 
-  // Cartões com inclinação e luz interna
-  root.querySelectorAll("[data-tilt]").forEach(card=>{
-   const move=e=>{const r=card.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
-    card.style.setProperty("--mx",`${x*100}%`);card.style.setProperty("--my",`${y*100}%`);
-    const k=e.pointerType==="mouse"?1:1.6;card.style.setProperty("--ry",`${(x-.5)*9*k}deg`);card.style.setProperty("--rx",`${(.5-y)*7*k}deg`)};
-   const leave=()=>{card.style.setProperty("--ry","0deg");card.style.setProperty("--rx","0deg");card.classList.remove("rx-pressed")};
-   const down=e=>{if(e.pointerType!=="mouse"){card.classList.add("rx-pressed");move(e)}};
-   on(card,"pointermove",move);on(card,"pointerleave",leave);on(card,"pointerdown",down);on(card,"pointerup",leave);on(card,"pointercancel",leave);
-  });
-
-  // Botões magnéticos
-  if(fine)root.querySelectorAll("[data-magnetic]").forEach(btn=>{
-   const move=e=>{const r=btn.getBoundingClientRect(),x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2;btn.style.transform=`translate(${x*.18}px,${y*.28}px)`};
-   const leave=()=>{btn.style.transform=""};
-   on(btn,"pointermove",move);on(btn,"pointerleave",leave);
-  });
-
   // Peças visuais reutilizadas pelos gestos (inseridas no body).
-  const glow=glowRef.current;let gx=innerWidth/2,gy=innerHeight/3,tx=gx,ty=gy,lastSpark=0,raf=0;
+  let lastSpark=0;
   const add=(cls,x,y,vars={})=>{const el=document.createElement(cls==="rx-spark"?"i":"span");el.className=cls;el.style.left=x+"px";el.style.top=y+"px";
    for(const k in vars)el.style.setProperty(k,vars[k]);document.body.appendChild(el);el.addEventListener("animationend",()=>el.remove(),{once:true});return el};
   const spark=(x,y,big,angle,dist,hue)=>{const a=angle??Math.random()*Math.PI*2,d=dist??((big?26:12)+Math.random()*(big?30:18));
@@ -108,13 +89,6 @@ export default function RuptixFx(){
    praf=requestAnimationFrame(draw);cleanups.push(()=>cancelAnimationFrame(praf));
   }
 
-  // Mouse: brilho que segue o cursor, rastro e onda no clique.
-  on(window,"pointermove",e=>{if(e.pointerType==="touch")return;tx=e.clientX;ty=e.clientY;glow?.classList.add("on");net.targets=[{x:e.clientX,y:e.clientY}];trail(e.clientX,e.clientY,46)},{passive:true});
-  on(window,"pointerdown",e=>{if(e.pointerType==="touch")return;ripple(e.clientX,e.clientY);net.burst(e.clientX,e.clientY,2.2,160)},{passive:true});
-  on(document,"pointerleave",()=>{glow?.classList.remove("on");net.targets=[]});
-  const follow=()=>{gx+=(tx-gx)*.14;gy+=(ty-gy)*.14;if(glow)glow.style.transform=`translate3d(${gx}px,${gy}px,0)`;raf=requestAnimationFrame(follow)};
-  raf=requestAnimationFrame(follow);cleanups.push(()=>cancelAnimationFrame(raf));
-
   // ----- Gestos de toque -----
   // Usa touch* (e não pointer*) porque o navegador cancela os eventos de
   // ponteiro assim que a rolagem começa; touch* continua chegando.
@@ -149,7 +123,7 @@ export default function RuptixFx(){
    if(e.touches.length>=2){cancelHold();g.holding=false;g.orb?.remove();g.orb=null;updateBeam(e.touches[0],e.touches[1]);
     for(const f of e.touches)add("rx-ripple",f.clientX,f.clientY);net.targets=[...e.touches].map(f=>({x:f.clientX,y:f.clientY}));buzz(6);return}
    Object.assign(g,{startX:t.clientX,startY:t.clientY,lastX:t.clientX,lastY:t.clientY,lastT:performance.now(),vx:0,vy:0,moved:false,holding:false});
-   tx=t.clientX;ty=t.clientY;glow?.classList.add("on");net.targets=[{x:t.clientX,y:t.clientY}];
+   net.targets=[{x:t.clientX,y:t.clientY}];
    const now=performance.now();
    if(now-g.lastTap<320&&Math.hypot(t.clientX-g.lastTapX,t.clientY-g.lastTapY)<48){fireworks(t.clientX,t.clientY);g.lastTap=0}
    else{ripple(t.clientX,t.clientY,7);net.burst(t.clientX,t.clientY,1.6,140)}
@@ -167,7 +141,7 @@ export default function RuptixFx(){
    g.lastX=t.clientX;g.lastY=t.clientY;g.lastT=now;
    if(Math.hypot(t.clientX-g.startX,t.clientY-g.startY)>12){g.moved=true;if(!g.holding)cancelHold()}
    if(g.orb){g.orb.style.left=t.clientX+"px";g.orb.style.top=t.clientY+"px"}
-   tx=t.clientX;ty=t.clientY;glow?.classList.add("on");net.targets=[{x:t.clientX,y:t.clientY}];trail(t.clientX,t.clientY,24);
+   net.targets=[{x:t.clientX,y:t.clientY}];trail(t.clientX,t.clientY,24);
   },{passive:true});
 
   const touchEnd=e=>{
@@ -178,7 +152,7 @@ export default function RuptixFx(){
     const r=el.getBoundingClientRect();el.remove();shockwave(r.left+r.width/2,r.top+r.height/2,.45+held*.55)}
    else if(g.moved&&Math.hypot(g.vx,g.vy)>.55&&performance.now()-g.lastT<90)comet(g.lastX,g.lastY,g.vx,g.vy);
    else if(!g.moved){g.lastTap=performance.now();g.lastTapX=g.startX;g.lastTapY=g.startY}
-   glow?.classList.remove("on");setTimeout(()=>{if(!g.holding)net.targets=[]},250);
+   setTimeout(()=>{if(!g.holding)net.targets=[]},250);
   };
   on(window,"touchend",touchEnd,{passive:true});on(window,"touchcancel",touchEnd,{passive:true});
   cleanups.push(()=>{clearTimeout(g.holdTimer);g.orb?.remove();g.beam?.remove()});
@@ -210,6 +184,5 @@ export default function RuptixFx(){
  return <>
   <div className="rx-progress" ref={progressRef} aria-hidden="true"/>
   <canvas className="rx-net" ref={canvasRef} aria-hidden="true"/>
-  <div className="rx-cursor-glow" ref={glowRef} aria-hidden="true"/>
  </>;
 }
