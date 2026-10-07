@@ -1323,3 +1323,7 @@ body{background:linear-gradient(135deg,#f8f0f4 0%,#f2e8f4 55%,#f8eee9 100%);colo
 .monthly-address>b{grid-column:1/-1;font-size:11px}.monthly-address label{font-size:10px;font-weight:750;display:grid;gap:5px}.monthly-address .wide{grid-column:1/-1}
 .monthly-invoice{margin-top:10px}
 @media(max-width:640px){.monthly-address{grid-template-columns:1fr}.monthly-address .wide,.monthly-address>b{grid-column:auto}}
+
+/* Clean sidebar toggle */
+.dashboard-shell .sidebar-toggle svg{transition:transform .2s ease}
+.dashboard-shell .sidebar.collapsed .sidebar-toggle svg{transform:rotate(180deg)}

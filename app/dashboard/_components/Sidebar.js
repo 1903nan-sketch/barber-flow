@@ -57,10 +57,10 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
             <span className="brand-subtitle">Gestão de beleza</span>
           </div>
         </div>
+        <button type="button" className="sidebar-toggle" onClick={onToggle} aria-label={collapsed?"Expandir menu":"Minimizar menu"} title={collapsed?"Expandir menu":"Minimizar menu"}>
+          <ChevronLeft size={17}/>
+        </button>
       </div>
-      <button type="button" className="sidebar-toggle sidebar-edge-tab" onClick={onToggle} aria-label={collapsed?"Expandir menu":"Minimizar menu"} title={collapsed?"Expandir menu":"Minimizar menu"}>
-        <ChevronLeft size={17}/>
-      </button>
 
       <div className="workspace-switcher">
         <button type="button" className={"workspace-card workspace-card-button "+(workspaceOpen?"open":"")} onClick={()=>setWorkspaceOpen(v=>!v)}>
