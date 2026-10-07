@@ -49,6 +49,12 @@ const initials=name=>String(name||"BT").trim().split(/\s+/).slice(0,2).map(x=>x[
 export default function Sidebar({ workspace, collapsed=false, onToggle }) {
   const pathname = usePathname();
   const [workspaceOpen,setWorkspaceOpen]=useState(false);
+  const [staff,setStaff]=useState([]);
+  const [staffLoading,setStaffLoading]=useState(false);
+  const [selectedStaff,setSelectedStaff]=useState(null);
+  const [switchPassword,setSwitchPassword]=useState("");
+  const [switchError,setSwitchError]=useState("");
+  const [switching,setSwitching]=useState(false);
   const [intro,setIntro]=useState(false);
   const switcherRef=useRef(null);
   const role=workspace?.membership?.role;
@@ -58,8 +64,29 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
   useEffect(()=>{if(!workspaceOpen)return;const close=e=>{if(e.type==="keydown"?e.key==="Escape":!switcherRef.current?.contains(e.target))setWorkspaceOpen(false)};document.addEventListener("mousedown",close);document.addEventListener("keydown",close);return()=>{document.removeEventListener("mousedown",close);document.removeEventListener("keydown",close)}},[workspaceOpen]);
   const starter=String(workspace?.tenant?.plans?.name||"").toLowerCase()==="starter";
   const starterRoutes=new Set(["/dashboard","/dashboard/clientes","/dashboard/barbeiros","/dashboard/servicos","/dashboard/financeiro","/dashboard/estoque","/dashboard/comandas","/dashboard/vendas","/dashboard/caixa","/dashboard/relatorios","/dashboard/comissoes","/dashboard/mensalidade"]);
-  async function changeWorkspace(tenantId){localStorage.setItem("barberflow_workspace",tenantId);setWorkspaceOpen(false);window.location.href="/dashboard"}
-  async function changeAccount(){localStorage.removeItem("barberflow_workspace");await supabase?.auth.signOut();window.location.href="/login"}
+  async function openStaffSwitcher(){
+    const opening=!workspaceOpen;setWorkspaceOpen(opening);setSelectedStaff(null);setSwitchPassword("");setSwitchError("");
+    if(!opening||staffLoading||staff.length||!workspace?.tenant?.id)return;
+    setStaffLoading(true);
+    try{
+      const {data:{session}}=await supabase.auth.getSession();
+      const r=await fetch("/api/team?tenant_id="+encodeURIComponent(workspace.tenant.id),{headers:{Authorization:"Bearer "+(session?.access_token||"")},cache:"no-store"});
+      const j=await r.json();if(!r.ok)throw new Error(j.error||"Não foi possível carregar os funcionários.");
+      setStaff(j.items||[]);
+    }catch(e){setSwitchError(e.message||"Não foi possível carregar os funcionários.")}finally{setStaffLoading(false)}
+  }
+  async function switchStaff(e){
+    e.preventDefault();if(!selectedStaff||!switchPassword||switching)return;
+    setSwitching(true);setSwitchError("");
+    try{
+      const {error}=await supabase.auth.signInWithPassword({email:selectedStaff.login_email,password:switchPassword});
+      if(error)throw error;
+      localStorage.setItem("barberflow_workspace",workspace.tenant.id);
+      window.location.href="/dashboard";
+    }catch(e){
+      setSwitchError(e?.message==="Invalid login credentials"?"Senha incorreta para este funcionário.":e?.message||"Não foi possível trocar o funcionário.");
+    }finally{setSwitching(false)}
+  }
   async function signOut(){if(!window.confirm("Deseja sair do BarberTix?"))return;await supabase?.auth.signOut();window.location.href="/login"}
 
   return (
@@ -72,25 +99,34 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
             <span className="brand-subtitle">Gestão inteligente</span>
           </div>
         </div>
+        <button type="button" className="sidebar-toggle" onClick={onToggle} aria-label={collapsed?"Expandir menu":"Minimizar menu"} title={collapsed?"Expandir menu":"Minimizar menu"}>
+          <ChevronLeft size={17}/>
+        </button>
       </div>
-      <button type="button" className="sidebar-toggle sidebar-edge-tab" onClick={onToggle} aria-label={collapsed?"Expandir menu":"Minimizar menu"} title={collapsed?"Expandir menu":"Minimizar menu"}>
-        <ChevronLeft size={17}/>
-      </button>
 
       <div className="workspace-switcher" ref={switcherRef}>
-        <button type="button" className={"workspace-card workspace-card-button "+(workspaceOpen?"open":"")} onClick={()=>setWorkspaceOpen(v=>!v)} aria-expanded={workspaceOpen} aria-haspopup="menu">
-          <span className="workspace-avatar">{initials(workspace?.tenant?.name)}</span>
-          <div><strong>{workspace?.tenant?.name||"BarberTix"}</strong><small>{roleLabel[role]||role||"Equipe"}</small></div>
+        <button type="button" className={"workspace-card workspace-card-button "+(workspaceOpen?"open":"")} onClick={openStaffSwitcher} aria-expanded={workspaceOpen} aria-haspopup="menu">
+          <span className="workspace-avatar">{initials(workspace?.membership?.name||workspace?.tenant?.name)}</span>
+          <div><strong>{workspace?.membership?.name||workspace?.tenant?.name||"BarberTix"}</strong><small>{roleLabel[role]||role||"Equipe"} · Trocar funcionário</small></div>
           <ChevronRight size={17} />
         </button>
-        {workspaceOpen&&<div className="workspace-menu">
-          <p>Trocar perfil</p>
-          {(workspace?.memberships||[]).map(m=><button type="button" key={m.tenant_id} className={m.tenant_id===workspace?.tenant?.id?"current":""} onClick={()=>changeWorkspace(m.tenant_id)}>
-            <span className="workspace-avatar mini">{initials(m.tenants?.name)}</span>
-            <span><strong>{m.tenants?.name||"Barbearia"}</strong><small>{roleLabel[m.role]||m.role}</small></span>
-            {m.tenant_id===workspace?.tenant?.id&&<b>Atual</b>}
-          </button>)}
-          <button type="button" className="workspace-other-account" onClick={changeAccount}>Entrar em outra conta</button>
+        {workspaceOpen&&<div className="workspace-menu staff-switch-menu">
+          <p>{selectedStaff?"Confirmar acesso":"Trocar funcionário"}</p>
+          {selectedStaff?<form className="staff-switch-form" onSubmit={switchStaff}>
+            <div className="staff-switch-selected"><span className="workspace-avatar mini">{initials(selectedStaff.name)}</span><span><strong>{selectedStaff.name}</strong><small>@{selectedStaff.username} · {roleLabel[selectedStaff.role]||selectedStaff.role}</small></span></div>
+            <label>Senha do funcionário<input type="password" autoFocus value={switchPassword} onChange={e=>setSwitchPassword(e.target.value)} placeholder="Digite a senha" autoComplete="current-password" required/></label>
+            {switchError&&<small className="staff-switch-error">{switchError}</small>}
+            <div className="staff-switch-actions"><button type="button" onClick={()=>{setSelectedStaff(null);setSwitchPassword("");setSwitchError("")}}>Voltar</button><button type="submit" disabled={switching}>{switching?"Entrando...":"Entrar"}</button></div>
+          </form>:<>
+            {staffLoading&&<div className="staff-switch-empty">Carregando funcionários...</div>}
+            {!staffLoading&&switchError&&<div className="staff-switch-empty error">{switchError}</div>}
+            {!staffLoading&&!switchError&&staff.length===0&&<div className="staff-switch-empty">Nenhum funcionário com acesso cadastrado.</div>}
+            {!staffLoading&&staff.map(m=><button type="button" key={m.user_id} className={m.user_id===workspace?.user?.id?"current":""} onClick={()=>{setSelectedStaff(m);setSwitchPassword("");setSwitchError("")}}>
+              <span className="workspace-avatar mini">{initials(m.name)}</span>
+              <span><strong>{m.name}</strong><small>@{m.username} · {roleLabel[m.role]||m.role}</small></span>
+              {m.user_id===workspace?.user?.id&&<b>Atual</b>}
+            </button>)}
+          </>}
         </div>}
       </div>
 

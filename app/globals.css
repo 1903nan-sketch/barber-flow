@@ -1398,3 +1398,22 @@ html:has(.admin-layout),body:has(.admin-layout){background:#f7f8f9!important}
  .rh2-custom-v2-window>header{grid-template-columns:1fr auto}
  .rh2-custom-v2-window>header b{display:none}
 }
+
+/* Clean sidebar toggle + employee password switcher */
+.dashboard-shell .sidebar-toggle svg{transition:transform .2s ease}
+.dashboard-shell .sidebar.collapsed .sidebar-toggle svg{transform:rotate(180deg)}
+.dashboard-shell .staff-switch-menu{padding:9px}
+.dashboard-shell .staff-switch-form{display:grid;gap:10px;padding:4px}
+.dashboard-shell .staff-switch-selected{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:9px;padding:7px 5px}
+.dashboard-shell .staff-switch-selected strong,.dashboard-shell .staff-switch-selected small{display:block}
+.dashboard-shell .staff-switch-selected strong{font-size:11px}.dashboard-shell .staff-switch-selected small{margin-top:2px;font-size:9px;color:#626a78}
+.dashboard-shell .staff-switch-form label{display:grid;gap:5px;font-size:10px;font-weight:750;color:#4a5160}
+.dashboard-shell .staff-switch-form input{width:100%;height:40px;border:1px solid #d8dade;border-radius:10px;background:#fff;color:#171717;padding:0 11px;outline:none}
+.dashboard-shell .staff-switch-form input:focus{border-color:#8aa8d8;box-shadow:0 0 0 3px rgba(82,141,244,.10)}
+.dashboard-shell .staff-switch-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.dashboard-shell .staff-switch-actions button{min-height:38px;border:1px solid #d7d9dd;border-radius:10px;background:#f2f3f5;color:#2a303b;font-size:10px;font-weight:800;cursor:pointer}
+.dashboard-shell .staff-switch-actions button[type="submit"]{background:#171717;color:#fff;border-color:#171717}
+.dashboard-shell .staff-switch-actions button:disabled{opacity:.55;cursor:wait}
+.dashboard-shell .staff-switch-error{color:#8d2e39!important;font-size:9px!important}
+.dashboard-shell .staff-switch-empty{padding:12px 8px;color:#666e7c;font-size:10px;text-align:center}
+.dashboard-shell .staff-switch-empty.error{color:#8d2e39}

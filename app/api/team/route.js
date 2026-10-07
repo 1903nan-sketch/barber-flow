@@ -19,6 +19,36 @@ async function context(request,tenant){
  return {admin,user,company,plan:company.plans||{}};
 }
 
+async function switcherContext(request,tenant){
+ const token=request.headers.get("authorization")?.replace(/^Bearer\s+/i,"");
+ if(!token)throw Object.assign(new Error("Sessão inválida."),{status:401});
+ const admin=server(),{data:{user},error:userError}=await admin.auth.getUser(token);
+ if(userError||!user)throw Object.assign(new Error("Sessão expirada."),{status:401});
+ const {data:membership}=await admin.from("memberships").select("tenant_id").eq("tenant_id",tenant).eq("user_id",user.id).eq("active",true).maybeSingle();
+ if(!membership)throw Object.assign(new Error("Você não pertence a esta barbearia."),{status:403});
+ const {data:company}=await admin.from("tenants").select("id,product_slug").eq("id",tenant).maybeSingle();
+ if(!company||company.product_slug!=="barberflow")throw Object.assign(new Error("Barbearia inválida."),{status:403});
+ return {admin,user};
+}
+
+export async function GET(request){
+ try{
+  const tenant=String(new URL(request.url).searchParams.get("tenant_id")||"");
+  if(!tenant)return NextResponse.json({error:"Barbearia não informada."},{status:400});
+  const {admin}=await switcherContext(request,tenant);
+  const [{data:members,error:membersError},{data:logins,error:loginsError}]=await Promise.all([
+   admin.from("memberships").select("tenant_id,user_id,name,role,active").eq("tenant_id",tenant).eq("active",true).neq("role","owner").order("name"),
+   admin.from("staff_logins").select("user_id,username,login_email").eq("tenant_id",tenant)
+  ]);
+  if(membersError)throw membersError;if(loginsError)throw loginsError;
+  const byUser=new Map((logins||[]).map(x=>[x.user_id,x]));
+  const items=(members||[]).map(m=>{const login=byUser.get(m.user_id);return login?{user_id:m.user_id,name:m.name,role:m.role,username:login.username,login_email:login.login_email}:null}).filter(Boolean);
+  return NextResponse.json({items});
+ }catch(error){
+  return NextResponse.json({error:error.message||"Não foi possível carregar os funcionários."},{status:error.status||500});
+ }
+}
+
 async function setProvider(admin,tenant,userId,name,enabled,photo=""){
  if(!enabled){
   await admin.from("barbers").update({active:false}).eq("tenant_id",tenant).eq("user_id",userId);
