@@ -23,8 +23,9 @@ export default function OnboardingPage(){
   if(!supabase){if(alive){setError("Supabase não configurado.");setLoading(false)}return}
   const {data:{user}}=await supabase.auth.getUser();
   if(!user){router.replace("/login");return}
-  const {data:memberships}=await supabase.from("memberships").select("tenant_id").eq("user_id",user.id).eq("active",true).limit(1);
-  if(memberships?.length){router.replace("/dashboard");return}
+  // Same rule as useWorkspace: only a BarberTix tenant counts, otherwise the two pages redirect to each other.
+  const {data:memberships}=await supabase.from("memberships").select("tenant_id,tenants(product_slug)").eq("user_id",user.id).eq("active",true);
+  if((memberships||[]).some(m=>m.tenants&&(m.tenants.product_slug||"barberflow")==="barberflow")){router.replace("/dashboard");return}
   const {data,error}=await supabase.rpc("onboarding_options");
   if(!alive)return;
   const options=Array.isArray(data)?data:[];
