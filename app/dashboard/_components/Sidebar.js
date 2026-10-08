@@ -44,7 +44,7 @@ const items = [
 ];
 
 const roleLabel={owner:"Proprietário",manager:"Gerente",reception:"Recepção",attendant:"Atendente",barber:"Barbeiro"};
-const initials=name=>String(name||"BT").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
+const initials=name=>String(name||"RC").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
 
 export default function Sidebar({ workspace, collapsed=false, onToggle }) {
   const pathname = usePathname();
@@ -87,7 +87,7 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
       setSwitchError(e?.message==="Invalid login credentials"?"Senha incorreta para este funcionário.":e?.message||"Não foi possível trocar o funcionário.");
     }finally{setSwitching(false)}
   }
-  async function signOut(){if(!window.confirm("Deseja sair do BarberTix?"))return;await supabase?.auth.signOut();window.location.href="/login"}
+  async function signOut(){if(!window.confirm("Deseja sair do RupControl?"))return;await supabase?.auth.signOut();window.location.href="/login"}
 
   return (
     <aside className={"sidebar "+(collapsed?"collapsed ":"")+(intro?"sidebar-intro":"")}>
@@ -95,7 +95,7 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
         <div className="brand-client-lockup">
           <span className="bf-simple-mark" aria-hidden="true"/>
           <div className="brand-copy">
-            <div className="brand">BarberTix</div>
+            <div className="brand">RupControl</div>
             <span className="brand-subtitle">Gestão inteligente</span>
           </div>
         </div>
@@ -107,7 +107,7 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
       <div className="workspace-switcher" ref={switcherRef}>
         <button type="button" className={"workspace-card workspace-card-button "+(workspaceOpen?"open":"")} onClick={openStaffSwitcher} aria-expanded={workspaceOpen} aria-haspopup="menu">
           <span className="workspace-avatar">{initials(workspace?.membership?.name||workspace?.tenant?.name)}</span>
-          <div><strong>{workspace?.membership?.name||workspace?.tenant?.name||"BarberTix"}</strong><small>{roleLabel[role]||role||"Equipe"} · Trocar funcionário</small></div>
+          <div><strong>{workspace?.membership?.name||workspace?.tenant?.name||"RupControl"}</strong><small>{roleLabel[role]||role||"Equipe"} · Trocar funcionário</small></div>
           <ChevronRight size={17} />
         </button>
         {workspaceOpen&&<div className="workspace-menu staff-switch-menu">
@@ -145,7 +145,7 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
       </nav>
 
       <div className="sidebar-footer">
-        <button className="profile-card" style={{ width: "100%", background: "transparent", color: "inherit", borderLeft: 0, borderRight: 0, borderBottom: 0, textAlign: "left", cursor: "pointer" }} type="button" onClick={signOut} title="Sair" aria-label="Sair do BarberTix">
+        <button className="profile-card" style={{ width: "100%", background: "transparent", color: "inherit", borderLeft: 0, borderRight: 0, borderBottom: 0, textAlign: "left", cursor: "pointer" }} type="button" onClick={signOut} title="Sair" aria-label="Sair do RupControl">
           <span className="profile-avatar">{initials(workspace?.membership?.name||"Administrador")}</span>
           <div><strong>{workspace?.membership?.name||"Administrador"}</strong><small>Plano {workspace?.tenant?.plans?.name||"contratado"}</small></div>
           <LogOut size={18} />

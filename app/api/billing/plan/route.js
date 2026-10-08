@@ -12,7 +12,7 @@ export async function POST(request){
  try{
   const body=await request.json().catch(()=>({})),tenantId=String(body.tenant_id||""),planId=String(body.plan_id||"");
   const ctx=await requireTenantOwner(request,tenantId);
-  if(ctx.tenant.last_paid_at)return NextResponse.json({error:"Para trocar de plano depois do primeiro pagamento, fale com o suporte BarberTix."},{status:400});
+  if(ctx.tenant.last_paid_at)return NextResponse.json({error:"Para trocar de plano depois do primeiro pagamento, fale com o suporte RupControl."},{status:400});
   const {data:plan}=await ctx.admin.from("plans").select("id,name,monthly_cents,extra_unit_cents,max_barbers,max_units,max_profiles,included_units").eq("id",planId).maybeSingle();
   if(!plan||!PLAN_NAMES.includes(plan.name))return NextResponse.json({error:"Plano inválido."},{status:400});
   if(plan.id===ctx.tenant.plan_id)return NextResponse.json({ok:true,unchanged:true});
@@ -39,7 +39,7 @@ export async function POST(request){
   // Keep an existing Asaas subscription in line with the new price.
   const amountCents=calculateBillingAmount(ctx.tenant,plan,units);
   if(asaasConfigured()&&ctx.tenant.asaas_subscription_id){
-   await asaasRequest("/subscriptions/"+encodeURIComponent(ctx.tenant.asaas_subscription_id),{method:"PUT",body:{value:amountCents/100,description:"BarberTix - "+plan.name,updatePendingPayments:true}});
+   await asaasRequest("/subscriptions/"+encodeURIComponent(ctx.tenant.asaas_subscription_id),{method:"PUT",body:{value:amountCents/100,description:"RupControl - "+plan.name,updatePendingPayments:true}});
   }
   await ctx.admin.from("tenants").update({billing_amount_cents:amountCents}).eq("id",ctx.tenant.id);
   return NextResponse.json({ok:true,plan:plan.name,amount_cents:amountCents});

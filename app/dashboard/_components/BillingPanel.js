@@ -25,7 +25,7 @@ function PixBox({pix}){
   <p>Escaneie o QR Code ou use o PIX Copia e Cola.</p>
   {payload&&<button className="monthly-copy" type="button" onClick={async()=>{await navigator.clipboard.writeText(payload);setCopied(true);setTimeout(()=>setCopied(false),1800)}}>{copied?<><Check size={17}/> PIX copiado</>:<><Copy size={17}/> Copiar código PIX</>}</button>}
   {invoice}
-  <small><ShieldCheck size={14}/> Cobrança vinculada à mensalidade BarberTix</small>
+  <small><ShieldCheck size={14}/> Cobrança vinculada à mensalidade RupControl</small>
  </div>
 }
 
@@ -164,7 +164,7 @@ export default function BillingPanel({workspace,locked=null}){
      {waiting&&!qrPending&&<p className="billing-waiting"><span className="billing-pulse" aria-hidden="true"/>Aguardando a confirmação do pagamento. Esta tela atualiza sozinha.</p>}
     </>:<>
      <p>A cobrança online ainda não está configurada. Nenhum pagamento será confirmado manualmente ou direcionado para uma chave fixa.</p>
-     <div className="form-alert">Fale com o suporte BarberTix para ativar o provedor de pagamentos.</div>
+     <div className="form-alert">Fale com o suporte RupControl para ativar o provedor de pagamentos.</div>
     </>}
    </div>
   </section>

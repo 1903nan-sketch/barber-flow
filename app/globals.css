@@ -121,7 +121,7 @@ html:has(.admin-layout),body:has(.admin-layout){background:#f7f8f9!important}
 }
 
 
-/* Barber Flow — dark glass dashboard refinement */
+/* RupControl — dark glass dashboard refinement */
 .dashboard-shell{--bg:#f6f7f8;--surface:#f3f4f5;--text:#f5f7fb;--muted:#8d96a8;--line:#e9ebed;--purple:#387cf2;--purple-soft:#e7e9ed;--nav:#f5f6f8;background:#f6f7f8;color:#f5f7fb}
 .dashboard-shell .sidebar{background:linear-gradient(180deg,#f5f6f7,#f6f7f8);border-right:1px solid #d9dbde}
 .dashboard-shell .content{max-width:none;background:radial-gradient(circle at 78% -5%,rgba(56,124,242,.13),transparent 31%),#f6f7f8!important;padding:30px 34px 50px}
@@ -279,7 +279,7 @@ html:has(.admin-layout),body:has(.admin-layout){background:#f7f8f9!important}
 }
 
 
-/* Barber Flow collapsible sidebar */
+/* RupControl collapsible sidebar */
 .dash{transition:grid-template-columns .22s ease}
 .dash.sidebar-mini{grid-template-columns:78px minmax(0,1fr)}
 .sidebar{overflow-y:auto;overflow-x:hidden;scrollbar-width:none;transition:width .22s ease,padding .22s ease}
@@ -1124,7 +1124,7 @@ html:has(.admin-layout),body:has(.admin-layout){background:#f7f8f9!important}
 }
 
 
-/* BeautyTix uses the same product-card hierarchy as BarberTix */
+/* BeautyTix uses the same product-card hierarchy as RupControl */
 .rh2-line .rh2-featured + .rh2-featured{margin-top:22px}
 .rh2-featured-beauty{
   background:

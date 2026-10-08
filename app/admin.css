@@ -1,4 +1,4 @@
-/* Barber Flow — Master Console */
+/* RupControl — Master Console */
 .admin-layout{min-height:100vh;display:grid;grid-template-columns:270px minmax(0,1fr);background:radial-gradient(circle at 80% 0,rgba(47,101,195,.13),transparent 28%),#060a0f;color:#f5f7fb}
 .admin-sidebar{position:sticky;top:0;height:100vh;padding:26px 18px;background:linear-gradient(180deg,rgba(15,20,29,.98),rgba(7,11,17,.98));border-right:1px solid #202b38;display:flex;flex-direction:column;z-index:20}
 .brand-wrap{display:flex;align-items:center;gap:12px;padding:4px 8px 27px}.brand-mark{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(145deg,#2563ce,#3279f2);box-shadow:0 10px 30px rgba(36,103,218,.3)}.brand-mark svg{width:22px}.brand{font-size:18px;font-weight:900}.brand-subtitle{font-size:11px;color:#7e8998;text-transform:uppercase;letter-spacing:.12em}

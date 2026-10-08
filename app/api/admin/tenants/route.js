@@ -40,7 +40,7 @@ export async function POST(request){
   const redirectTo="https://barbertix.3ruptix.com/login?setup=password";
   const {data:created,error:createError}=await admin.auth.admin.inviteUserByEmail(email,{
    redirectTo,
-   data:{full_name:ownerName,tenant_name:name,product:"BarberTix"}
+   data:{full_name:ownerName,tenant_name:name,product:"RupControl"}
   });
   if(createError){
    const duplicate=/already|registered|exists|user.*exists/i.test(createError.message||"");
