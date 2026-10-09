@@ -190,24 +190,32 @@
 .rx-line-head span{font-size:11px;font-weight:800;letter-spacing:.2em;color:var(--rx-violet)}
 .rx-line-head h3{margin:0;font-size:34px;letter-spacing:-.04em}
 .rx-line-head p{margin:0 0 0 auto;max-width:420px;font-size:14px}
-.rx-cards{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.rx-cards{display:grid;grid-template-columns:1fr;gap:18px}
 .rx-product{display:flex;flex-direction:column;min-height:420px;padding:28px;overflow:hidden}
 .rx-product::before{content:"";position:absolute;width:320px;height:320px;right:-90px;top:-110px;border-radius:50%;filter:blur(30px);opacity:.55;pointer-events:none;
   background:radial-gradient(circle,rgba(63,74,99,.45),transparent 70%);transition:transform .6s ease}
-.rx-product-beauty::before{background:radial-gradient(circle,rgba(170,150,160,.45),transparent 70%)}
 .rx-product-head{display:flex;justify-content:space-between;align-items:center;font:700 12px ui-monospace,monospace;color:var(--rx-muted)}
 .rx-live{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;background:rgba(46,180,110,.1);color:#1d8a52;font-size:10.5px;letter-spacing:.12em}
 .rx-live i{width:7px;height:7px;border-radius:50%;background:#2ec27e;animation:rx-pulse 1.8s ease-out infinite}
 .rx-product-icon{width:64px;height:64px;margin:40px 0 26px;display:grid;place-items:center;border-radius:20px;color:#fff;
   background:linear-gradient(135deg,var(--rx-violet),#232a3b);box-shadow:0 14px 30px rgba(63,74,99,.32);transition:transform .4s cubic-bezier(.2,.8,.2,1)}
-.rx-product-beauty .rx-product-icon{background:linear-gradient(135deg,#b48a9d,#7a5567);box-shadow:0 14px 30px rgba(122,85,103,.22)}
 .rx-product-icon svg{width:28px;height:28px}
 .rx-product-tag{font-size:11px;font-weight:800;letter-spacing:.16em;color:var(--rx-muted)}
 .rx-product h3{margin:10px 0 12px;font-size:clamp(44px,5vw,64px);line-height:.92;letter-spacing:-.06em;font-weight:900}
 .rx-product p{margin:0;color:var(--rx-muted);line-height:1.6;max-width:420px}
 .rx-product>b{margin-top:auto;padding-top:26px;display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:750;color:var(--rx-violet)}
-.rx-product-beauty>b{color:#7a5567}
 .rx-product>b svg{width:16px;transition:transform .25s ease}
+.rx-product-points{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:10px}
+.rx-product-points li{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:var(--rx-ink)}
+.rx-product-points svg{width:18px;height:18px;flex:0 0 18px;padding:3px;border-radius:50%;background:rgba(46,180,110,.12);color:#1d8a52}
+/* Card único na linha: no computador os destaques ficam na metade direita. */
+@media(min-width:900px){
+ .rx-product.rx-product-wide{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:56px;align-content:start;min-height:0}
+ .rx-product-wide>*{grid-column:1;justify-self:start}
+ .rx-product-wide .rx-product-head{grid-column:1/-1;justify-self:stretch}
+ .rx-product-wide .rx-product-points{grid-column:2;grid-row:2/span 5;align-self:center;margin:0;gap:14px}
+ .rx-product-wide .rx-product-points li{font-size:16px}
+}
 
 .rx-manifesto{text-align:center}
 .rx-manifesto>p{max-width:980px;margin:18px auto 0;font-size:clamp(30px,4.4vw,58px)!important;line-height:1.1!important;letter-spacing:-.045em;font-weight:800;color:var(--rx-ink)!important}
@@ -274,7 +282,6 @@
    O prefixo html:not(#rx) vence as regras escuras antigas de globals.css.
    ===================================================================== */
 html:not(#rx) .rx.ruptix-site{--rp:var(--rx-violet);--acc:var(--rx-violet);--acc-2:var(--rx-cyan);background:var(--rx-bg)!important;color:var(--rx-ink)!important;overflow:visible!important}
-html:not(#rx) .rx.rx-beauty{--acc:#7a5567;--acc-2:#a88a99}
 html:not(#rx) .rx.ruptix-site>*:not(.rx-aurora):not(.rx-grid):not(.rx-progress){position:relative;z-index:1}
 html:not(#rx) .rx.ruptix-site .rp-nav{
   position:sticky;top:14px;z-index:50;width:min(1240px,calc(100% - 28px));height:auto!important;margin:14px auto 0!important;padding:10px 12px 10px 22px!important;

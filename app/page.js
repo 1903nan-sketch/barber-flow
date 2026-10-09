@@ -113,7 +113,7 @@ export default async function HomePage(){
   <section className="rx-stats" aria-label="Números da Ruptix">
    <div className="rx-glass rx-stat" data-reveal><b data-count="100" data-suffix="%">0%</b><span>código próprio, sem software de prateleira</span></div>
    <div className="rx-glass rx-stat" data-reveal style={{"--d":".1s"}}><b data-count="24" data-suffix="/7">0/7</b><span>sistemas e automações em operação</span></div>
-   <div className="rx-glass rx-stat" data-reveal style={{"--d":".2s"}}><b data-count="2">0</b><span>produtos próprios em operação</span></div>
+   <div className="rx-glass rx-stat" data-reveal style={{"--d":".2s"}}><b data-count="1">0</b><span>produto próprio em operação</span></div>
    {activeUsers>0
     ?<div className="rx-glass rx-stat" data-reveal style={{"--d":".3s"}}><b data-count={activeUsers}>0</b><span>usuários ativos agora nas plataformas</span></div>
     :<div className="rx-glass rx-stat" data-reveal style={{"--d":".3s"}}><b data-count="4">0</b><span>etapas do problema ao produto em produção</span></div>}
@@ -127,21 +127,14 @@ export default async function HomePage(){
    </div>
    <div className="rx-line-head" data-reveal><span>LINHA 01</span><h3>Gestão.</h3><p>Sistemas prontos para organizar agenda, atendimento, vendas e financeiro de qualquer negócio.</p></div>
    <div className="rx-cards">
-    <Link href="/produtos/rupcontrol" className="rx-glass rx-product" data-reveal>
+    <Link href="/produtos/rupcontrol" className="rx-glass rx-product rx-product-wide" data-reveal>
      <div className="rx-product-head"><span className="rx-live"><i/> 14 DIAS GRÁTIS</span><span>01</span></div>
      <div className="rx-product-icon"><CalendarCheck/></div>
      <span className="rx-product-tag">PARA TODO TIPO DE NEGÓCIO</span>
      <h3>Rup<br/>Control.</h3>
      <p>Gestão completa para qualquer negócio que atende clientes: agenda, site de agendamento, caixa, equipe e financeiro. Teste grátis por 14 dias.</p>
+     <ul className="rx-product-points">{["Agenda e site de agendamento","Caixa, vendas e PIX","Equipe e comissões","Financeiro e relatórios","Lembretes no WhatsApp"].map(x=><li key={x}><Check/>{x}</li>)}</ul>
      <b>Conhecer e testar grátis <ArrowUpRight/></b>
-    </Link>
-    <Link href="/produtos/beautytix" className="rx-glass rx-product rx-product-beauty" data-reveal style={{"--d":".12s"}}>
-     <div className="rx-product-head"><span className="rx-live"><i/> PRODUTO ATIVO</span><span>02</span></div>
-     <div className="rx-product-icon"><Sparkles/></div>
-     <span className="rx-product-tag">SALÕES & ESTÉTICA · LINHA BELEZA</span>
-     <h3>Beauty<br/>Tix.</h3>
-     <p>Gestão completa para salões, estúdios e clínicas de estética, com agendamento on-line.</p>
-     <b>Explorar produto <ArrowUpRight/></b>
     </Link>
    </div>
   </section>
