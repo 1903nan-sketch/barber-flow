@@ -10,7 +10,7 @@ import {
   ClipboardList,
   LayoutDashboard,
   LogOut,
-  Scissors,
+  Briefcase,
   Settings,
   Sparkles,
   CreditCard,
@@ -30,7 +30,7 @@ const items = [
   { label: "Agenda", href: "/dashboard/agenda", icon: CalendarDays },
   { label: "Clientes", href: "/dashboard/clientes", icon: Users },
   { label: "Equipe", href: "/dashboard/barbeiros", icon: UserRound },
-  { label: "Serviços", href: "/dashboard/servicos", icon: Scissors },
+  { label: "Serviços", href: "/dashboard/servicos", icon: Briefcase },
   { label: "Financeiro", href: "/dashboard/financeiro", icon: CircleDollarSign, permission: "finance" },
   { label: "Estoque", href: "/dashboard/estoque", icon: Package, permission: "inventory" },
   { label: "Comandas", href: "/dashboard/comandas", icon: ClipboardList },
@@ -43,7 +43,7 @@ const items = [
   { label: "Site, Instagram e WhatsApp", href: "/dashboard/configuracoes", icon: Settings, ownerOnly: true },
 ];
 
-const roleLabel={owner:"Proprietário",manager:"Gerente",reception:"Recepção",attendant:"Atendente",barber:"Barbeiro"};
+const roleLabel={owner:"Proprietário",manager:"Gerente",reception:"Recepção",attendant:"Atendente",barber:"Profissional"};
 const initials=name=>String(name||"RC").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
 
 export default function Sidebar({ workspace, collapsed=false, onToggle }) {

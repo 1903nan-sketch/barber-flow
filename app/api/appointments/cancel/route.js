@@ -82,7 +82,7 @@ export async function POST(request){
     const message=[
       "❌ *Agendamento cancelado*",
       "",
-      "Olá, "+(client?.name||"cliente")+". Seu agendamento na *"+(tenant?.name||"barbearia")+"* foi cancelado.",
+      "Olá, "+(client?.name||"cliente")+". Seu agendamento na *"+(tenant?.name||"empresa")+"* foi cancelado.",
       "",
       "✂️ *Serviço:* "+(service?.name||"Atendimento"),
       "👤 *Profissional:* "+(barber?.name||"Profissional"),

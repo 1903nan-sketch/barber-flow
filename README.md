@@ -1,6 +1,6 @@
 # RupControl
 
-Sistema SaaS da Ruptix para gestão de barbearias. O mesmo projeto serve a página institucional (`3ruptix.com`) e o sistema (`rupcontrol.3ruptix.com`).
+Sistema SaaS da Ruptix para gestão de negócios de qualquer ramo que atendem clientes. O mesmo projeto serve a página institucional (`3ruptix.com`) e o sistema (`rupcontrol.3ruptix.com`).
 
 ## Domínio
 
@@ -8,7 +8,7 @@ O endereço do sistema fica em `lib/site.js` (`APP_HOST`). Hoje é `barbertix.3r
 
 ## Cadastro e teste grátis
 
-O site da Ruptix leva para `/login?criar=1`, onde a pessoa cria o acesso (Supabase Auth, com confirmação por e-mail). O link de confirmação abre `/onboarding`, que cria a barbearia com 14 dias de teste no plano escolhido. Quando o teste termina sem pagamento, o proprietário só vê a tela de planos e pagamento (`BillingPanel`).
+O site da Ruptix leva para `/login?criar=1`, onde a pessoa cria o acesso (Supabase Auth, com confirmação por e-mail). O link de confirmação abre `/onboarding`, que cria a empresa com 14 dias de teste no plano escolhido. Quando o teste termina sem pagamento, o proprietário só vê a tela de planos e pagamento (`BillingPanel`).
 
 ## Limite de requisições
 

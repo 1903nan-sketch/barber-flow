@@ -56,7 +56,7 @@ function NewMemberForm({tenant}){
    <label>Usuário de acesso<div className="username-field"><span>@</span><input name="username" required minLength="3" placeholder="anthony01"/></div></label>
    <label>Senha de acesso<input name="password" type="password" required minLength="6" placeholder="Mínimo 6 caracteres"/></label>
    <label>WhatsApp do funcionário<input name="whatsapp" type="tel" inputMode="tel" placeholder="(11) 99999-9999"/></label>
-   <label>Função<select name="role" required value={role} onChange={e=>changeRole(e.target.value)}><option value="barber">Barbeiro</option><option value="reception">Recepção</option><option value="attendant">Atendente</option><option value="manager">Gerente</option></select></label>
+   <label>Função<select name="role" required value={role} onChange={e=>changeRole(e.target.value)}><option value="barber">Profissional</option><option value="reception">Recepção</option><option value="attendant">Atendente</option><option value="manager">Gerente</option></select></label>
   </div>
 
   <label className="check-line" style={{marginTop:12}}>

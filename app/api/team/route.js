@@ -15,7 +15,7 @@ async function context(request,tenant){
  const {data:owner}=await admin.from("memberships").select("tenant_id").eq("tenant_id",tenant).eq("user_id",user.id).eq("role","owner").eq("active",true).maybeSingle();
  if(!owner)throw Object.assign(new Error("Somente o proprietário pode administrar acessos."),{status:403});
  const {data:company,error}=await admin.from("tenants").select("id,plan_id,plans(name,max_profiles,max_barbers)").eq("id",tenant).maybeSingle();
- if(error||!company)throw Object.assign(new Error("Barbearia não encontrada."),{status:404});
+ if(error||!company)throw Object.assign(new Error("Empresa não encontrada."),{status:404});
  return {admin,user,company,plan:company.plans||{}};
 }
 
@@ -25,16 +25,16 @@ async function switcherContext(request,tenant){
  const admin=server(),{data:{user},error:userError}=await admin.auth.getUser(token);
  if(userError||!user)throw Object.assign(new Error("Sessão expirada."),{status:401});
  const {data:membership}=await admin.from("memberships").select("tenant_id").eq("tenant_id",tenant).eq("user_id",user.id).eq("active",true).maybeSingle();
- if(!membership)throw Object.assign(new Error("Você não pertence a esta barbearia."),{status:403});
+ if(!membership)throw Object.assign(new Error("Você não pertence a esta empresa."),{status:403});
  const {data:company}=await admin.from("tenants").select("id,product_slug").eq("id",tenant).maybeSingle();
- if(!company||company.product_slug!=="barberflow")throw Object.assign(new Error("Barbearia inválida."),{status:403});
+ if(!company||company.product_slug!=="barberflow")throw Object.assign(new Error("Empresa inválida."),{status:403});
  return {admin,user};
 }
 
 export async function GET(request){
  try{
   const tenant=String(new URL(request.url).searchParams.get("tenant_id")||"");
-  if(!tenant)return NextResponse.json({error:"Barbearia não informada."},{status:400});
+  if(!tenant)return NextResponse.json({error:"Empresa não informada."},{status:400});
   const {admin}=await switcherContext(request,tenant);
   const [{data:members,error:membersError},{data:logins,error:loginsError}]=await Promise.all([
    admin.from("memberships").select("tenant_id,user_id,name,role,active").eq("tenant_id",tenant).eq("active",true).neq("role","owner").order("name"),
@@ -89,7 +89,7 @@ export async function POST(request){
   }
   const loginEmail=`${username}.${tenant.replace(/-/g,"").slice(0,10)}@staff.barberflow.app`;
   const {data:created,error:createError}=await admin.auth.admin.createUser({email:loginEmail,password,email_confirm:true,user_metadata:{name,staff_username:"@"+username,avatar_url:body.photo_url||""}});
-  if(createError)return NextResponse.json({error:createError.message.includes("already")?"Este usuário já está em uso nesta barbearia.":createError.message},{status:400});
+  if(createError)return NextResponse.json({error:createError.message.includes("already")?"Este usuário já está em uso nesta empresa.":createError.message},{status:400});
 
   const {error}=await admin.rpc("save_staff_member",{p_actor:user.id,p_tenant:tenant,p_user:created.user.id,p_name:name,p_role:role,p_permissions:body.permissions||[],p_username:username,p_login_email:loginEmail});
   if(error){await admin.auth.admin.deleteUser(created.user.id);return NextResponse.json({error:error.message},{status:400})}

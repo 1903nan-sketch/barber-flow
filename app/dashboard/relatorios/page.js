@@ -1,6 +1,6 @@
 "use client";
 import {useEffect,useMemo,useState} from "react";
-import {BarChart3,CircleDollarSign,Scissors,Users,Printer,FileDown,Filter} from "lucide-react";
+import {BarChart3,CircleDollarSign,Briefcase,Users,Printer,FileDown,Filter} from "lucide-react";
 import {supabase} from "../../../lib/supabase";
 import ModuleShell from "../_components/ModuleShell";
 const money=v=>(Number(v||0)/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});

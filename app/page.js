@@ -2,7 +2,7 @@ import Link from "next/link";
 import {headers} from "next/headers";
 import {redirect} from "next/navigation";
 import {createClient} from "@supabase/supabase-js";
-import {ArrowUpRight,BarChart3,Bot,CalendarDays,Check,Code2,Cpu,GitBranch,Globe2,Mail,Package,Percent,Scissors,ShieldCheck,Sparkles,Users,WalletCards,Workflow,Zap} from "lucide-react";
+import {ArrowUpRight,BarChart3,Bot,CalendarCheck,CalendarDays,Check,Code2,Cpu,GitBranch,Globe2,Mail,Package,Percent,ShieldCheck,Sparkles,Users,WalletCards,Workflow,Zap} from "lucide-react";
 import RuptixFx from "./_components/RuptixFx";
 import {APP_HOSTS,SIGNUP_URL} from "../lib/site";
 import "./ruptix-home.css";
@@ -43,7 +43,7 @@ export default async function HomePage(){
   <div className="rx-aurora" aria-hidden="true"><i/><i/><i/><i/></div>
   <div className="rx-grid" aria-hidden="true"/>
 
-  <a className="rx-announce" href={SIGNUP_URL}><b>14 DIAS GRÁTIS</b><span>Teste o RupControl, o sistema de gestão para barbearias da Ruptix</span><ArrowUpRight/></a>
+  <a className="rx-announce" href={SIGNUP_URL}><b>14 DIAS GRÁTIS</b><span>Teste o RupControl, o sistema de gestão da Ruptix para todo tipo de negócio</span><ArrowUpRight/></a>
 
   <nav className="rx-nav">
    <Link href="/" className="rx-logo" aria-label="Ruptix — início">RUPTIX<sup>®</sup></Link>
@@ -83,9 +83,9 @@ export default async function HomePage(){
     <small>Sem cartão de crédito e sem cobrança no cadastro. O pagamento só começa depois do teste, se você quiser continuar.</small>
    </div>
    <div className="rx-rc-copy" data-reveal style={{"--d":".1s"}}>
-    <span className="rx-kicker">PRODUTO RUPTIX · RUPCONTROL</span>
-    <h2>A gestão completa da sua barbearia, grátis por 14 dias.</h2>
-    <p>O RupControl reúne em um só painel tudo o que a barbearia usa no dia a dia: agenda de cada profissional, página própria para os clientes agendarem, caixa rápido com PIX, clientes, comissões, estoque e financeiro. O robô do WhatsApp confirma e lembra os horários sozinho.</p>
+    <span className="rx-kicker">PRODUTO RUPTIX · PARA TODO TIPO DE NEGÓCIO</span>
+    <h2>A gestão completa do seu negócio, grátis por 14 dias.</h2>
+    <p>Seja qual for o seu ramo, o RupControl reúne em um só painel tudo o que você usa no dia a dia para atender clientes: agenda de cada profissional, página própria para os clientes agendarem, caixa rápido com PIX, clientes, comissões, estoque e financeiro. O robô do WhatsApp confirma e lembra os horários sozinho.</p>
     <ul className="rx-rc-features">{rcFeatures.map(([t,Icon])=><li key={t}><Icon/>{t}</li>)}</ul>
     <p className="rx-rc-note">Site de agendamento e robô do WhatsApp nos planos Pro.</p>
     <div className="rx-actions"><a className="rx-btn rx-btn-primary" href={SIGNUP_URL}>Criar conta grátis <ArrowUpRight/></a><Link className="rx-btn rx-btn-glass" href="/produtos/rupcontrol">Ver planos e recursos</Link></div>
@@ -113,7 +113,7 @@ export default async function HomePage(){
   <section className="rx-stats" aria-label="Números da Ruptix">
    <div className="rx-glass rx-stat" data-reveal><b data-count="100" data-suffix="%">0%</b><span>código próprio, sem software de prateleira</span></div>
    <div className="rx-glass rx-stat" data-reveal style={{"--d":".1s"}}><b data-count="24" data-suffix="/7">0/7</b><span>sistemas e automações em operação</span></div>
-   <div className="rx-glass rx-stat" data-reveal style={{"--d":".2s"}}><b data-count="2">0</b><span>produtos próprios na linha beleza</span></div>
+   <div className="rx-glass rx-stat" data-reveal style={{"--d":".2s"}}><b data-count="2">0</b><span>produtos próprios em operação</span></div>
    {activeUsers>0
     ?<div className="rx-glass rx-stat" data-reveal style={{"--d":".3s"}}><b data-count={activeUsers}>0</b><span>usuários ativos agora nas plataformas</span></div>
     :<div className="rx-glass rx-stat" data-reveal style={{"--d":".3s"}}><b data-count="4">0</b><span>etapas do problema ao produto em produção</span></div>}
@@ -125,14 +125,14 @@ export default async function HomePage(){
     <h2>Tecnologia<br/>que já opera.</h2>
     <p>Além de projetos sob medida, a Ruptix cria produtos próprios para segmentos específicos. São sistemas reais, construídos a partir de operações reais.</p>
    </div>
-   <div className="rx-line-head" data-reveal><span>LINHA 01</span><h3>Beleza.</h3><p>Soluções digitais para barbearias, salões, estética e outros negócios do setor de beleza.</p></div>
+   <div className="rx-line-head" data-reveal><span>LINHA 01</span><h3>Gestão.</h3><p>Sistemas prontos para organizar agenda, atendimento, vendas e financeiro de qualquer negócio.</p></div>
    <div className="rx-cards">
     <Link href="/produtos/rupcontrol" className="rx-glass rx-product" data-reveal>
      <div className="rx-product-head"><span className="rx-live"><i/> 14 DIAS GRÁTIS</span><span>01</span></div>
-     <div className="rx-product-icon"><Scissors/></div>
-     <span className="rx-product-tag">BARBEARIAS · LINHA BELEZA</span>
+     <div className="rx-product-icon"><CalendarCheck/></div>
+     <span className="rx-product-tag">PARA TODO TIPO DE NEGÓCIO</span>
      <h3>Rup<br/>Control.</h3>
-     <p>Gestão completa da barbearia: agenda, site de agendamento, caixa, clientes, equipe e financeiro. Teste grátis por 14 dias.</p>
+     <p>Gestão completa para qualquer negócio que atende clientes: agenda, site de agendamento, caixa, equipe e financeiro. Teste grátis por 14 dias.</p>
      <b>Conhecer e testar grátis <ArrowUpRight/></b>
     </Link>
     <Link href="/produtos/beautytix" className="rx-glass rx-product rx-product-beauty" data-reveal style={{"--d":".12s"}}>
