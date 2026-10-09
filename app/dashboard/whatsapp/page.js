@@ -4,6 +4,7 @@ import {notify} from "../../../lib/notify";
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {Bot,CheckCircle2,ExternalLink,MessageCircle,RefreshCw,ShieldCheck,Smartphone,Unplug,UserRound} from "lucide-react";
 import {supabase} from "../../../lib/supabase";
+import {bookingUrl} from "../../../lib/site";
 import ModuleShell from "../_components/ModuleShell";
 
 const labels={
@@ -114,7 +115,7 @@ function WhatsAppContent({workspace}){
         {status!=="connected"&&<button className="primary" type="button" onClick={connect} disabled={busy||!configured}><MessageCircle size={16}/>{busy?"Conectando...":qr?"Gerar novo QR Code":"Conectar WhatsApp"}</button>}
         <button className="secondary-action" type="button" onClick={load} disabled={busy}><RefreshCw size={16}/>Atualizar status</button>
         {status==="connected"&&<button className="secondary-action" type="button" onClick={disconnect} disabled={busy}><Unplug size={16}/>Desconectar</button>}
-        {tenant.slug&&<a className="secondary-action" href={"/agendar/"+tenant.slug} target="_blank" rel="noreferrer"><ExternalLink size={16}/>Abrir agenda pública</a>}
+        {tenant.slug&&<a className="secondary-action" href={bookingUrl(location.origin,tenant.slug)} target="_blank" rel="noreferrer"><ExternalLink size={16}/>Abrir agenda pública</a>}
       </div>
     </section>
 

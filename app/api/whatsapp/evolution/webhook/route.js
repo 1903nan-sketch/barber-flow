@@ -2,6 +2,7 @@ import {timingSafeEqual} from "node:crypto";
 import {NextResponse} from "next/server";
 import {getEvolutionWebhookSecret,normalizeEvolutionState,sendEvolutionList,sendEvolutionText,tenantIdFromEvolutionInstance} from "../../../../../lib/evolution";
 import {whatsappAdmin} from "../../../../../lib/whatsapp-server";
+import {bookingUrl} from "../../../../../lib/site";
 import {openaiWhatsappConfigured,runOpenAIWhatsappAgent} from "../../../../../lib/openai-whatsapp-agent";
 
 const DEFAULT_TZ="America/Sao_Paulo";
@@ -473,7 +474,7 @@ export async function POST(req){
   }
   if(/\b(site|link|agenda online|agendamento online)\b/.test(t)){
     await saveSession(db,tenantId,phone,state,d);
-    await reply(db,tenantId,instance,phone,"📲 *Prefere agendar pelo site?*\n\n"+origin+"/agendar/"+tenant.slug+"\n\n_O link abre direto na agenda da "+shopName+"._");
+    await reply(db,tenantId,instance,phone,"📲 *Prefere agendar pelo site?*\n\n"+bookingUrl(origin,tenant.slug)+"\n\n_O link abre direto na agenda da "+shopName+"._");
     return NextResponse.json({ok:true});
   }
 
