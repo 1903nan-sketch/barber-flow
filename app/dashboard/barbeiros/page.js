@@ -4,7 +4,7 @@ import {CalendarCheck2,Plus,UserRound} from "lucide-react";
 import {supabase} from "../../../lib/supabase";
 import ModuleShell from "../_components/ModuleShell";
 
-const roles={owner:"Proprietário",manager:"Gerente",reception:"Recepção",attendant:"Atendente",barber:"Barbeiro"};
+const roles={owner:"Proprietário",manager:"Gerente",reception:"Recepção",attendant:"Atendente",barber:"Profissional"};
 
 function TeamContent({workspace}){
  const [items,setItems]=useState([]),[providers,setProviders]=useState(new Set()),[loading,setLoading]=useState(true),[busy,setBusy]=useState(""),[error,setError]=useState("");

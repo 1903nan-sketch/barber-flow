@@ -24,7 +24,7 @@ export async function POST(request){
   const name=String(body.name||"").trim(),ownerName=String(body.owner_name||"").trim(),email=String(body.owner_email||"").trim().toLowerCase();
   let slug=cleanSlug(body.slug||name);
 
-  if(!name||!ownerName||!email||!slug||!body.plan_id)return NextResponse.json({error:"Preencha os dados obrigatórios da barbearia, proprietário e plano."},{status:400});
+  if(!name||!ownerName||!email||!slug||!body.plan_id)return NextResponse.json({error:"Preencha os dados obrigatórios da empresa, proprietário e plano."},{status:400});
 
   const {data:plan,error:planError}=await admin.from("plans").select("id,name,monthly_cents,default_grace_days").eq("id",body.plan_id).maybeSingle();
   if(planError||!plan||!["Starter","Pro","Pro + Filiais"].includes(plan.name))return NextResponse.json({error:"Selecione um plano válido."},{status:400});
@@ -35,7 +35,7 @@ export async function POST(request){
    const {data:existing}=await admin.from("tenants").select("id").eq("slug",slug).maybeSingle();
    if(!existing)break;
    slug=baseSlug+"-"+suffix++;
-   if(suffix>99)return NextResponse.json({error:"Não foi possível gerar uma URL única para esta barbearia."},{status:400});
+   if(suffix>99)return NextResponse.json({error:"Não foi possível gerar uma URL única para esta empresa."},{status:400});
   }
 
   const redirectTo=APP_URL+"/login?setup=password";
@@ -83,13 +83,13 @@ export async function POST(request){
   const {error:updateError}=await admin.from("tenants").update(patch).eq("id",tenantId);
   if(updateError){
    console.error("Tenant billing setup failed",updateError.message);
-   return NextResponse.json({error:"A barbearia foi criada, mas houve erro ao salvar a assinatura. Atualize a página e revise o cadastro em Barbearias."},{status:500});
+   return NextResponse.json({error:"A empresa foi criada, mas houve erro ao salvar a assinatura. Atualize a página e revise o cadastro em Empresas."},{status:500});
   }
 
   const ownerIsProvider=plan.name!=="Starter"&&["on","true","1",true].includes(body.owner_is_provider);
   if(ownerIsProvider){
    const {data:barber,error:barberError}=await admin.from("barbers").upsert({tenant_id:tenantId,user_id:created.user.id,name:ownerName,active:true},{onConflict:"tenant_id,user_id"}).select("id").single();
-   if(barberError)return NextResponse.json({error:"A barbearia foi criada, mas não foi possível habilitar o proprietário na agenda."},{status:500});
+   if(barberError)return NextResponse.json({error:"A empresa foi criada, mas não foi possível habilitar o proprietário na agenda."},{status:500});
    const [units,services]=await Promise.all([
     admin.from("units").select("id").eq("tenant_id",tenantId).eq("active",true),
     admin.from("services").select("id").eq("tenant_id",tenantId).eq("active",true)
@@ -101,6 +101,6 @@ export async function POST(request){
   return NextResponse.json({id:tenantId,slug,name,plan:plan.name,owner_is_provider:ownerIsProvider,invite_sent:true,owner_email:email});
  }catch(error){
   console.error("Create tenant route failed",error?.message||error);
-  return NextResponse.json({error:error.message||"Não foi possível criar a barbearia."},{status:500});
+  return NextResponse.json({error:error.message||"Não foi possível criar a empresa."},{status:500});
  }
 }

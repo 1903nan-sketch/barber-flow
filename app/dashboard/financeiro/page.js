@@ -1,7 +1,7 @@
 "use client";
 import {notify} from "../../../lib/notify";
 import {useCallback,useEffect,useMemo,useState,useRef} from 'react';
-import {Banknote,ClipboardList,Download,LayoutGrid,Package,Plus,Scissors,Search,Wallet,X} from 'lucide-react';
+import {Banknote,ClipboardList,Download,LayoutGrid,Package,Plus,Briefcase,Search,Wallet,X} from 'lucide-react';
 import {supabase} from '../../../lib/supabase';
 import ModuleShell from '../_components/ModuleShell';
 const money=n=>(Number(n||0)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
@@ -13,7 +13,7 @@ const qty=v=>Number(v||0).toLocaleString('pt-BR',{maximumFractionDigits:2});
 const methods={cash:'Dinheiro',pix:'Pix',credit:'Cartão de crédito',debit:'Cartão de débito',transfer:'Transferência',account:'Conta do cliente',order:'Comanda'};
 const statusName={open:'Em aberto',paid:'Liquidado',cancelled:'Cancelado'};
 const presets=[['today','Hoje'],['7d','7 dias'],['month','Este mês'],['lastmonth','Mês passado'],['custom','Personalizado']];
-const tabs=[['overview','Visão geral',LayoutGrid],['cash','Caixa',Wallet],['services','Serviços',Scissors],['products','Produtos',Package],['accounts','Contas',ClipboardList]];
+const tabs=[['overview','Visão geral',LayoutGrid],['cash','Caixa',Wallet],['services','Serviços',Briefcase],['products','Produtos',Package],['accounts','Contas',ClipboardList]];
 function range(preset){
  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
  if(preset==='today')return [today(),today()];

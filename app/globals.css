@@ -182,7 +182,6 @@ html:has(.admin-layout),body:has(.admin-layout){background:#f7f8f9!important}
 .rh2-logo .ruptix-logo svg{width:48px;height:41px}.rh2-logo .ruptix-logo>span{font-size:20px}
 .brand-client-lockup{display:flex;align-items:center;gap:14px}.brand-client-lockup>.ruptix-logo{padding-right:14px;border-right:1px solid rgba(15,23,42,0.096)}.brand-client-lockup>.ruptix-logo svg{width:30px;height:27px}.brand-client-lockup>.ruptix-logo>span{display:none}
 .ruptix-logo-small{gap:6px;margin-left:5px;vertical-align:middle}.ruptix-logo-small svg{width:20px;height:18px}.ruptix-logo-small>span{font-size:10px;letter-spacing:.24em}
-.premium-booking footer .ruptix-logo{display:inline-flex}
 @media(max-width:680px){.ruptix-logo>span{font-size:14px}.rh2-logo .ruptix-logo svg{width:38px;height:34px}.brand-client-lockup{gap:9px}.brand-client-lockup>.ruptix-logo{padding-right:9px}}
 
 

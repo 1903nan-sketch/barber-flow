@@ -1,6 +1,6 @@
 # RupControl
 
-Sistema SaaS da Ruptix para gestão de barbearias. O mesmo projeto serve a página institucional (`3ruptix.com`) e o sistema (`rupcontrol.3ruptix.com`).
+Sistema SaaS da Ruptix para gestão de negócios de qualquer ramo que atendem clientes. O mesmo projeto serve a página institucional (`3ruptix.com`) e o sistema (`rupcontrol.3ruptix.com`).
 
 ## Domínio
 
@@ -8,7 +8,7 @@ O endereço do sistema fica em `lib/site.js` (`APP_HOST`). Hoje é `barbertix.3r
 
 ## Cadastro e teste grátis
 
-O site da Ruptix leva para `/login?criar=1`, onde a pessoa cria o acesso (Supabase Auth, com confirmação por e-mail). O link de confirmação abre `/onboarding`, que cria a barbearia com 14 dias de teste no plano escolhido. Quando o teste termina sem pagamento, o proprietário só vê a tela de planos e pagamento (`BillingPanel`).
+O site da Ruptix leva para `/login?criar=1`, onde a pessoa cria o acesso (Supabase Auth, com confirmação por e-mail). O link de confirmação abre `/onboarding`, que cria a empresa com 14 dias de teste no plano escolhido. Quando o teste termina sem pagamento, o proprietário só vê a tela de planos e pagamento (`BillingPanel`).
 
 ## Limite de requisições
 
@@ -27,3 +27,15 @@ OPENAI_WHATSAPP_MODEL=gpt-5.6-luna
 ```
 
 `OPENAI_WHATSAPP_MODEL` é opcional; o padrão é `gpt-5.6-luna`. Sem `OPENAI_API_KEY`, o fluxo legado do WhatsApp continua funcionando como fallback.
+
+## Fotos dos serviços
+
+Cada serviço pode ter uma foto, mostrada no site de agendamento. Em **Serviços**, o dono envia uma imagem (JPG, PNG ou WebP, até 5 MB) ou clica em **Criar com IA**, que gera a foto a partir do nome do serviço. A rota é `/api/services/image`, e a foto fica no bucket `tenant-public-media`. Sem foto, o site mostra um quadro colorido com um ícone escolhido pelo nome.
+
+A geração usa a mesma `OPENAI_API_KEY` do WhatsApp. O modelo é opcional:
+
+```env
+OPENAI_IMAGE_MODEL=gpt-image-1-mini
+```
+
+Cada empresa pode gerar até 20 fotos com IA por dia. Enviar foto própria não tem esse limite.

@@ -323,7 +323,7 @@ export async function POST(req){
     .eq("id",tenantId).maybeSingle();
   if(!tenant)return NextResponse.json({ok:true,ignored:"unknown_tenant"});
   if(String(tenant?.plans?.name||"").toLowerCase()==="starter")return NextResponse.json({ok:true,ignored:"plan_without_whatsapp"});
-  const shopName=brandLabel(tenant.name)||"barbearia";
+  const shopName=brandLabel(tenant.name)||"empresa";
 
   if(event==="QRCODE_UPDATED")return NextResponse.json({ok:true,status:"connecting"});
   if(event==="CONNECTION_UPDATE")return NextResponse.json({ok:true,status:normalizeEvolutionState(payloadData(body))});

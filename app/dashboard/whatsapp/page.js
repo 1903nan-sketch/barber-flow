@@ -80,8 +80,8 @@ function WhatsAppContent({workspace}){
     <section className="box">
       <div className="box-head">
         <div>
-          <h2>WhatsApp da barbearia</h2>
-          <p>Conecte o próprio número da barbearia por QR Code. O agente de IA usa a agenda real do RupControl.</p>
+          <h2>WhatsApp da empresa</h2>
+          <p>Conecte o próprio número da empresa por QR Code. O agente de IA usa a agenda real do RupControl.</p>
         </div>
         <span style={{display:"inline-flex",alignItems:"center",gap:7,fontSize:12,fontWeight:800,padding:"8px 11px",border:"1px solid var(--line)",borderRadius:999}}>
           {status==="connected"?<CheckCircle2 size={16}/>:<MessageCircle size={16}/>}
@@ -105,7 +105,7 @@ function WhatsAppContent({workspace}){
       {qrSrc&&status!=="connected"&&<div style={{marginTop:20,display:"grid",placeItems:"center",gap:12,padding:22,border:"1px solid var(--line)",borderRadius:16}}>
         <strong>Escaneie este QR Code no WhatsApp</strong>
         <img src={qrSrc} alt="QR Code para conectar WhatsApp" width="260" height="260" style={{width:260,maxWidth:"100%",height:"auto",background:"#fff",padding:10,borderRadius:14}}/>
-        <p style={{maxWidth:520,textAlign:"center",fontSize:12,color:"var(--muted)",lineHeight:1.6}}>No celular da barbearia: WhatsApp → Aparelhos conectados → Conectar aparelho. O status será atualizado automaticamente.</p>
+        <p style={{maxWidth:520,textAlign:"center",fontSize:12,color:"var(--muted)",lineHeight:1.6}}>No celular da empresa: WhatsApp → Aparelhos conectados → Conectar aparelho. O status será atualizado automaticamente.</p>
       </div>}
 
       {error&&<div className="form-alert error" style={{marginTop:16}}>{error}</div>}
@@ -121,7 +121,7 @@ function WhatsAppContent({workspace}){
     <section className="box">
       <div className="box-head"><div><h2>Como o atendimento funciona</h2><p>O WhatsApp e o site continuam usando a mesma agenda do RupControl.</p></div></div>
       <div style={{display:"grid",gap:12}}>
-        <div className="appointment"><span className="quick-icon green">1</span><div className="appointment-main"><b>Cliente fala normalmente</b><p>Ex.: “Quero corte sexta depois das 18h com qualquer barbeiro”.</p></div></div>
+        <div className="appointment"><span className="quick-icon green">1</span><div className="appointment-main"><b>Cliente fala normalmente</b><p>Ex.: “Quero marcar sexta depois das 18h com qualquer profissional”.</p></div></div>
         <div className="appointment"><span className="quick-icon purple">2</span><div className="appointment-main"><b>IA usa ferramentas do RupControl</b><p>Serviços, profissionais, unidades e horários são consultados no Supabase; a IA não inventa disponibilidade.</p></div></div>
         <div className="appointment"><span className="quick-icon blue">3</span><div className="appointment-main"><b>Confirmação antes de gravar</b><p>O agente mostra o resumo e só cria o horário depois de uma confirmação explícita do cliente e nova validação da vaga.</p></div></div>
       </div>

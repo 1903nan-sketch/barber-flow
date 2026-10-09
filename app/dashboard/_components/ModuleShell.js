@@ -5,7 +5,7 @@ import Sidebar from "./Sidebar";
 import BillingPanel from "./BillingPanel";
 import ConsentScreen from "../../_components/ConsentScreen";
 import {useWorkspace} from "../../../lib/use-workspace";
-const roleLabel={owner:"Proprietário",manager:"Gerente",reception:"Recepção",attendant:"Atendente",barber:"Barbeiro"};
+const roleLabel={owner:"Proprietário",manager:"Gerente",reception:"Recepção",attendant:"Atendente",barber:"Profissional"};
 export default function ModuleShell({children,title,eyebrow="Gestão",action}){
  const workspace=useWorkspace(),pathname=usePathname(),[notice,setNotice]=useState(false),[sidebarCollapsed,setSidebarCollapsed]=useState(false);
  useEffect(()=>{if(!workspace.loading&&workspace.tenant?.id){const today=new Date().toISOString().slice(0,10),key="billing_notice_"+workspace.tenant.id;setNotice(localStorage.getItem(key)!==today)}},[workspace.loading,workspace.tenant?.id]);
