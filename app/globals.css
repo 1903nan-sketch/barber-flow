@@ -203,18 +203,16 @@ html:has(.admin-layout),body:has(.admin-layout){background:#f7f8f9!important}
 .workspace-menu>button.workspace-other-account{display:block;margin-top:6px;border-top:1px solid #d8d9dc;border-radius:0;padding:11px 8px 5px;color:#474f60;font-size:10px}
 
 
-/* Plan cards: lift on hover, no pointer-driven tilt or light */
+/* Plan cards: no movement on hover, only a border/shadow highlight */
 .rp-plan-grid article{
-  --lift:0px;--scale:1;
   overflow:hidden;
-  transform:translateY(var(--lift)) scale(var(--scale));
-  transition:transform .18s ease,border-color .2s ease,box-shadow .2s ease,background .2s ease;
+  transition:border-color .2s ease,box-shadow .2s ease,background .2s ease;
 }
-.rp-plan-grid article.featured{--lift:-8px}
-.rp-plan-grid article:hover{--lift:-12px;--scale:1.018;border-color:rgba(80,140,244,.7);box-shadow:0 28px 70px rgba(15,23,42,0.126),0 0 0 1px rgba(80,140,244,.08)}
+.rp-plan-grid article.featured{transform:translateY(-8px)}
+.rp-plan-grid article:hover{border-color:rgba(80,140,244,.7);box-shadow:0 28px 70px rgba(15,23,42,0.126),0 0 0 1px rgba(80,140,244,.08)}
 .rp-plan-grid article>*{position:relative;z-index:1}
 @media (hover:none),(max-width:800px){
- .rp-plan-grid article,.rp-plan-grid article.featured,.rp-plan-grid article:hover{--lift:0px;--scale:1;transform:none}
+ .rp-plan-grid article.featured{transform:none}
 }
 
 

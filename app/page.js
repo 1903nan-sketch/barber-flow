@@ -2,8 +2,9 @@ import Link from "next/link";
 import {headers} from "next/headers";
 import {redirect} from "next/navigation";
 import {createClient} from "@supabase/supabase-js";
-import {ArrowUpRight,Check,Code2,Cpu,GitBranch,Mail,Scissors,ShieldCheck,Sparkles,Workflow,Zap} from "lucide-react";
+import {ArrowUpRight,BarChart3,Bot,CalendarDays,Check,Code2,Cpu,GitBranch,Globe2,Mail,Package,Percent,Scissors,ShieldCheck,Sparkles,Users,WalletCards,Workflow,Zap} from "lucide-react";
 import RuptixFx from "./_components/RuptixFx";
+import {APP_HOSTS,SIGNUP_URL} from "../lib/site";
 import "./ruptix-home.css";
 
 export const metadata={
@@ -29,21 +30,24 @@ async function getActiveUsers(){
 }
 
 const words=(text,start=0)=>text.split(" ").map((w,i)=><span className="rx-word" style={{"--i":start+i}} key={i}>{w}&nbsp;</span>);
+const rcFeatures=[["Agenda por profissional",CalendarDays],["Site de agendamento",Globe2],["Caixa rápido e PIX",WalletCards],["Clientes e conta do cliente",Users],["Comissões da equipe",Percent],["Estoque",Package],["Financeiro e relatórios",BarChart3],["Robô do WhatsApp",Bot]];
 const capabilities=["SISTEMAS INTERNOS","SAAS","AUTOMAÇÕES","PORTAIS","INTEGRAÇÕES","APLICATIVOS WEB","PAGAMENTOS","WHATSAPP","PAINÉIS DE GESTÃO","APIs"];
 
 export default async function HomePage(){
  const activeUsers=await getActiveUsers();
  const host=(await headers()).get("host")?.split(":")[0]?.toLowerCase();
- if(host==="barberflow.3ruptix.com"||host==="barbertix.3ruptix.com") redirect("/login");
+ if(APP_HOSTS.includes(host)) redirect("/login");
 
  return <main className="rx">
   <RuptixFx/>
   <div className="rx-aurora" aria-hidden="true"><i/><i/><i/><i/></div>
   <div className="rx-grid" aria-hidden="true"/>
 
+  <a className="rx-announce" href={SIGNUP_URL}><b>14 DIAS GRÁTIS</b><span>Teste o RupControl, o sistema de gestão para barbearias da Ruptix</span><ArrowUpRight/></a>
+
   <nav className="rx-nav">
    <Link href="/" className="rx-logo" aria-label="Ruptix — início">RUPTIX<sup>®</sup></Link>
-   <div className="rx-nav-links"><a href="#sob-medida">Software sob medida</a><a href="#produtos">Produtos</a><a href="#sobre">Sobre</a><a href="#contato">Contato</a></div>
+   <div className="rx-nav-links"><a href="#rupcontrol">RupControl</a><a href="#sob-medida">Software sob medida</a><a href="#produtos">Produtos</a><a href="#sobre">Sobre</a><a href="#contato">Contato</a></div>
    <div className="rx-nav-right">
     <span className="rx-status"><i/> ONLINE{activeUsers>0&&<b>· {activeUsers} usuários</b>}</span>
     <a href={mail("Software personalizado")} className="rx-btn rx-btn-dark rx-btn-sm">Criar um sistema <ArrowUpRight/></a>
@@ -61,7 +65,7 @@ export default async function HomePage(){
     <p data-reveal style={{"--d":".5s"}}>A Ruptix desenvolve <strong>softwares personalizados</strong> para empresas que precisam organizar operações, automatizar processos e transformar uma necessidade real em um sistema próprio.</p>
     <div className="rx-actions" data-reveal style={{"--d":".65s"}}>
      <a className="rx-btn rx-btn-primary" href={mail("Quero um software personalizado")}>Quero um software personalizado <ArrowUpRight/></a>
-     <a className="rx-btn rx-btn-glass" href="#produtos">Ver produtos Ruptix</a>
+     <a className="rx-btn rx-btn-glass" href="#rupcontrol">RupControl: 14 dias grátis</a>
     </div>
     <div className="rx-trust" data-reveal style={{"--d":".8s"}}><span><ShieldCheck/>Código próprio</span><span><Zap/>Entrega contínua</span><span><Cpu/>Nuvem e IA</span></div>
    </div>
@@ -70,6 +74,23 @@ export default async function HomePage(){
   <div className="rx-marquee" aria-label="O que desenvolvemos">
    <div className="rx-marquee-track">{[...capabilities,...capabilities].map((c,i)=><span key={i}>{c}<i/></span>)}</div>
   </div>
+
+  <section className="rx-section rx-rc" id="rupcontrol">
+   <div className="rx-rc-trial" data-reveal>
+    <span>TESTE GRÁTIS</span>
+    <b>14</b>
+    <strong>dias grátis</strong>
+    <small>Sem cartão de crédito e sem cobrança no cadastro. O pagamento só começa depois do teste, se você quiser continuar.</small>
+   </div>
+   <div className="rx-rc-copy" data-reveal style={{"--d":".1s"}}>
+    <span className="rx-kicker">PRODUTO RUPTIX · RUPCONTROL</span>
+    <h2>A gestão completa da sua barbearia, grátis por 14 dias.</h2>
+    <p>O RupControl reúne em um só painel tudo o que a barbearia usa no dia a dia: agenda de cada profissional, página própria para os clientes agendarem, caixa rápido com PIX, clientes, comissões, estoque e financeiro. O robô do WhatsApp confirma e lembra os horários sozinho.</p>
+    <ul className="rx-rc-features">{rcFeatures.map(([t,Icon])=><li key={t}><Icon/>{t}</li>)}</ul>
+    <p className="rx-rc-note">Site de agendamento e robô do WhatsApp nos planos Pro.</p>
+    <div className="rx-actions"><a className="rx-btn rx-btn-primary" href={SIGNUP_URL}>Criar conta grátis <ArrowUpRight/></a><Link className="rx-btn rx-btn-glass" href="/produtos/rupcontrol">Ver planos e recursos</Link></div>
+   </div>
+  </section>
 
   <section className="rx-section rx-custom" id="sob-medida">
    <div className="rx-custom-copy" data-reveal>
@@ -106,13 +127,13 @@ export default async function HomePage(){
    </div>
    <div className="rx-line-head" data-reveal><span>LINHA 01</span><h3>Beleza.</h3><p>Soluções digitais para barbearias, salões, estética e outros negócios do setor de beleza.</p></div>
    <div className="rx-cards">
-    <Link href="/produtos/barber-flow" className="rx-glass rx-product" data-reveal>
-     <div className="rx-product-head"><span className="rx-live"><i/> PRODUTO ATIVO</span><span>01</span></div>
+    <Link href="/produtos/rupcontrol" className="rx-glass rx-product" data-reveal>
+     <div className="rx-product-head"><span className="rx-live"><i/> 14 DIAS GRÁTIS</span><span>01</span></div>
      <div className="rx-product-icon"><Scissors/></div>
      <span className="rx-product-tag">BARBEARIAS · LINHA BELEZA</span>
-     <h3>Barber<br/>Tix.</h3>
-     <p>Plataforma completa para agenda, clientes, equipe, vendas e crescimento da barbearia.</p>
-     <b>Explorar produto <ArrowUpRight/></b>
+     <h3>Rup<br/>Control.</h3>
+     <p>Gestão completa da barbearia: agenda, site de agendamento, caixa, clientes, equipe e financeiro. Teste grátis por 14 dias.</p>
+     <b>Conhecer e testar grátis <ArrowUpRight/></b>
     </Link>
     <Link href="/produtos/beautytix" className="rx-glass rx-product rx-product-beauty" data-reveal style={{"--d":".12s"}}>
      <div className="rx-product-head"><span className="rx-live"><i/> PRODUTO ATIVO</span><span>02</span></div>
