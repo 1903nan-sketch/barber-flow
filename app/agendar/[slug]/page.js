@@ -1,31 +1,230 @@
 "use client";
-import {useEffect,useMemo,useState} from "react";
+import {useEffect,useMemo,useRef,useState} from "react";
 import {useParams} from "next/navigation";
-import {CalendarDays,CheckCircle2,ChevronLeft,ChevronRight,Clock,Instagram,MapPin,Phone,ShieldCheck,Store,UserRound,Users} from "lucide-react";
+import {ArrowLeft,ArrowRight,CalendarDays,Check,ChevronLeft,ChevronRight,Clock,Instagram,MapPin,MessageCircle,ShieldCheck,Store} from "lucide-react";
 import {supabase} from "../../../lib/supabase";
-import RuptixLogo from "../../_components/RuptixLogo";
+import ServiceArt from "../../_components/ServiceArt";
+
 const contactNumber=v=>{const n=String(v||"").replace(/\D/g,"");return n.length===10||n.length===11?"55"+n:n};
 const money=v=>(Number(v||0)/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
-const localDate=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)};
-const isoDate=d=>{const x=new Date(d);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,10)};
+const pad=n=>String(n).padStart(2,"0");
+const isoDate=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const today=()=>isoDate(new Date());
 const monthTitle=d=>d.toLocaleDateString("pt-BR",{month:"long",year:"numeric"}).replace(/^./,x=>x.toUpperCase());
-function CalendarPicker({month,setMonth,selected,onSelect,availability,enabled}){const y=month.getFullYear(),m=month.getMonth(),first=new Date(y,m,1),days=new Date(y,m+1,0).getDate(),cells=[...Array(first.getDay()).fill(null),...Array.from({length:days},(_,i)=>new Date(y,m,i+1))];return <div className="premium-panel calendar-panel"><div className="calendar-head"><button type="button" onClick={()=>setMonth(new Date(y,m-1,1))}><ChevronLeft/></button><strong>{monthTitle(month)}</strong><button type="button" onClick={()=>setMonth(new Date(y,m+1,1))}><ChevronRight/></button></div><div className="calendar-week">{["DOM","SEG","TER","QUA","QUI","SEX","SÁB"].map(x=><span key={x}>{x}</span>)}</div><div className="calendar-days">{cells.map((d,i)=>!d?<span key={"e"+i}/>:<button type="button" key={isoDate(d)} disabled={!enabled||isoDate(d)<localDate()} className={(selected===isoDate(d)?"selected ":"")+(availability[isoDate(d)]?"available":"")} onClick={()=>onSelect(isoDate(d))}>{d.getDate()}</button>)}</div><div className="calendar-legend"><span><i className="green"/>Disponível</span><span><i className="purple"/>Selecionado</span><span><i/>Indisponível</span></div></div>}
+const longDate=iso=>new Date(iso+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
+const shortDate=iso=>new Date(iso+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit"});
+// "Barbearia do Nico" vira "BN": ignora "do", "da", "de", "e"...
+const initials=name=>{const words=String(name||"").trim().split(/\s+/).filter(Boolean),main=words.filter(w=>!/^(d[aeo]s?|e|&)$/i.test(w));return (main.length?main:words).slice(0,2).map(x=>x[0]).join("").toUpperCase()||"?"};
+const firstName=name=>String(name||"").trim().split(/\s+/)[0]||"Profissional";
+const instagramHandle=v=>String(v||"").replace(/^@/,"").replace(/[^\w.]/g,"");
+// Horários no fuso da unidade, que é onde o atendimento acontece.
+function formatIn(tz,iso,options){try{return new Date(iso).toLocaleString("pt-BR",{...options,timeZone:tz})}catch{return new Date(iso).toLocaleString("pt-BR",options)}}
+const STEPS=["Serviço","Profissional","Horário","Confirmação"];
+// O profissional precisa fazer todos os serviços escolhidos.
+const doesAll=(links,barberId,ids)=>ids.every(sid=>(links||[]).some(x=>x.barber_id===barberId&&x.service_id===sid));
+
+function Avatar({barber,selected}){
+ return <span className="bk-avatar">{barber.photo_url?<img src={barber.photo_url} alt=""/>:initials(barber.name)}{selected&&<i><Check/></i>}</span>;
+}
+
+function Calendar({month,setMonth,selected,onSelect,availability}){
+ const y=month.getFullYear(),m=month.getMonth(),first=new Date(y,m,1),days=new Date(y,m+1,0).getDate(),now=new Date(),min=today();
+ const cells=[...Array(first.getDay()).fill(null),...Array.from({length:days},(_,i)=>new Date(y,m,i+1))];
+ return <div className="bk-cal">
+  <div className="bk-cal-head">
+   <button type="button" aria-label="Mês anterior" disabled={y===now.getFullYear()&&m<=now.getMonth()} onClick={()=>setMonth(new Date(y,m-1,1))}><ChevronLeft/></button>
+   <strong>{monthTitle(month)}</strong>
+   <button type="button" aria-label="Próximo mês" onClick={()=>setMonth(new Date(y,m+1,1))}><ChevronRight/></button>
+  </div>
+  <div className="bk-cal-week">{["D","S","T","Q","Q","S","S"].map((x,i)=><span key={i}>{x}</span>)}</div>
+  <div className="bk-cal-days">{cells.map((d,i)=>{if(!d)return <span key={"e"+i}/>;const iso=isoDate(d);return <button type="button" key={iso} disabled={iso<min} className={(selected===iso?"selected ":"")+(availability[iso]?"available":"")} onClick={()=>onSelect(iso)}>{d.getDate()}</button>})}</div>
+ </div>;
+}
+
 export default function PublicBooking(){
- const {slug}=useParams(),[data,setData]=useState(null),[loading,setLoading]=useState(true),[error,setError]=useState(""),[slots,setSlots]=useState([]),[looking,setLooking]=useState(false),[sending,setSending]=useState(false),[done,setDone]=useState(null),[month,setMonth]=useState(()=>new Date()),[availability,setAvailability]=useState({}),[form,setForm]=useState({unit:"",services:[],barber:"",date:localDate(),slot:"",name:"",phone:"",email:""}),[instagram,setInstagram]=useState({items:[],username:""});
+ const {slug}=useParams();
+ const [data,setData]=useState(null),[loading,setLoading]=useState(true),[error,setError]=useState("");
+ const [form,setForm]=useState({unit:"",services:[],barber:"",date:today(),slot:"",name:"",phone:"",email:""});
+ const [view,setView]=useState("pick");
+ const [slots,setSlots]=useState([]),[looking,setLooking]=useState(false);
+ const [month,setMonth]=useState(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)});
+ const [availability,setAvailability]=useState({}),[calendarOpen,setCalendarOpen]=useState(false);
+ const [allServices,setAllServices]=useState(false),[allPros,setAllPros]=useState(false);
+ const [sending,setSending]=useState(false),[done,setDone]=useState(null);
+ const [instagram,setInstagram]=useState({items:[],username:""});
+ const cardRef=useRef(null),timeRef=useRef(null);
+
  useEffect(()=>{fetch("/api/instagram/feed?slug="+encodeURIComponent(slug)).then(r=>r.json()).then(x=>setInstagram(x)).catch(()=>{})},[slug]);
- useEffect(()=>{if(!supabase){setError("Agenda temporariamente indisponível.");setLoading(false);return}supabase.rpc("public_booking_data",{p_slug:slug}).then(({data,error})=>{setData(data);setError(error?.message||"");setLoading(false);if(data?.state==="open")setForm(f=>({...f,unit:data.units?.[0]?.id||""}))})},[slug]);
- const selectedServices=data?.services?.filter(x=>form.services.includes(x.id))||[],totalPrice=selectedServices.reduce((s,x)=>s+Number(x.price_cents||0),0),totalDuration=selectedServices.reduce((s,x)=>s+Number(x.duration||0),0),unit=data?.units?.find(x=>x.id===form.unit),barber=data?.barbers?.find(x=>x.id===form.barber);
- const barbers=useMemo(()=>data?.barbers?.filter(b=>(data.barber_units||[]).some(x=>x.barber_id===b.id&&x.unit_id===form.unit)&&(data.barber_services||[]).some(x=>x.barber_id===b.id&&form.services.includes(x.service_id))&&form.services.every(sid=>(data.barber_services||[]).some(x=>x.barber_id===b.id&&x.service_id===sid)))||[],[data,form.unit,form.services]);
- useEffect(()=>{let alive=true;setSlots([]);setForm(f=>({...f,slot:""}));setLooking(false);if(!form.unit||!form.services.length||!form.barber||!form.date)return;setLooking(true);supabase.rpc("public_available_slots_multi",{p_slug:slug,p_unit:form.unit,p_barber:form.barber,p_services:form.services,p_date:form.date}).then(({data,error})=>{if(alive){setSlots(data||[]);setError(error?.message||"");setLooking(false)}}).catch(()=>{if(alive){setError("Não foi possível consultar os horários. Tente novamente.");setLooking(false)}});return()=>{alive=false}},[slug,form.unit,form.services,form.barber,form.date,done]);
- useEffect(()=>{let alive=true;setAvailability({});if(!form.unit||!form.services.length||!form.barber)return;const y=month.getFullYear(),m=month.getMonth(),days=new Date(y,m+1,0).getDate();Promise.all(Array.from({length:days},(_,i)=>{const d=isoDate(new Date(y,m,i+1));if(d<localDate())return Promise.resolve([d,false]);return supabase.rpc("public_available_slots_multi",{p_slug:slug,p_unit:form.unit,p_barber:form.barber,p_services:form.services,p_date:d}).then(({data})=>[d,(data||[]).length>0])})).then(rows=>{if(alive)setAvailability(Object.fromEntries(rows))}).catch(()=>{if(alive)setError("Não foi possível atualizar o calendário.")});return()=>{alive=false}},[slug,form.unit,form.services,form.barber,month,done]);
- const toggleService=id=>setForm(f=>({...f,services:f.services.includes(id)?f.services.filter(x=>x!==id):[...f.services,id],barber:"",slot:""}));
- const set=(key,value)=>setForm(f=>({...f,[key]:value,...(key==="unit"?{barber:"",slot:""}:key==="barber"||key==="date"?{slot:""}:{})}));
- async function book(e){e.preventDefault();if(!form.slot)return setError("Escolha um horário.");setSending(true);setError("");const {data:confirmation,error}=await supabase.rpc("public_book_multi",{p_slug:slug,p_unit:form.unit,p_barber:form.barber,p_services:form.services,p_starts_at:form.slot,p_name:form.name,p_phone:form.phone,p_email:form.email});setSending(false);if(error){setError(error.message);return}setDone(confirmation)}
- if(loading)return <main className="booking-state">Carregando agenda...</main>;
- if(error&&!data)return <main className="booking-state"><Store/><h1>Não foi possível abrir esta agenda</h1><p>{error}</p></main>;
- if(data?.state!=="open")return <main className="booking-state"><Store/><h1>{data?.name||"Agenda indisponível"}</h1><p>{data?.state==="plan_unavailable"?"Este estabelecimento usa o plano Starter, que não inclui site de agendamento on-line.":"O agendamento on-line está temporariamente indisponível."}</p></main>;
- if(done){const contact=contactNumber(done.whatsapp||done.phone);return <main className="booking-public premium-booking confirmation-page"><header className="premium-nav confirm-nav"><div className="premium-brand">{data?.tenant?.logo_url?<img src={data.tenant.logo_url} alt=""/>:<span><Store/></span>}<div><strong>{done.barbershop||data?.tenant?.name}</strong><small>AGENDAMENTO ONLINE</small></div></div><span className="confirm-nav-status"><CheckCircle2/>CONFIRMADO</span></header><section className="booking-confirm"><div className="confirm-check"><CheckCircle2/></div><span>AGENDAMENTO CONFIRMADO</span><h1>Seu horário está reservado!</h1><p className="confirm-subtitle">Tudo certo. Confira abaixo os detalhes do seu agendamento.</p><div className="confirm-grid"><p><b>Local</b>{done.barbershop}</p><p><b>Serviço</b>{done.service}</p><p><b>Profissional</b>{done.barber}</p><p><b>Data e horário</b>{new Date(done.starts_at).toLocaleString("pt-BR",{dateStyle:"long",timeStyle:"short"})}</p></div><div className="confirm-actions">{contact&&<a className="booking-submit confirm-whatsapp" href={`https://wa.me/${contact}`} target="_blank"><Phone/>Falar pelo WhatsApp</a>}<button type="button" className="confirm-new" onClick={()=>{setDone(null);setForm(f=>({...f,slot:"",name:"",phone:"",email:""}));window.scrollTo({top:0,behavior:"smooth"})}}><CalendarDays/>Fazer novo agendamento</button></div><small className="confirm-note"><ShieldCheck/>Precisa cancelar ou alterar seu horário? Entre em contato diretamente com o estabelecimento.</small></section><footer>Agendamento por <b>RupControl</b> · <RuptixLogo className="ruptix-logo-small"/></footer></main>}
- const t=data.tenant,contact=contactNumber(t.whatsapp||t.phone);
- const steps=[["1","Serviços",selectedServices.length?selectedServices.map(x=>x.name).join(", "):"Escolha os serviços"],["2","Profissional",barber?.name||"Escolha o profissional"],["3","Data e horário",form.slot?new Date(form.slot).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}):"Selecione no calendário"],["4","Seus dados",form.name||"Informe seus dados"],["5","Confirmação","Revise e agende"]],currentStep=!selectedServices.length?0:!barber?1:!form.slot?2:(form.name.trim().length<2||!form.phone.trim())?3:4;
- return <main className="booking-public premium-booking"><header className="premium-nav"><div className="premium-brand">{t.logo_url?<img src={t.logo_url} alt=""/>:<span><Store/></span>}<div><strong>{t.name}</strong><small>AGENDAMENTO ONLINE</small></div></div><nav><a href="#agendar">Agendamento</a><a href="#servicos">Serviços</a>{t.instagram&&<a href={`https://www.instagram.com/${String(t.instagram).replace(/^@/,"").replace(/\\/g,"")}`} target="_blank" rel="noreferrer"><Instagram/> Instagram</a>}{contact&&<a href={`https://wa.me/${contact}`} target="_blank">WhatsApp</a>}</nav><a className="nav-book" href="#agendar"><CalendarDays/>Agendar agora</a></header><section className={"premium-hero "+(t.cover_url?"has-cover":"")}>{t.cover_url&&<img className="premium-hero-cover" src={t.cover_url} alt="" fetchPriority="high"/>}<div><p>AGENDAMENTO ONLINE</p><h1>{t.name}</h1><h2>{t.description||"Estilo é questão de atitude."}</h2><div>{t.address&&<span><MapPin/>{t.address}</span>}<span><Clock/>Reserve seu horário em poucos cliques</span></div></div></section><form id="agendar" className="premium-shell" onSubmit={book}><aside className="steps-column">{steps.map((x,i)=><div className={"step "+(i===currentStep?"active":i<currentStep?"done":"")} key={x[0]}><span>{x[0]}</span><div><strong>{x[1]}</strong><small>{x[2]}</small></div></div>)}<div className="trust-list"><p><CalendarDays/><span><b>Agendamento rápido</b><small>Em poucos cliques</small></span></p><p><Clock/><span><b>Sem filas</b><small>Seu horário reservado</small></span></p><p><ShieldCheck/><span><b>Ambiente seguro</b><small>Organização e qualidade</small></span></p></div></aside><section className="booking-work"><div className="booking-title"><span>AGENDE SEU HORÁRIO</span><h2>Escolha o serviço, profissional e horário</h2><p>Os dias verdes possuem horários disponíveis.</p></div><div id="servicos" className="booking-grid booking-selects"><label>Unidade<select value={form.unit} onChange={e=>set("unit",e.target.value)} required>{data.units.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><div className="multi-services"><span>Serviços</span><div>{data.services.map(x=><button type="button" key={x.id} className={form.services.includes(x.id)?"selected":""} onClick={()=>toggleService(x.id)}><b>{x.name}</b><small>{x.duration} min · {money(x.price_cents)}</small></button>)}</div></div><label>Profissional<select value={form.barber} onChange={e=>set("barber",e.target.value)} required disabled={!form.services.length}><option value="">Selecione</option>{barbers.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label></div><div className="calendar-booking"><CalendarPicker month={month} setMonth={setMonth} selected={form.date} onSelect={d=>set("date",d)} availability={availability} enabled={!!form.barber}/><div className="premium-panel slots slots-panel"><div><b>{new Date(form.date+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"})}</b><small>Horários disponíveis</small></div>{looking?<p>Consultando agenda...</p>:!form.barber?<p>Escolha o serviço e o profissional primeiro.</p>:slots.length===0?<p>Nenhum horário disponível neste dia.</p>:<div>{slots.map(x=><button type="button" className={form.slot===x.starts_at?"selected":""} onClick={()=>set("slot",x.starts_at)} key={x.starts_at}>{new Date(x.starts_at).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}</button>)}</div>}</div></div><div className="customer-card"><h3>Seus dados</h3><div className="booking-grid customer"><label>Nome<input value={form.name} onChange={e=>set("name",e.target.value)} required minLength="2" placeholder="Seu nome"/></label><label>WhatsApp<input value={form.phone} onChange={e=>set("phone",e.target.value)} required placeholder="(11) 99999-9999"/></label><label>E-mail (opcional)<input type="email" value={form.email} onChange={e=>set("email",e.target.value)} placeholder="voce@email.com"/></label></div></div>{error&&<div className="form-alert error">{error}</div>}<button className="booking-submit" disabled={sending||!form.slot}><CheckCircle2/>{sending?"Confirmando...":"Confirmar agendamento"}</button></section><aside className="summary-column"><h3>Seu agendamento</h3><div className="summary-item"><Store/><div><small>Serviço</small><strong>{selectedServices.length?selectedServices.map(x=>x.name).join(" + "):"Não selecionado"}</strong>{selectedServices.length>0&&<b>{totalDuration} min · {money(totalPrice)}</b>}</div></div><div className="summary-item"><UserRound/><div><small>Profissional</small><strong>{barber?.name||"Não selecionado"}</strong></div></div><div className="summary-item"><CalendarDays/><div><small>Data e horário</small><strong>{form.slot?new Date(form.slot).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}):"Não selecionado"}</strong></div></div><div className="summary-total"><span>Total</span><strong>{selectedServices.length?money(totalPrice):"R$ 0,00"}</strong></div>{contact&&<a className="whatsapp-help" href={`https://wa.me/${contact}`} target="_blank"><Phone/><span><b>Precisa de ajuda?</b><small>Fale conosco no WhatsApp</small></span></a>}</aside></form>{t.instagram&&<section className="instagram-profile-link"><div><Instagram/><span><small>SIGA NO INSTAGRAM</small><strong>@{String(t.instagram).replace(/^@/,"")}</strong></span></div><a href={`https://www.instagram.com/${String(t.instagram).replace(/^@/,"")}`} target="_blank" rel="noreferrer">Abrir Instagram</a></section>}{instagram.items?.length>0&&<section className="instagram-preview"><div className="instagram-preview-head"><div><span>INSTAGRAM</span><h2>@{instagram.username||String(t.instagram||"").replace(/^@/,"")}</h2><p>Veja os trabalhos mais recentes.</p></div><a href={"https://www.instagram.com/"+(instagram.username||String(t.instagram||"").replace(/^@/,""))} target="_blank" rel="noreferrer"><Instagram/>Ver perfil</a></div><div className="instagram-grid">{instagram.items.slice(0,6).map(x=><a href={x.permalink} target="_blank" rel="noreferrer" key={x.id}><img src={x.media_type==="VIDEO"?(x.thumbnail_url||x.media_url):x.media_url} alt={x.caption?.slice(0,80)||"Publicação no Instagram"}/><span><Instagram/></span></a>)}</div></section>}<section className="premium-benefits"><div><CalendarDays/><span><b>Agendamento online</b><small>Rápido e prático</small></span></div><div><Store/><span><b>Profissionais</b><small>Escolha quem vai atender</small></span></div><div><ShieldCheck/><span><b>Horário garantido</b><small>Agenda em tempo real</small></span></div><div><Users/><span><b>Feito para você</b><small>Experiência simples</small></span></div></section><footer>Agendamento por <b>RupControl</b></footer></main>;
+ useEffect(()=>{
+  if(!supabase){setError("Agenda temporariamente indisponível.");setLoading(false);return}
+  supabase.rpc("public_booking_data",{p_slug:slug}).then(({data,error})=>{setData(data);setError(error?.message||"");setLoading(false);if(data?.state==="open")setForm(f=>({...f,unit:data.units?.[0]?.id||""}))});
+ },[slug]);
+
+ const services=data?.services||[],selectedServices=services.filter(x=>form.services.includes(x.id));
+ const totalPrice=selectedServices.reduce((s,x)=>s+Number(x.price_cents||0),0),totalDuration=selectedServices.reduce((s,x)=>s+Number(x.duration||0),0);
+ const unit=data?.units?.find(x=>x.id===form.unit),tz=unit?.timezone||"America/Sao_Paulo",barber=data?.barbers?.find(x=>x.id===form.barber);
+ // Profissionais da unidade que fazem todos os serviços escolhidos; o proprietário aparece primeiro.
+ const pros=useMemo(()=>(data?.barbers||[])
+  .filter(b=>(data.barber_units||[]).some(x=>x.barber_id===b.id&&x.unit_id===form.unit)&&doesAll(data.barber_services,b.id,form.services))
+  .sort((a,b)=>(b.is_owner?1:0)-(a.is_owner?1:0)),[data,form.unit,form.services]);
+
+ useEffect(()=>{
+  let alive=true;setSlots([]);setLooking(false);
+  if(!form.unit||!form.services.length||!form.barber||!form.date)return;
+  setLooking(true);
+  supabase.rpc("public_available_slots_multi",{p_slug:slug,p_unit:form.unit,p_barber:form.barber,p_services:form.services,p_date:form.date})
+   .then(({data,error})=>{if(alive){setSlots(data||[]);setError(error?.message||"");setLooking(false)}})
+   .catch(()=>{if(alive){setError("Não foi possível consultar os horários. Tente novamente.");setLooking(false)}});
+  return()=>{alive=false};
+ },[slug,form.unit,form.services,form.barber,form.date,done]);
+
+ // Dias com horário livre no mês exibido (uma consulta só).
+ useEffect(()=>{
+  let alive=true;setAvailability({});
+  if(!form.unit||!form.services.length||!form.barber)return;
+  const days=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();
+  supabase.rpc("public_available_days",{p_slug:slug,p_unit:form.unit,p_barber:form.barber,p_services:form.services,p_from:isoDate(month),p_days:days})
+   .then(({data})=>{if(alive)setAvailability(Object.fromEntries((data||[]).map(x=>[x.day,x.slots>0])))})
+   .catch(()=>{});
+  return()=>{alive=false};
+ },[slug,form.unit,form.services,form.barber,month,done]);
+
+ function toggleService(id){
+  setError("");
+  setForm(f=>{const ids=f.services.includes(id)?f.services.filter(x=>x!==id):[...f.services,id];return {...f,services:ids,barber:f.barber&&doesAll(data.barber_services,f.barber,ids)?f.barber:"",slot:""}});
+ }
+ function chooseBarber(id){
+  setError("");setForm(f=>({...f,barber:id,slot:""}));
+  if(form.services.length)setTimeout(()=>timeRef.current?.scrollIntoView({behavior:"smooth",block:"start"}),60);
+ }
+ const chooseDate=iso=>{setForm(f=>({...f,date:iso,slot:""}));setCalendarOpen(false)};
+ const chooseUnit=id=>setForm(f=>({...f,unit:id,barber:"",slot:""}));
+ const show=next=>{setView(next);setError("");setTimeout(()=>cardRef.current?.scrollIntoView({behavior:"smooth",block:"start"}),30)};
+
+ async function book(e){
+  e.preventDefault();if(sending)return;
+  setSending(true);setError("");
+  const {data:confirmation,error}=await supabase.rpc("public_book_multi",{p_slug:slug,p_unit:form.unit,p_barber:form.barber,p_services:form.services,p_starts_at:form.slot,p_name:form.name,p_phone:form.phone,p_email:form.email});
+  setSending(false);
+  if(error)return setError(error.message);
+  setDone(confirmation);window.scrollTo({top:0,behavior:"smooth"});
+ }
+
+ if(loading)return <main className="bk-state"><Clock/><p>Carregando agenda...</p></main>;
+ if(error&&!data)return <main className="bk-state"><Store/><h1>Não foi possível abrir esta agenda</h1><p>{error}</p></main>;
+ if(data?.state!=="open")return <main className="bk-state"><Store/><h1>{data?.name||"Agenda indisponível"}</h1><p>{data?.state==="plan_unavailable"?"Este estabelecimento usa o plano Starter, que não inclui site de agendamento on-line.":"O agendamento on-line está temporariamente indisponível."}</p></main>;
+
+ const t=data.tenant,contact=contactNumber(t.whatsapp||t.phone),insta=instagramHandle(instagram.username||t.instagram);
+ const header=<header className="bk-top"><div className="bk-brand">{t.logo_url?<img src={t.logo_url} alt=""/>:<span>{initials(t.name)}</span>}<div><strong>{t.name}</strong><small>AGENDAMENTO ONLINE</small></div></div>{contact&&<a className="bk-top-wa" href={`https://wa.me/${contact}`} target="_blank" rel="noreferrer"><MessageCircle/>WhatsApp</a>}</header>;
+ const footer=<footer className="bk-foot">Agendamento por <b>RupControl</b></footer>;
+
+ if(done){
+  const doneContact=contactNumber(done.whatsapp||done.phone)||contact;
+  return <main className="bk">{header}<div className="bk-wrap"><section className="bk-card bk-done">
+   <div className="bk-done-check"><Check/></div>
+   <h1>Agendamento confirmado!</h1>
+   <p>Seu horário está reservado. Confira os detalhes:</p>
+   <div className="bk-review">
+    <div className="bk-review-row"><Store/><div><small>Local</small><strong>{done.barbershop||t.name}</strong></div></div>
+    <div className="bk-review-row"><ServiceArt name={selectedServices[0]?.name||done.service} src={selectedServices.length===1?selectedServices[0].image_url:null}/><div><small>Serviço</small><strong>{done.service}</strong></div></div>
+    <div className="bk-review-row">{barber?<Avatar barber={barber}/>:<Store/>}<div><small>Profissional</small><strong>{done.barber}</strong></div></div>
+    <div className="bk-review-row"><CalendarDays/><div><small>Data e horário</small><strong>{formatIn(tz,done.starts_at,{weekday:"long",day:"2-digit",month:"long",hour:"2-digit",minute:"2-digit"})}</strong></div></div>
+   </div>
+   <div className="bk-done-actions">
+    {doneContact&&<a href={`https://wa.me/${doneContact}`} target="_blank" rel="noreferrer"><MessageCircle/>Falar pelo WhatsApp</a>}
+    <button type="button" onClick={()=>{setDone(null);setView("pick");setForm(f=>({...f,slot:"",name:"",phone:"",email:""}))}}><CalendarDays/>Fazer outro agendamento</button>
+   </div>
+   <small className="bk-done-note"><ShieldCheck size={13}/> Precisa cancelar ou mudar o horário? Fale direto com o estabelecimento.</small>
+  </section></div>{footer}</main>;
+ }
+
+ const current=view==="confirm"?3:!form.services.length?0:!form.barber?1:!form.slot?2:3;
+ const ready=form.services.length&&form.barber&&form.slot;
+ const nextFree=Object.keys(availability).filter(d=>availability[d]&&d>form.date).sort()[0];
+ const visibleServices=allServices?services:services.slice(0,3);
+ // Serviço escolhido que estaria escondido em "Ver todos" continua visível.
+ const shownServices=allServices?services:[...visibleServices,...selectedServices.filter(x=>!visibleServices.includes(x))];
+ const when=form.slot?formatIn(tz,form.slot,{weekday:"long",day:"2-digit",month:"long"})+" às "+formatIn(tz,form.slot,{hour:"2-digit",minute:"2-digit"}):"";
+
+ return <main className="bk">
+  {header}
+  <div className="bk-wrap">
+   {t.cover_url&&<img className="bk-cover" src={t.cover_url} alt="" fetchPriority="high"/>}
+   <section className="bk-card" ref={cardRef}>
+    <div className="bk-head">{view==="confirm"&&<button type="button" className="bk-back" aria-label="Voltar" onClick={()=>show("pick")}><ArrowLeft/></button>}<h1>{view==="confirm"?"Confirmar agendamento":"Novo agendamento"}</h1></div>
+    <ol className="bk-steps">{STEPS.map((label,i)=><li key={label} className={i===current?"current":i<current?"done":""}><span>{i<current?<Check/>:i+1}</span>{label}</li>)}</ol>
+
+    {view==="pick"?<>
+     {data.units.length>1&&<section className="bk-sec"><div className="bk-sec-head"><h2>Local</h2></div><div className="bk-chips">{data.units.map(u=><button type="button" key={u.id} className={"bk-chip"+(form.unit===u.id?" selected":"")} aria-pressed={form.unit===u.id} onClick={()=>chooseUnit(u.id)}>{u.name}</button>)}</div></section>}
+
+     <section className="bk-sec">
+      <div className="bk-sec-head"><h2>Escolha o serviço</h2>{services.length>3&&<button type="button" className="bk-link" onClick={()=>setAllServices(x=>!x)}>{allServices?"Ver menos":"Ver todos"}</button>}</div>
+      {services.length===0?<p className="bk-empty">Nenhum serviço disponível no momento.</p>:<div className="bk-services">{shownServices.map(s=>{const on=form.services.includes(s.id);return <button type="button" key={s.id} className={"bk-service"+(on?" selected":"")} aria-pressed={on} onClick={()=>toggleService(s.id)}>
+       <ServiceArt name={s.name} src={s.image_url}/>
+       <span><strong>{s.name}</strong><small>{money(s.price_cents)} <i>· {s.duration} min</i></small></span>
+       {on?<Check/>:<ChevronRight/>}
+      </button>})}</div>}
+      {services.length>1&&<p className="bk-hint">Pode escolher mais de um serviço.</p>}
+     </section>
+
+     <section className="bk-sec">
+      <div className="bk-sec-head"><h2>Selecione o profissional</h2>{pros.length>4&&<button type="button" className="bk-link" onClick={()=>setAllPros(x=>!x)}>{allPros?"Ver menos":"Ver todos"}</button>}</div>
+      {pros.length===0?<p className="bk-empty">{form.services.length>1?"Nenhum profissional faz todos esses serviços juntos. Tente tirar um deles.":"Nenhum profissional disponível para este serviço."}</p>:<div className={"bk-pros"+(allPros?" all":"")}>{pros.map(b=>{const on=form.barber===b.id;return <button type="button" key={b.id} className={"bk-pro"+(on?" selected":"")} aria-pressed={on} onClick={()=>chooseBarber(b.id)}>
+       <Avatar barber={b} selected={on}/><strong>{firstName(b.name)}</strong><small>{b.is_owner?"Proprietário":"Profissional"}</small>
+      </button>})}</div>}
+     </section>
+
+     <section className="bk-sec" ref={timeRef}>
+      <div className="bk-sec-head"><h2>Escolha o horário</h2></div>
+      <button type="button" className="bk-date" aria-expanded={calendarOpen} onClick={()=>setCalendarOpen(x=>!x)}><CalendarDays/><span>{longDate(form.date)}</span><ChevronRight className={calendarOpen?"open":""}/></button>
+      {calendarOpen&&<Calendar month={month} setMonth={setMonth} selected={form.date} onSelect={chooseDate} availability={availability}/>}
+      {!form.services.length||!form.barber?<p className="bk-empty bk-slots-note">Escolha o serviço e o profissional para ver os horários livres.</p>
+       :looking?<p className="bk-empty bk-slots-note">Consultando horários...</p>
+       :slots.length===0?<p className="bk-empty bk-slots-note">Nenhum horário livre neste dia.{nextFree&&<button type="button" onClick={()=>chooseDate(nextFree)}>Ver {shortDate(nextFree)}</button>}</p>
+       :<div className="bk-slots">{slots.map(x=><button type="button" key={x.starts_at} className={form.slot===x.starts_at?"selected":""} aria-pressed={form.slot===x.starts_at} onClick={()=>setForm(f=>({...f,slot:x.starts_at}))}>{formatIn(tz,x.starts_at,{hour:"2-digit",minute:"2-digit"})}</button>)}</div>}
+     </section>
+
+     {error&&<p className="bk-alert">{error}</p>}
+     <button type="button" className="bk-continue" disabled={!ready} onClick={()=>show("confirm")}>{ready?<>Continuar <ArrowRight/></>:!form.services.length?"Escolha o serviço":!form.barber?"Escolha o profissional":"Escolha o horário"}</button>
+    </>:<form onSubmit={book}>
+     <div className="bk-review">
+      {selectedServices.map(s=><div className="bk-review-row" key={s.id}><ServiceArt name={s.name} src={s.image_url}/><div><small>Serviço</small><strong>{s.name}</strong></div></div>)}
+      {barber&&<div className="bk-review-row"><Avatar barber={barber}/><div><small>Profissional</small><strong>{barber.name}</strong></div></div>}
+      <div className="bk-review-row"><CalendarDays/><div><small>Data e horário</small><strong>{when}</strong></div></div>
+     </div>
+     <div className="bk-total"><span>Total · {totalDuration} min</span><strong>{money(totalPrice)}</strong></div>
+     <section className="bk-sec">
+      <div className="bk-sec-head"><h2>Seus dados</h2></div>
+      <div className="bk-fields">
+       <label>Nome<input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} required minLength="2" autoComplete="name" placeholder="Seu nome"/></label>
+       <label>WhatsApp<input value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} required type="tel" inputMode="tel" autoComplete="tel" placeholder="(11) 99999-9999"/></label>
+       <label>E-mail (opcional)<input value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} type="email" autoComplete="email" placeholder="voce@email.com"/></label>
+      </div>
+     </section>
+     {error&&<p className="bk-alert">{error}</p>}
+     <button className="bk-continue bk-submit" disabled={sending}>{sending?"Confirmando...":<>Confirmar agendamento <Check/></>}</button>
+    </form>}
+   </section>
+
+   <aside className="bk-aside">
+    {selectedServices.length>0&&<section className="bk-card bk-info bk-summary"><h3>Seu agendamento</h3>
+     <small>Serviço</small><strong>{selectedServices.map(x=>x.name).join(" + ")}</strong>
+     {barber&&<><small>Profissional</small><strong>{barber.name}</strong></>}
+     {when&&<><small>Data e horário</small><strong>{when}</strong></>}
+     <small>Total</small><strong>{money(totalPrice)} · {totalDuration} min</strong>
+    </section>}
+    <section className="bk-card bk-info">
+     <h3>{t.name}</h3>
+     {t.description&&<p>{t.description}</p>}
+     {t.public_info&&<p>{t.public_info}</p>}
+     {t.address&&<a href={"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.address)} target="_blank" rel="noreferrer"><MapPin/>{t.address}</a>}
+     {contact&&<a href={`https://wa.me/${contact}`} target="_blank" rel="noreferrer"><MessageCircle/>Falar pelo WhatsApp</a>}
+     {insta&&<a href={`https://www.instagram.com/${insta}`} target="_blank" rel="noreferrer"><Instagram/>@{insta}</a>}
+     <span><ShieldCheck/>Horário confirmado na hora</span>
+    </section>
+    {instagram.items?.length>0&&<section className="bk-card bk-info"><h3>No Instagram</h3><div className="bk-insta-grid">{instagram.items.slice(0,6).map(x=><a href={x.permalink} target="_blank" rel="noreferrer" key={x.id}><img src={x.media_type==="VIDEO"?(x.thumbnail_url||x.media_url):x.media_url} alt={x.caption?.slice(0,80)||"Publicação no Instagram"} loading="lazy"/></a>)}</div></section>}
+   </aside>
+  </div>
+  {footer}
+ </main>;
 }

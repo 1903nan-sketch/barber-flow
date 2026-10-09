@@ -11,6 +11,7 @@ const API_LIMITS=[
  ["/api/admin/","admin",60,60],
  ["/api/appointments/","appointments",20,60],
  ["/api/media/upload","upload",30,60],
+ ["/api/services/image","upload",30,60],
  ["/api/instagram/","instagram",30,60],
  ["/api/","api",120,60]
 ];

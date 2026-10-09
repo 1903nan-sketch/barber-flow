@@ -1,7 +1,7 @@
 import "./globals.css";
 import "./modules.css";
 import "./admin.css";
-import "./public-booking.css";
+import "./booking-flow.css";
 import "./settings.css";
 import "./sidebar-motion.css";
 import "./corporate-glass.css";
