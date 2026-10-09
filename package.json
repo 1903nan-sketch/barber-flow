@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "lint": "eslint app lib next.config.mjs",
+    "lint": "eslint app lib middleware.js next.config.mjs",
     "typecheck": "tsc -p jsconfig.json --noEmit",
     "build": "next build",
     "start": "next start"

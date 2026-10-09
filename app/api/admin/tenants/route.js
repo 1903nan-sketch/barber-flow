@@ -1,6 +1,7 @@
 import {createClient} from "@supabase/supabase-js";
 import {NextResponse} from "next/server";
 import {TRIAL_DAYS,addDaysISO,todaySP} from "../../../../lib/legal";
+import {APP_URL} from "../../../../lib/site";
 
 const cleanSlug=value=>String(value||"")
  .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
@@ -37,7 +38,7 @@ export async function POST(request){
    if(suffix>99)return NextResponse.json({error:"Não foi possível gerar uma URL única para esta barbearia."},{status:400});
   }
 
-  const redirectTo="https://barbertix.3ruptix.com/login?setup=password";
+  const redirectTo=APP_URL+"/login?setup=password";
   const {data:created,error:createError}=await admin.auth.admin.inviteUserByEmail(email,{
    redirectTo,
    data:{full_name:ownerName,tenant_name:name,product:"RupControl"}

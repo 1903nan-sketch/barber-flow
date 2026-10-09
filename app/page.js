@@ -4,6 +4,7 @@ import {redirect} from "next/navigation";
 import {createClient} from "@supabase/supabase-js";
 import {ArrowUpRight,Check,Code2,Cpu,GitBranch,Mail,Scissors,ShieldCheck,Sparkles,Workflow,Zap} from "lucide-react";
 import RuptixFx from "./_components/RuptixFx";
+import {APP_HOST,LEGACY_APP_HOSTS} from "../lib/site";
 import "./ruptix-home.css";
 
 export const metadata={
@@ -34,7 +35,7 @@ const capabilities=["SISTEMAS INTERNOS","SAAS","AUTOMAÇÕES","PORTAIS","INTEGRA
 export default async function HomePage(){
  const activeUsers=await getActiveUsers();
  const host=(await headers()).get("host")?.split(":")[0]?.toLowerCase();
- if(host==="barberflow.3ruptix.com"||host==="barbertix.3ruptix.com") redirect("/login");
+ if(host===APP_HOST||LEGACY_APP_HOSTS.includes(host)) redirect("/login");
 
  return <main className="rx">
   <RuptixFx/>
@@ -106,11 +107,11 @@ export default async function HomePage(){
    </div>
    <div className="rx-line-head" data-reveal><span>LINHA 01</span><h3>Beleza.</h3><p>Soluções digitais para barbearias, salões, estética e outros negócios do setor de beleza.</p></div>
    <div className="rx-cards">
-    <Link href="/produtos/barber-flow" className="rx-glass rx-product" data-reveal>
+    <Link href="/produtos/rupcontrol" className="rx-glass rx-product" data-reveal>
      <div className="rx-product-head"><span className="rx-live"><i/> PRODUTO ATIVO</span><span>01</span></div>
      <div className="rx-product-icon"><Scissors/></div>
      <span className="rx-product-tag">BARBEARIAS · LINHA BELEZA</span>
-     <h3>Barber<br/>Tix.</h3>
+     <h3>Rup<br/>Control.</h3>
      <p>Plataforma completa para agenda, clientes, equipe, vendas e crescimento da barbearia.</p>
      <b>Explorar produto <ArrowUpRight/></b>
     </Link>
