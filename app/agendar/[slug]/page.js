@@ -110,17 +110,19 @@ export default function PublicBooking(){
   setDone(confirmation);window.scrollTo({top:0,behavior:"smooth"});
  }
 
- if(loading)return <main className="bk-state"><Clock/><p>Carregando agenda...</p></main>;
- if(error&&!data)return <main className="bk-state"><Store/><h1>Não foi possível abrir esta agenda</h1><p>{error}</p></main>;
- if(data?.state!=="open")return <main className="bk-state"><Store/><h1>{data?.name||"Agenda indisponível"}</h1><p>{data?.state==="plan_unavailable"?"Este estabelecimento usa o plano Starter, que não inclui site de agendamento on-line.":"O agendamento on-line está temporariamente indisponível."}</p></main>;
+ if(loading)return <main className="bk-state"><div><Clock/><p>Carregando agenda...</p></div></main>;
+ if(error&&!data)return <main className="bk-state"><div><Store/><h1>Não foi possível abrir esta agenda</h1><p>{error}</p></div></main>;
+ if(data?.state!=="open")return <main className="bk-state"><div><Store/><h1>{data?.name||"Agenda indisponível"}</h1><p>{data?.state==="plan_unavailable"?"Este estabelecimento usa o plano Starter, que não inclui site de agendamento on-line.":"O agendamento on-line está temporariamente indisponível."}</p></div></main>;
 
  const t=data.tenant,contact=contactNumber(t.whatsapp||t.phone),insta=instagramHandle(instagram.username||t.instagram);
  const header=<header className="bk-top"><div className="bk-brand">{t.logo_url?<img src={t.logo_url} alt=""/>:<span>{initials(t.name)}</span>}<div><strong>{t.name}</strong><small>AGENDAMENTO ONLINE</small></div></div>{contact&&<a className="bk-top-wa" href={`https://wa.me/${contact}`} target="_blank" rel="noreferrer"><MessageCircle/>WhatsApp</a>}</header>;
+ // Fundo: a capa da empresa (Configurações) ou a paisagem padrão.
+ const background=<div className={"bk-bg"+(t.cover_url?" custom":"")} aria-hidden="true"><img src={t.cover_url||"/booking-landscape.webp"} alt="" fetchPriority="high"/></div>;
  const footer=<footer className="bk-foot">Agendamento por <b>RupControl</b></footer>;
 
  if(done){
   const doneContact=contactNumber(done.whatsapp||done.phone)||contact;
-  return <main className="bk">{header}<div className="bk-wrap"><section className="bk-card bk-done">
+  return <main className="bk">{background}{header}<div className="bk-wrap"><section className="bk-card bk-done">
    <div className="bk-done-check"><Check/></div>
    <h1>Agendamento confirmado!</h1>
    <p>Seu horário está reservado. Confira os detalhes:</p>
@@ -147,9 +149,9 @@ export default function PublicBooking(){
  const when=form.slot?formatIn(tz,form.slot,{weekday:"long",day:"2-digit",month:"long"})+" às "+formatIn(tz,form.slot,{hour:"2-digit",minute:"2-digit"}):"";
 
  return <main className="bk">
+  {background}
   {header}
   <div className="bk-wrap">
-   {t.cover_url&&<img className="bk-cover" src={t.cover_url} alt="" fetchPriority="high"/>}
    <section className="bk-card" ref={cardRef}>
     <div className="bk-head">{view==="confirm"&&<button type="button" className="bk-back" aria-label="Voltar" onClick={()=>show("pick")}><ArrowLeft/></button>}<h1>{view==="confirm"?"Confirmar agendamento":"Novo agendamento"}</h1></div>
     <ol className="bk-steps">{STEPS.map((label,i)=><li key={label} className={i===current?"current":i<current?"done":""}><span>{i<current?<Check/>:i+1}</span>{label}</li>)}</ol>
