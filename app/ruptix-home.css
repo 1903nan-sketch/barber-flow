@@ -47,26 +47,9 @@
   animation:rx-grid-move 18s linear infinite;
 }
 @keyframes rx-grid-move{to{background-position:56px 56px,56px 56px}}
-.rx-net{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
 .rx-progress{position:fixed;left:0;top:0;right:0;height:3px;z-index:60;transform-origin:0 50%;transform:scaleX(0);
   background:linear-gradient(90deg,var(--rx-violet),var(--rx-cyan),var(--rx-pink));box-shadow:0 0 12px rgba(63,74,99,.5)}
 
-/* Faíscas e ondas dos gestos de toque (inseridas no body) */
-.rx-spark{
-  position:fixed;z-index:80;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;pointer-events:none;
-  background:hsl(var(--hue,220) 14% 62%);box-shadow:0 0 10px 2px hsl(var(--hue,220) 14% 70% / .6),0 0 22px 4px rgba(150,160,180,.35);
-  animation:rx-spark .8s cubic-bezier(.2,.7,.3,1) forwards;
-}
-.rx-spark-big{width:9px;height:9px;margin:-4.5px 0 0 -4.5px;animation-duration:1s}
-@keyframes rx-spark{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
-.rx-ripple{
-  position:fixed;z-index:79;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;pointer-events:none;
-  border:2px solid rgba(63,74,99,.65);
-  background:radial-gradient(circle,rgba(255,255,255,.9) 0,rgba(120,130,150,.45) 35%,rgba(150,160,180,0) 70%);
-  box-shadow:0 0 24px rgba(63,74,99,.55),0 0 50px rgba(150,160,180,.35);
-  animation:rx-ripple 1.1s ease-out forwards;
-}
-@keyframes rx-ripple{0%{transform:scale(.4);opacity:1}100%{transform:scale(7);opacity:0}}
 
 /* ---------- Vidro líquido ---------- */
 .rx-glass{
@@ -144,7 +127,6 @@
 .rx-trust span{display:inline-flex;align-items:center;gap:7px}
 .rx-trust svg{width:16px;height:16px;color:var(--rx-violet)}
 
-@keyframes rx-spin{to{transform:rotate(360deg)}}
 @keyframes rx-float{50%{translate:0 -12px}}
 
 /* ---------- Faixa rolante ---------- */
@@ -155,6 +137,24 @@
 .rx-marquee span{display:inline-flex;align-items:center;gap:26px;padding-right:26px;font-size:13px;font-weight:800;letter-spacing:.2em;color:var(--rx-ink-2)}
 .rx-marquee span i{width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,var(--rx-violet),var(--rx-cyan))}
 @keyframes rx-marquee{to{transform:translateX(-50%)}}
+
+/* ---------- Faixa de aviso do RupControl ---------- */
+.rx-announce{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 12px;padding:10px 16px;background:var(--rx-ink);color:#fff;font-size:13px;font-weight:600;line-height:1.4;text-align:center}
+.rx-announce b{padding:4px 10px;border-radius:999px;background:#fff;color:var(--rx-ink);font-size:11px;font-weight:850;letter-spacing:.12em}
+.rx-announce svg{width:16px;height:16px;flex:none}
+.rx-announce:hover span{text-decoration:underline}
+
+/* ---------- RupControl em destaque ---------- */
+.rx-rc{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:48px;align-items:center}
+.rx-rc-trial{display:grid;justify-items:start;gap:6px;padding:36px;border-radius:28px;background:var(--rx-ink);color:#fff;box-shadow:0 30px 70px rgba(15,18,34,.25)}
+.rx-rc-trial span{font-size:11px;font-weight:800;letter-spacing:.2em;color:rgba(255,255,255,.7)}
+.rx-rc-trial b{font-size:clamp(110px,14vw,180px);line-height:.85;font-weight:900;letter-spacing:-.06em}
+.rx-rc-trial strong{font-size:clamp(28px,3vw,40px);font-weight:850;letter-spacing:-.03em}
+.rx-rc-trial small{margin-top:10px;max-width:320px;font-size:14px;line-height:1.5;color:rgba(255,255,255,.78)}
+.rx-rc-features{list-style:none;padding:0;margin:24px 0 10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.rx-rc-features li{display:flex;align-items:center;gap:10px;font-size:14.5px;font-weight:600;color:var(--rx-ink-2)}
+.rx-rc-features svg{width:18px;height:18px;padding:6px;box-sizing:content-box;border-radius:10px;color:#fff;background:linear-gradient(135deg,var(--rx-violet),var(--rx-cyan));flex:none}
+.rx-section .rx-rc-note{margin:0;font-size:13px}
 
 /* ---------- Seções ---------- */
 .rx-section{width:min(1240px,calc(100% - 40px));margin:0 auto;padding:120px 0}
@@ -238,6 +238,7 @@
 /* ---------- Responsivo ---------- */
 @media(max-width:1000px){
   .rx-nav-links{display:none}
+  .rx-rc{grid-template-columns:1fr;gap:28px}
   .rx-hero{min-height:auto;padding-top:50px}
   .rx-custom{grid-template-columns:1fr}
   .rx-stats{grid-template-columns:1fr 1fr}
@@ -252,6 +253,8 @@
   .rx-actions .rx-btn{width:100%}
   .rx-section{width:calc(100% - 32px);padding:80px 0}
   .rx-flow{grid-template-columns:1fr}
+  .rx-rc-trial{padding:26px}
+  .rx-rc-features{grid-template-columns:1fr}
   .rx-step:nth-child(2),.rx-step:nth-child(4){translate:none}
   .rx-stats{width:calc(100% - 32px)}
   .rx-line-head{flex-wrap:wrap}.rx-line-head p{margin:0}
@@ -272,7 +275,7 @@
    ===================================================================== */
 html:not(#rx) .rx.ruptix-site{--rp:var(--rx-violet);--acc:var(--rx-violet);--acc-2:var(--rx-cyan);background:var(--rx-bg)!important;color:var(--rx-ink)!important;overflow:visible!important}
 html:not(#rx) .rx.rx-beauty{--acc:#7a5567;--acc-2:#a88a99}
-html:not(#rx) .rx.ruptix-site>*:not(.rx-aurora):not(.rx-grid):not(.rx-net):not(.rx-progress){position:relative;z-index:1}
+html:not(#rx) .rx.ruptix-site>*:not(.rx-aurora):not(.rx-grid):not(.rx-progress){position:relative;z-index:1}
 html:not(#rx) .rx.ruptix-site .rp-nav{
   position:sticky;top:14px;z-index:50;width:min(1240px,calc(100% - 28px));height:auto!important;margin:14px auto 0!important;padding:10px 12px 10px 22px!important;
   border:1px solid var(--rx-edge)!important;border-radius:999px;background:rgba(255,255,255,.55)!important;box-shadow:var(--rx-shadow);
@@ -365,68 +368,12 @@ html:not(#rx) .rx.ruptix-site .rp-cta a{background:#fff!important;color:var(--rx
 html:not(#rx) .rx.ruptix-site .rp-footer{border-top:1px solid var(--rx-line)!important;color:var(--rx-muted)!important;background:transparent!important}
 html:not(#rx) .rx.ruptix-site .rp-footer b,html:not(#rx) .rx.ruptix-site .rp-footer strong{color:var(--rx-ink)!important}
 html:not(#rx) .rx.ruptix-site .rp-footer a,html:not(#rx) .rx.ruptix-site .rp-footer p,html:not(#rx) .rx.ruptix-site .rp-footer small{color:var(--rx-muted)!important}
+html:not(#rx) .rx.ruptix-site .rp-nav-actions{display:flex;align-items:center;gap:8px}
+html:not(#rx) .rx.ruptix-site .rp-nav-actions .rp-primary{min-height:40px;padding:0 16px;font-size:11px}
+html:not(#rx) .rx.ruptix-site .rp-trial-note{margin:14px 0 0;font-size:13px;font-weight:600;color:var(--rx-ink-2)!important}
+html:not(#rx) .rx.ruptix-site .rp-plan-grid li.rp-missing{color:var(--rx-muted)!important}
+html:not(#rx) .rx.ruptix-site .rp-plan-grid li.rp-missing svg{color:#b4232a!important}
 @media(max-width:800px){
   html:not(#rx) .rx.ruptix-site .rp-nav{border-radius:22px;padding:10px 14px!important}
 }
 .rx-end-card h2{font-size:clamp(30px,3.6vw,50px)}
-
-/* =====================================================================
-   Gestos de toque (celular)
-   ===================================================================== */
-.rx-ripple-xl{width:26px;height:26px;margin:-13px 0 0 -13px;border-width:3px;animation-duration:1.2s}
-/* Esfera de energia ao segurar o dedo */
-.rx-orb{
-  position:fixed;z-index:81;width:90px;height:90px;margin:-45px 0 0 -45px;border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle at 35% 30%,#fff 0,rgba(255,255,255,.9) 12%,rgba(120,130,150,.85) 38%,rgba(150,160,180,.55) 62%,rgba(150,160,180,0) 72%);
-  box-shadow:0 0 30px rgba(63,74,99,.6),0 0 70px rgba(150,160,180,.45);
-  animation:rx-orb-grow 1.4s cubic-bezier(.2,.8,.2,1) forwards,rx-orb-pulse .7s ease-in-out 1.4s infinite alternate;
-}
-.rx-orb::before,.rx-orb::after{content:"";position:absolute;inset:-14px;border-radius:50%;border:2px dashed rgba(63,74,99,.55);animation:rx-spin 2.2s linear infinite}
-.rx-orb::after{inset:-28px;border-color:rgba(150,160,180,.45);border-style:dotted;animation-duration:3.4s;animation-direction:reverse}
-@keyframes rx-orb-grow{from{transform:scale(.15);opacity:.4}to{transform:scale(1);opacity:1}}
-@keyframes rx-orb-pulse{to{transform:scale(1.12);filter:brightness(1.15) hue-rotate(25deg)}}
-/* Onda de choque ao soltar a esfera */
-.rx-shock{
-  position:fixed;z-index:80;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;pointer-events:none;
-  border:3px solid rgba(63,74,99,.8);box-shadow:0 0 40px rgba(63,74,99,.6),inset 0 0 30px rgba(150,160,180,.5);
-  background:radial-gradient(circle,rgba(255,255,255,.85) 0,rgba(120,130,150,.25) 40%,transparent 70%);
-  animation:rx-shock 1s cubic-bezier(.1,.7,.2,1) forwards;
-}
-@keyframes rx-shock{0%{transform:scale(.3);opacity:1}100%{transform:scale(calc(10 + var(--p,1) * 12));opacity:0}}
-/* Cometa ao deslizar rápido */
-.rx-comet{
-  position:fixed;z-index:80;height:6px;width:var(--len,160px);margin-top:-3px;border-radius:999px;pointer-events:none;transform-origin:100% 50%;
-  translate:calc(var(--len,160px) * -1) 0;rotate:var(--a,0rad);
-  background:linear-gradient(90deg,rgba(150,160,180,0),rgba(120,130,150,.7) 60%,#fff);
-  box-shadow:0 0 18px rgba(63,74,99,.7),0 0 36px rgba(150,160,180,.4);
-  animation:rx-comet .75s ease-out forwards;
-}
-.rx-comet::after{content:"";position:absolute;right:-7px;top:50%;width:16px;height:16px;margin-top:-8px;border-radius:50%;background:#fff;box-shadow:0 0 20px 6px rgba(120,130,150,.9)}
-@keyframes rx-comet{0%{opacity:1;scale:.4 1}35%{scale:1 1}100%{opacity:0;scale:1.2 .4}}
-/* Feixe de luz entre dois dedos */
-.rx-beam{
-  position:fixed;z-index:80;height:4px;margin-top:-2px;border-radius:999px;pointer-events:none;transform-origin:0 50%;
-  background:linear-gradient(90deg,hsl(var(--hue,220) 14% 66%),#fff 50%,hsl(var(--hue,220) 12% 72%));
-  box-shadow:0 0 16px hsl(var(--hue,220) 14% 66% / .6),0 0 40px rgba(150,160,180,.5);
-  animation:rx-beam-flicker .18s steps(2) infinite;transition:opacity .3s ease;
-}
-.rx-beam::before,.rx-beam::after{content:"";position:absolute;top:50%;width:34px;height:34px;margin-top:-17px;border-radius:50%;
-  background:radial-gradient(circle,#fff 0,hsl(var(--hue,220) 14% 75% / .7) 35%,transparent 70%)}
-.rx-beam::before{left:-17px}.rx-beam::after{right:-17px}
-.rx-beam-out{opacity:0}
-@keyframes rx-beam-flicker{50%{filter:brightness(1.35)}}
-/* Paralaxe ao inclinar o aparelho */
-.rx-tilting .rx-aurora{transform:translate3d(calc(var(--tilt-x,0) * 26px),calc(var(--tilt-y,0) * 26px),0);transition:transform .2s linear}
-.rx-tilting .rx-grid{transform:translate3d(calc(var(--tilt-x,0) * -12px),calc(var(--tilt-y,0) * -12px),0)}
-.rx-tilting .rp-product,.rx-tilting .rx-cards{translate:calc(var(--tilt-x,0) * 14px) calc(var(--tilt-y,0) * 10px)}
-/* Dica de gestos */
-.rx-hint{
-  position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));z-index:90;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);
-  padding:11px 16px;border-radius:999px;font:600 12.5px/1.35 Inter,system-ui,sans-serif;color:#0f1222;text-align:center;
-  background:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.8);box-shadow:0 12px 34px rgba(30,34,48,.18);
-  -webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
-  animation:rx-hint-in .5s cubic-bezier(.2,.8,.2,1) both;transition:opacity .45s ease,translate .45s ease;
-}
-.rx-hint b{color:#2b74f1;margin-right:4px}
-.rx-hint.out{opacity:0;translate:0 12px}
-@keyframes rx-hint-in{from{opacity:0;translate:0 16px}}

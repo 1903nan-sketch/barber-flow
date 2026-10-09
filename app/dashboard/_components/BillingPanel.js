@@ -1,10 +1,13 @@
 "use client";
 import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import QRCode from "qrcode";
-import {CalendarPlus,Check,CircleDollarSign,Copy,CreditCard,ShieldCheck} from "lucide-react";
+import {CalendarPlus,Check,CircleDollarSign,Copy,CreditCard,ShieldCheck,X} from "lucide-react";
 import {supabase} from "../../../lib/supabase";
 
 const money=cents=>(Number(cents||0)/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+// Starter: só gestão interna e financeiro, sem robô do WhatsApp e sem site de agendamento.
+const managementOnly=plan=>plan?.features?(plan.features.whatsapp_bot===false&&plan.features.public_booking===false):plan?.name==="Starter";
+const PLAN_FEATURES=[["public_booking","Site de agendamento"],["whatsapp_bot","Robô do WhatsApp"],["automations","Lembretes e confirmações automáticas"],["multi_unit","Várias unidades"]];
 const ptDate=v=>v?new Date(String(v).slice(0,10)+"T12:00:00").toLocaleDateString("pt-BR"):"—";
 const nextMonth=v=>{const d=new Date(String(v).slice(0,10)+"T12:00:00Z");d.setUTCMonth(d.getUTCMonth()+1);return d.toISOString().slice(0,10)};
 
@@ -47,7 +50,7 @@ export default function BillingPanel({workspace,locked=null}){
   }catch(e){if(!silent)setError(e.message)}finally{if(!silent)setLoading(false)}
  },[tenant?.id]);
  useEffect(()=>{load()},[load]);
- useEffect(()=>{supabase.from("plans").select("id,name,monthly_cents,description,sort_order").in("name",["Starter","Pro","Pro + Filiais"]).order("sort_order").then(({data})=>setPlans(data||[]))},[]);
+ useEffect(()=>{supabase.from("plans").select("id,name,monthly_cents,description,sort_order,features").in("name",["Starter","Pro","Pro + Filiais"]).order("sort_order").then(({data})=>setPlans(data||[]))},[]);
  async function refresh(){await load();workspace.reload?.()}
 
  // No "refresh" button: while something is waiting to be paid, watch the shop's billing
@@ -88,7 +91,7 @@ export default function BillingPanel({workspace,locked=null}){
  },[qrPending,load]);
  async function choosePlan(plan){
   if(busy||plan.id===info?.plan_id)return;
-  if(!window.confirm(`Mudar para o plano ${plan.name} (${money(plan.monthly_cents)}/mês)?`))return;
+  if(!window.confirm(`Mudar para o plano ${plan.name} (${money(plan.monthly_cents)}/mês)?`+(managementOnly(plan)?`\n\nAtenção: o ${plan.name} não tem robô do WhatsApp nem site de agendamento. É só a gestão interna e o financeiro (vendas, caixa, clientes e estoque).`:"")))return;
   setBusy("plan");setError("");setMessage("");
   try{
    const token=await accessToken(),r=await fetch("/api/billing/plan",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+token},body:JSON.stringify({tenant_id:tenant.id,plan_id:plan.id})}),j=await r.json();
@@ -121,12 +124,12 @@ export default function BillingPanel({workspace,locked=null}){
  }
  const amount=info?.amount_cents??fallbackAmount,due=info?.due_date||tenant?.billing_due_date,online=Boolean(info?.configured),cardActive=info?.billing_method==="CREDIT_CARD"&&info?.has_subscription;
  return <div className="monthly-wrap">
-  {locked==="trial_ended"&&<div className="billing-lock"><h2>Seu teste grátis de 14 dias terminou</h2><p>Escolha um plano e faça o pagamento para liberar o sistema. Seus dados continuam salvos e tudo volta a funcionar assim que o pagamento for confirmado.</p></div>}
+  {locked==="trial_ended"&&<div className="billing-lock"><h2>Seu teste grátis de 14 dias terminou</h2><p>Escolha um dos planos abaixo e faça o pagamento para liberar o sistema. Atenção: o Starter não tem robô do WhatsApp nem site de agendamento, é só a gestão e o financeiro. Seus dados continuam salvos e tudo volta a funcionar assim que o pagamento for confirmado.</p></div>}
   {locked==="blocked"&&<div className="billing-lock"><h2>Acesso suspenso por mensalidade em aberto</h2><p>Pague a mensalidade abaixo para liberar o sistema. Seus dados continuam salvos e o acesso volta assim que o pagamento for confirmado.</p></div>}
   {!locked&&info?.status==="trial"&&info?.trial_ends_at&&<div className="billing-lock"><h2>Teste grátis até {ptDate(info.trial_ends_at)}</h2><p>Escolha seu plano e a forma de pagamento quando quiser. A primeira cobrança vence no fim do teste; pagando antes, o sistema já fica ativo.</p></div>}
   {error&&<div className="form-alert error">{error}</div>}
   {message&&<div className="form-alert success">{message}</div>}
-  {info?.can_change_plan&&plans.length>1&&<section className="box"><div className="plan-picker-head"><h3>{locked?"Escolha seu plano":"Seu plano"}</h3><small>Você pode trocar até o primeiro pagamento</small></div><div className="plan-picker">{plans.map(p=><button type="button" key={p.id} className={"plan-option"+(p.id===info.plan_id?" selected":"")} disabled={Boolean(busy)} onClick={()=>choosePlan(p)}>{p.id===info.plan_id&&<em>PLANO SELECIONADO</em>}<b>{p.name}</b><strong>{money(p.monthly_cents)}<small>/mês</small></strong><span>{p.description}</span></button>)}</div></section>}
+  {info?.can_change_plan&&plans.length>1&&<section className="box"><div className="plan-picker-head"><h3>{locked?"Escolha seu plano":"Seu plano"}</h3><small>Você pode trocar até o primeiro pagamento</small></div><div className="plan-picker">{plans.map(p=><button type="button" key={p.id} className={"plan-option"+(p.id===info.plan_id?" selected":"")} disabled={Boolean(busy)} onClick={()=>choosePlan(p)}>{p.id===info.plan_id&&<em>PLANO SELECIONADO</em>}<b>{p.name}</b><strong>{money(p.monthly_cents)}<small>/mês</small></strong><span>{p.description}</span>{p.features&&<ul className="plan-features">{PLAN_FEATURES.map(([key,label])=><li key={key} className={p.features[key]?"":"off"}>{p.features[key]?<Check size={14}/>:<X size={14}/>}{label}</li>)}</ul>}{managementOnly(p)&&<small className="plan-warning">Só gestão e financeiro: sem robô do WhatsApp e sem site de agendamento.</small>}</button>)}</div></section>}
   <section className="monthly-card">
    <div className="monthly-plan">
     <span>PLANO ATUAL</span>
