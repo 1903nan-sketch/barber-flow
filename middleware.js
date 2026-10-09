@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {APP_HOST,LEGACY_APP_HOSTS} from "./lib/site";
+import {APP_HOST,APP_HOSTS,LEGACY_APP_HOSTS,RESERVED_SLUGS} from "./lib/site";
 
 // Limite por IP nas rotas /api. A contagem fica no Postgres (public.api_rate_limit_hit),
 // então vale para todas as instâncias da Vercel ao mesmo tempo.
@@ -50,6 +50,13 @@ export async function middleware(request){
   if(LEGACY_APP_HOSTS.includes(host)&&(request.method==="GET"||request.method==="HEAD")){
    const target=new URL(pathname+request.nextUrl.search,"https://"+APP_HOST);
    return NextResponse.redirect(target,308);
+  }
+  // Link curto da agenda: /ph-barber abre a mesma página de /agendar/ph-barber.
+  const short=APP_HOSTS.includes(host)&&pathname.match(/^\/([a-zA-Z0-9][a-zA-Z0-9-]{0,62})\/?$/);
+  if(short&&!RESERVED_SLUGS.includes(short[1].toLowerCase())){
+   const target=request.nextUrl.clone();
+   target.pathname="/agendar/"+short[1].toLowerCase();
+   return NextResponse.rewrite(target);
   }
   return NextResponse.next();
  }
