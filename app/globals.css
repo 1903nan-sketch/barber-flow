@@ -121,7 +121,7 @@ html:has(.admin-layout),body:has(.admin-layout){background:#f7f8f9!important}
 }
 
 
-/* Barber Flow — dark glass dashboard refinement */
+/* RupControl — dark glass dashboard refinement */
 .dashboard-shell{--bg:#f6f7f8;--surface:#f3f4f5;--text:#f5f7fb;--muted:#8d96a8;--line:#e9ebed;--purple:#387cf2;--purple-soft:#e7e9ed;--nav:#f5f6f8;background:#f6f7f8;color:#f5f7fb}
 .dashboard-shell .sidebar{background:linear-gradient(180deg,#f5f6f7,#f6f7f8);border-right:1px solid #d9dbde}
 .dashboard-shell .content{max-width:none;background:radial-gradient(circle at 78% -5%,rgba(56,124,242,.13),transparent 31%),#f6f7f8!important;padding:30px 34px 50px}
@@ -277,7 +277,7 @@ html:has(.admin-layout),body:has(.admin-layout){background:#f7f8f9!important}
 }
 
 
-/* Barber Flow collapsible sidebar */
+/* RupControl collapsible sidebar */
 .dash{transition:grid-template-columns .22s ease}
 .dash.sidebar-mini{grid-template-columns:78px minmax(0,1fr)}
 .sidebar{overflow-y:auto;overflow-x:hidden;scrollbar-width:none;transition:width .22s ease,padding .22s ease}
@@ -1122,7 +1122,7 @@ html:has(.admin-layout),body:has(.admin-layout){background:#f7f8f9!important}
 }
 
 
-/* BeautyTix uses the same product-card hierarchy as BarberTix */
+/* BeautyTix uses the same product-card hierarchy as RupControl */
 .rh2-line .rh2-featured + .rh2-featured{margin-top:22px}
 .rh2-featured-beauty{
   background:
@@ -1396,3 +1396,22 @@ html:has(.admin-layout),body:has(.admin-layout){background:#f7f8f9!important}
  .rh2-custom-v2-window>header{grid-template-columns:1fr auto}
  .rh2-custom-v2-window>header b{display:none}
 }
+
+/* Clean sidebar toggle + employee password switcher */
+.dashboard-shell .sidebar-toggle svg{transition:transform .2s ease}
+.dashboard-shell .sidebar.collapsed .sidebar-toggle svg{transform:rotate(180deg)}
+.dashboard-shell .staff-switch-menu{padding:9px}
+.dashboard-shell .staff-switch-form{display:grid;gap:10px;padding:4px}
+.dashboard-shell .staff-switch-selected{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:9px;padding:7px 5px}
+.dashboard-shell .staff-switch-selected strong,.dashboard-shell .staff-switch-selected small{display:block}
+.dashboard-shell .staff-switch-selected strong{font-size:11px}.dashboard-shell .staff-switch-selected small{margin-top:2px;font-size:9px;color:#626a78}
+.dashboard-shell .staff-switch-form label{display:grid;gap:5px;font-size:10px;font-weight:750;color:#4a5160}
+.dashboard-shell .staff-switch-form input{width:100%;height:40px;border:1px solid #d8dade;border-radius:10px;background:#fff;color:#171717;padding:0 11px;outline:none}
+.dashboard-shell .staff-switch-form input:focus{border-color:#8aa8d8;box-shadow:0 0 0 3px rgba(82,141,244,.10)}
+.dashboard-shell .staff-switch-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.dashboard-shell .staff-switch-actions button{min-height:38px;border:1px solid #d7d9dd;border-radius:10px;background:#f2f3f5;color:#2a303b;font-size:10px;font-weight:800;cursor:pointer}
+.dashboard-shell .staff-switch-actions button[type="submit"]{background:#171717;color:#fff;border-color:#171717}
+.dashboard-shell .staff-switch-actions button:disabled{opacity:.55;cursor:wait}
+.dashboard-shell .staff-switch-error{color:#8d2e39!important;font-size:9px!important}
+.dashboard-shell .staff-switch-empty{padding:12px 8px;color:#666e7c;font-size:10px;text-align:center}
+.dashboard-shell .staff-switch-empty.error{color:#8d2e39}

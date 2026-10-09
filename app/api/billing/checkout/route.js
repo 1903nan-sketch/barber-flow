@@ -59,7 +59,7 @@ export async function POST(request){
     value:amountCents/100,
     nextDueDate:due,
     cycle:"MONTHLY",
-    description:"BarberTix - "+(ctx.plan?.name||"Plano"),
+    description:"RupControl - "+(ctx.plan?.name||"Plano"),
     externalReference:"tenant:"+ctx.tenant.id
    }});
    await ctx.admin.from("tenants").update({
@@ -87,8 +87,8 @@ export async function POST(request){
     expiredUrl:origin+"/dashboard/mensalidade?pagamento=expirado"
    },
    items:[{
-    name:"BarberTix "+(ctx.plan?.name||"Plano"),
-    description:"Mensalidade BarberTix",
+    name:"RupControl "+(ctx.plan?.name||"Plano"),
+    description:"Mensalidade RupControl",
     quantity:1,
     value:amountCents/100
    }],

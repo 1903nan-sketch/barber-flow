@@ -35,7 +35,7 @@ export async function POST(request){
     billingType:"BOLETO",
     value:amountCents/100,
     dueDate:addDaysISO(todaySP(),3),
-    description:`BarberTix ${ctx.plan?.name||"Plano"} - mensalidade adiantada (vencimento ${coveredBR})`,
+    description:`RupControl ${ctx.plan?.name||"Plano"} - mensalidade adiantada (vencimento ${coveredBR})`,
     externalReference:advanceReference(tenant.id,covered)
    }});
    if(!payment?.id)throw new Error("O Asaas não retornou a cobrança adiantada.");

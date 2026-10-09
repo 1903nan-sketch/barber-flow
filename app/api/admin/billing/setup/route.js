@@ -19,7 +19,7 @@ export async function POST(request){
   try{list=await asaasRequest("/webhooks?limit=100")}catch{}
   const existing=Array.isArray(list?.data)?list.data.find(x=>x.url===webhookUrl):null;
   const payload={
-   name:"BarberTix Billing",
+   name:"RupControl Billing",
    url:webhookUrl,
    email:user.email,
    enabled:true,

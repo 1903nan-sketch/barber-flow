@@ -22,7 +22,7 @@ export default function ConsentScreen({onAccepted}){
  return <main className="consent-screen"><form className="consent-card" onSubmit={accept}>
   <span>ANTES DE CONTINUAR</span>
   <h1>Seus dados, suas regras</h1>
-  <p>Para usar o BarberTix precisamos do seu aceite aos Termos de Uso e à Política de Privacidade. Veja de forma resumida o que tratamos:</p>
+  <p>Para usar o RupControl precisamos do seu aceite aos Termos de Uso e à Política de Privacidade. Veja de forma resumida o que tratamos:</p>
   <div className="consent-data">
    <div><b>Sua conta:</b> nome, e-mail, telefone e, para cobrança, CPF/CNPJ e endereço.</div>
    <div><b>Sua barbearia:</b> serviços, equipe, agenda, clientes, vendas e financeiro que você cadastrar.</div>
@@ -31,7 +31,7 @@ export default function ConsentScreen({onAccepted}){
   </div>
   <label className="consent-check"><input type="checkbox" checked={terms} onChange={e=>setTerms(e.target.checked)} required/><span>Li e aceito os <a href="/termos" target="_blank" rel="noreferrer">Termos de Uso</a>, incluindo o teste grátis de 14 dias e a cobrança mensal após a escolha do plano.</span></label>
   <label className="consent-check"><input type="checkbox" checked={privacy} onChange={e=>setPrivacy(e.target.checked)} required/><span>Li a <a href="/privacidade" target="_blank" rel="noreferrer">Política de Privacidade</a> e autorizo o tratamento dos meus dados e dos dados da barbearia para a prestação do serviço, conforme a LGPD.</span></label>
-  <label className="consent-check"><input type="checkbox" checked={marketing} onChange={e=>setMarketing(e.target.checked)}/><span>Quero receber novidades e dicas do BarberTix por e-mail e WhatsApp.<small>Opcional. Você pode cancelar quando quiser.</small></span></label>
+  <label className="consent-check"><input type="checkbox" checked={marketing} onChange={e=>setMarketing(e.target.checked)}/><span>Quero receber novidades e dicas do RupControl por e-mail e WhatsApp.<small>Opcional. Você pode cancelar quando quiser.</small></span></label>
   {error&&<div className="consent-error" role="alert">{error}</div>}
   <div className="consent-actions"><button className="primary" type="submit" disabled={!terms||!privacy||busy}><ShieldCheck size={17}/> {busy?"Registrando...":"Aceitar e continuar"}</button><button type="button" className="link" onClick={leave}>Não aceito, sair</button></div>
  </form></main>

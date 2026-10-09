@@ -5,7 +5,7 @@
 - Self-service onboarding: authenticated owners can create a trial tenant, choose a commercial plan and slug, create the initial unit, owner professional, service and weekly schedule without master-panel intervention. Provisioning is atomic, idempotent and tenant-scoped.
 - Validation pipeline: ESLint and JavaScript/TypeScript compiler scripts are now explicit; production builds no longer suppress lint or type errors through Next.js configuration.
 - Billing safety: removed the hard-coded fallback PIX recipient. When Asaas is unavailable, the UI now reports that online billing is not configured instead of generating an untracked payment.
-- WhatsApp: fixed the year rollover mutation used when interpreting customer dates and aligned interactive-message branding with BarberTix.
+- WhatsApp: fixed the year rollover mutation used when interpreting customer dates and aligned interactive-message branding with RupControl.
 
 - Inventory: per-unit product catalog; SKU, supplier, category, cost, price, minimum quantity, active state and product commission rate.
 - Audited stock entry, exit, loss and counted-balance adjustment. Negative quantities and unauthorized tenant access are rejected. Requests use idempotency keys.
