@@ -216,3 +216,27 @@ html[data-theme=dark] .dashboard-shell .ranking-list span{color:#c9cad0!importan
 html[data-theme=dark] .dashboard-shell .ranking-list span small{color:#8e8f97!important}
 html[data-theme=dark] .dashboard-shell .monthly-plan{background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.08)!important}
 html[data-theme=dark] .dashboard-shell :is(.monthly-payment,.monthly-pix){background:transparent!important}
+
+/* Segunda revisão: barras de abas, textos secundários e modais */
+html[data-theme=dark] .dashboard-shell .content .agenda-subnav{background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.08)!important;box-shadow:none!important}
+html[data-theme=dark] .dashboard-shell .content .agenda-subnav button:not(.active){background:transparent!important;border-color:transparent!important;color:#c2c3c9!important}
+html[data-theme=dark] .dashboard-shell .content .agenda-subnav button:not(.active) *{color:#c2c3c9!important}
+html[data-theme=dark] .dashboard-shell .content .agenda-subnav button:not(.active):hover{background:rgba(255,255,255,.06)!important}
+html[data-theme=dark] .dashboard-shell .agenda-kicker{color:#6ea8ff!important}
+html[data-theme=dark] .dashboard-shell .wk-day-head.today b,html[data-theme=dark] .dashboard-shell .mo-day.today>b{background:#d93a32!important}
+html[data-theme=dark] .dashboard-shell :is(.fin-period,.fin-kpi span,.fin-session header span,.fin-session footer,.fin-session footer span,.fin-session li span,.inventory-history article span,.inventory-history small){color:#a8a9b0!important}
+html[data-theme=dark] .dashboard-shell .fin-session header b{color:#f1f1f3!important}
+html[data-theme=dark] .dashboard-shell .fin-session li{background:rgba(255,255,255,.04)!important}
+html[data-theme=dark] :is(.client-account-summary,.client-account-summary>div){background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.1)!important}
+html[data-theme=dark] .client-account-summary span{color:#a2a3ab!important}
+html[data-theme=dark] .client-account-summary strong{color:#f1f1f3!important}
+html[data-theme=dark] .client-account-summary svg{color:#8ec2ff!important}
+html[data-theme=dark] .appointment-edit-summary span{background:rgba(255,255,255,.07)!important;color:#d6d7dc!important}
+html[data-theme=dark] :is(.reschedule-empty,.reschedule-loading,.reschedule-hint,.reschedule-slots-head small){color:#a8a9b0!important}
+html[data-theme=dark] .dashboard-shell input:is([type=checkbox],[type=radio]){background-color:transparent!important}
+html[data-theme=dark] .dashboard-shell .inventory-low{color:#ffb340!important}
+html[data-theme=dark] .dashboard-shell .empty-state svg{color:#7c7d85!important}
+html[data-theme=dark] .dashboard-shell .staff-photo-upload{background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.1)!important}
+html[data-theme=dark] .dashboard-shell .staff-photo-upload :is(strong,b){color:#f1f1f3!important}
+html[data-theme=dark] .dashboard-shell .staff-photo-upload p{color:#a2a3ab!important}
+html[data-theme=dark] .dashboard-shell .staff-photo-preview{background:rgba(255,255,255,.08)!important;color:#c9cad0!important}

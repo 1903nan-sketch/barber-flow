@@ -6,6 +6,7 @@ import {Save,Camera,UserRound,CalendarCheck2} from "lucide-react";
 import {supabase} from "../../../../lib/supabase";
 import {uploadMedia} from "../../../../lib/image-file";
 import PhoneInput from "../../../_components/PhoneInput";
+import ImageCropper from "../../../_components/ImageCropper";
 import ModuleShell from "../../_components/ModuleShell";
 
 const permissions=[
@@ -15,14 +16,15 @@ const permissions=[
 ];
 
 function NewMemberForm({tenant}){
- const router=useRouter(),[busy,setBusy]=useState(false),[error,setError]=useState(""),[photo,setPhoto]=useState(""),[role,setRole]=useState("barber"),[provider,setProvider]=useState(true);
+ const router=useRouter(),[busy,setBusy]=useState(false),[error,setError]=useState(""),[photo,setPhoto]=useState(""),[crop,setCrop]=useState(null),[role,setRole]=useState("barber"),[provider,setProvider]=useState(true);
  const starter=String(tenant?.plans?.name||"").toLowerCase()==="starter";
  const limit=Number(tenant?.plans?.max_profiles||0);
 
- async function uploadPhoto(e){
-  const file=e.target.files?.[0];e.target.value="";if(!file)return;setBusy(true);setError("");
-  try{setPhoto(await uploadMedia(supabase,tenant.id,"professional_photo",file))}
-  catch(err){setError(err.message||"Não foi possível enviar a foto.")}finally{setBusy(false)}
+ function uploadPhoto(e){const file=e.target.files?.[0];e.target.value="";if(file){setError("");setCrop(file)}}
+ async function cropped(file){
+  setBusy(true);
+  try{setPhoto(await uploadMedia(supabase,tenant.id,"professional_photo",file));setCrop(null)}
+  catch(err){setError(err.message||"Não foi possível enviar a foto.");setCrop(null)}finally{setBusy(false)}
  }
 
  function changeRole(value){
@@ -66,6 +68,7 @@ function NewMemberForm({tenant}){
   <p className="form-hint"><strong>Limite do plano:</strong> proprietário + {limit} {limit===1?"perfil adicional":"perfis adicionais"}. Cargo e agenda são independentes: recepção/atendente não aparecem na agenda a menos que você marque a opção acima.</p>
   {error&&<div className="form-alert error">{error}</div>}
   <button className="primary form-submit" disabled={busy}><Save size={17}/>{busy?"Salvando...":"Adicionar funcionário"}</button>
+  {crop&&<ImageCropper file={crop} shape="circle" output={800} title="Ajustar foto do profissional" onCancel={()=>setCrop(null)} onDone={cropped}/>}
  </form>
 }
 

@@ -42,7 +42,7 @@ const items = [
   { label: "Comissões", href: "/dashboard/comissoes", icon: Percent, permission: "finance" },
   { label: "Mensalidade", href: "/dashboard/mensalidade", icon: CreditCard, ownerOnly: true },
   { label: "WhatsApp", href: "/dashboard/whatsapp", icon: MessageCircle, ownerOnly: true },
-  { label: "Site, Instagram e WhatsApp", href: "/dashboard/configuracoes", icon: Settings, ownerOnly: true },
+  { label: "Configurações", href: "/dashboard/configuracoes", icon: Settings, ownerOnly: true },
 ];
 
 const roleLabel={owner:"Proprietário",manager:"Gerente",reception:"Recepção",attendant:"Atendente",barber:"Profissional"};

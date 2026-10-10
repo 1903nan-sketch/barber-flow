@@ -1,13 +1,14 @@
 "use client";
 import {notify} from "../../../lib/notify";
 import {useRef,useState} from "react";
-import {Camera,CheckCircle2,Copy,ExternalLink,Globe,ImagePlus,Instagram,MessageCircle,QrCode,Save,Trash2} from "lucide-react";
+import {Camera,CheckCircle2,Copy,ExternalLink,Globe,ImagePlus,Instagram,MessageCircle,Move,QrCode,Save,Trash2} from "lucide-react";
 import {supabase} from "../../../lib/supabase";
 import {bookingUrl} from "../../../lib/site";
 import {uploadMedia} from "../../../lib/image-file";
 import {formatPhone,phoneDigits} from "../../../lib/phone";
 import PhoneInput from "../../_components/PhoneInput";
 import {IosSwitch} from "../../_components/ThemeSwitch";
+import ImageCropper,{fileFromUrl} from "../../_components/ImageCropper";
 import ScheduleManager from "../agenda/ScheduleManager";
 import ModuleShell from "../_components/ModuleShell";
 
@@ -16,7 +17,7 @@ const initials=name=>{const w=String(name||"").trim().split(/\s+/).filter(x=>!/^
 function SettingsContent({workspace}){
  const t=workspace.tenant,formRef=useRef(null);
  const [media,setMedia]=useState({logo_url:t.logo_url||"",cover_url:t.cover_url||""}),[siteOn,setSiteOn]=useState(t.public_site_enabled!==false),[name,setName]=useState(t.name||"");
- const [busy,setBusy]=useState(""),[error,setError]=useState("");
+ const [busy,setBusy]=useState(""),[error,setError]=useState(""),[crop,setCrop]=useState(null);
  const link=typeof location!=="undefined"?bookingUrl(location.origin,t.slug):"";
 
  function payload(over={}){
@@ -46,7 +47,9 @@ function SettingsContent({workspace}){
  async function savePayment(e){e.preventDefault();setBusy("pix");setError("");const p=Object.fromEntries(new FormData(e.currentTarget));const {error}=await supabase.rpc("save_payment_settings",{t:t.id,p});setBusy("");if(error)setError(error.message);else notify("Dados do PIX atualizados.")}
 
  const insta=String(t.instagram||"").replace(/^@/,""),wa=phoneDigits(t.whatsapp);
- const imageInput=field=><input type="file" accept="image/*" hidden disabled={!!busy} onChange={e=>{const f=e.target.files?.[0];e.target.value="";changeImage(field,f)}}/>;
+ // Escolher a imagem abre o ajuste (posição e zoom); a imagem é enviada já recortada.
+ const imageInput=field=><input type="file" accept="image/*" hidden disabled={!!busy} onChange={e=>{const f=e.target.files?.[0];e.target.value="";if(f){setError("");setCrop({field,file:f})}}}/>;
+ async function adjust(field){setError("");try{setCrop({field,file:await fileFromUrl(media[field])})}catch(err){setError(err.message)}}
 
  return <div className="cfg">
   <form ref={formRef} onSubmit={saveSite} className="cfg-main">
@@ -65,13 +68,13 @@ function SettingsContent({workspace}){
       {media.cover_url?<img src={media.cover_url} alt="Capa"/>:<div className="cfg-cover-empty"><ImagePlus size={26}/><span>Sem capa</span></div>}
       <div className="cfg-cover-actions">
        <label className="cfg-pill">{busy==="cover_url"?"Enviando...":<><Camera size={15}/>{media.cover_url?"Trocar capa":"Adicionar capa"}</>}{imageInput("cover_url")}</label>
-       {media.cover_url&&<button type="button" className="cfg-pill" onClick={()=>removeImage("cover_url")} disabled={!!busy} aria-label="Remover capa"><Trash2 size={15}/></button>}
+       {media.cover_url&&<button type="button" className="cfg-pill" onClick={()=>adjust("cover_url")} disabled={!!busy} aria-label="Ajustar capa"><Move size={15}/></button>}{media.cover_url&&<button type="button" className="cfg-pill" onClick={()=>removeImage("cover_url")} disabled={!!busy} aria-label="Remover capa"><Trash2 size={15}/></button>}
       </div>
      </div>
      <div className="cfg-brand-row">
       <label className="cfg-logo" title="Trocar logo">{media.logo_url?<img src={media.logo_url} alt="Logo"/>:<span>{initials(name)}</span>}<i>{busy==="logo_url"?"…":<Camera size={15}/>}</i>{imageInput("logo_url")}</label>
       <div className="cfg-brand-copy"><strong>{name||"Sua empresa"}</strong><small>Logo quadrada fica melhor (ex.: 600 × 600).</small>
-       <div className="cfg-brand-actions"><label className="secondary-action">{busy==="logo_url"?"Enviando...":<><Camera size={15}/>{media.logo_url?"Trocar logo":"Adicionar logo"}</>}{imageInput("logo_url")}</label>{media.logo_url&&<button type="button" className="secondary-action" onClick={()=>removeImage("logo_url")} disabled={!!busy}><Trash2 size={15}/>Remover</button>}</div>
+       <div className="cfg-brand-actions"><label className="secondary-action">{busy==="logo_url"?"Enviando...":<><Camera size={15}/>{media.logo_url?"Trocar logo":"Adicionar logo"}</>}{imageInput("logo_url")}</label>{media.logo_url&&<button type="button" className="secondary-action" onClick={()=>adjust("logo_url")} disabled={!!busy}><Move size={15}/>Ajustar</button>}{media.logo_url&&<button type="button" className="secondary-action" onClick={()=>removeImage("logo_url")} disabled={!!busy}><Trash2 size={15}/>Remover</button>}</div>
       </div>
      </div>
     </div>
@@ -107,6 +110,7 @@ function SettingsContent({workspace}){
    </section>
   </form>
 
+  {crop&&<ImageCropper file={crop.file} shape={crop.field==="cover_url"?"wide":"rounded"} aspect={crop.field==="cover_url"?3:1} output={crop.field==="cover_url"?1800:800} title={crop.field==="cover_url"?"Ajustar capa":"Ajustar logo"} onCancel={()=>setCrop(null)} onDone={async f=>{const field=crop.field;setCrop(null);await changeImage(field,f)}}/>}
   <ScheduleManager workspace={workspace} mode="hours"/>
 
   <form className="cfg-card cfg-pix" onSubmit={savePayment}>

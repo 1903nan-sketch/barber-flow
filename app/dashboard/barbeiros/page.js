@@ -1,11 +1,12 @@
 "use client";
 import {notify} from "../../../lib/notify";
 import {useCallback,useEffect,useMemo,useState} from "react";
-import {CalendarCheck2,Camera,Check,Pencil,Plus,Trash2,UserRound,X} from "lucide-react";
+import {CalendarCheck2,Camera,Check,Move,Pencil,Plus,Trash2,UserRound,X} from "lucide-react";
 import {supabase} from "../../../lib/supabase";
 import {uploadMedia} from "../../../lib/image-file";
 import {formatPhone} from "../../../lib/phone";
 import PhoneInput from "../../_components/PhoneInput";
+import ImageCropper,{fileFromUrl} from "../../_components/ImageCropper";
 import ModuleShell from "../_components/ModuleShell";
 
 const roles={owner:"Proprietário",manager:"Gerente",reception:"Recepção",attendant:"Atendente",barber:"Profissional"};
@@ -19,8 +20,11 @@ async function teamPatch(body){
 
 // Editar nome, WhatsApp e foto. A foto aparece no site de agendamento.
 function EditMember({workspace,member,barber,close,saved}){
- const [photo,setPhoto]=useState(barber?.photo_url||""),[name,setName]=useState(member.name||""),[whatsapp,setWhatsapp]=useState(formatPhone(member.whatsapp)),[busy,setBusy]=useState(""),[error,setError]=useState("");
- async function pick(e){const file=e.target.files?.[0];e.target.value="";if(!file)return;setBusy("photo");setError("");try{setPhoto(await uploadMedia(supabase,workspace.tenant.id,"professional_photo",file))}catch(err){setError(err.message)}finally{setBusy("")}}
+ const [crop,setCrop]=useState(null),[photo,setPhoto]=useState(barber?.photo_url||""),[name,setName]=useState(member.name||""),[whatsapp,setWhatsapp]=useState(formatPhone(member.whatsapp)),[busy,setBusy]=useState(""),[error,setError]=useState("");
+ // Escolheu a foto: abre o ajuste (posição e zoom) e só depois envia.
+ function pick(e){const file=e.target.files?.[0];e.target.value="";if(file){setError("");setCrop(file)}}
+ async function adjust(){setError("");try{setCrop(await fileFromUrl(photo))}catch(err){setError(err.message)}}
+ async function cropped(file){setBusy("photo");try{setPhoto(await uploadMedia(supabase,workspace.tenant.id,"professional_photo",file));setCrop(null)}catch(err){setError(err.message);setCrop(null)}finally{setBusy("")}}
  async function save(e){e.preventDefault();if(busy)return;setBusy("save");setError("");try{await teamPatch({tenant_id:workspace.tenant.id,user_id:member.user_id,profile:true,name,whatsapp,photo_url:photo});notify("Perfil atualizado.");saved()}catch(err){setError(err.message);setBusy("")}}
  return <div className="checkout-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget&&!busy)close()}}><form className="checkout-modal team-edit" onSubmit={save}>
   <button type="button" className="checkout-close" onClick={close} aria-label="Fechar"><X/></button>
@@ -28,12 +32,13 @@ function EditMember({workspace,member,barber,close,saved}){
   <div className="team-photo">
    <label className="team-photo-pic">{photo?<img src={photo} alt=""/>:<span>{initials(name)}</span>}<i><Camera size={15}/></i><input type="file" accept="image/*" hidden disabled={!!busy} onChange={pick}/></label>
    <div><strong>Foto de perfil</strong><small>{barber?"Aparece no site de agendamento. Use uma foto do rosto, de frente.":"Identifica o perfil no sistema."}</small>
-    <div className="team-photo-actions"><label className="secondary-action"><Camera size={14}/>{busy==="photo"?"Enviando...":photo?"Trocar foto":"Escolher foto"}<input type="file" accept="image/*" hidden disabled={!!busy} onChange={pick}/></label>{photo&&<button type="button" className="secondary-action" disabled={!!busy} onClick={()=>setPhoto("")}><Trash2 size={14}/>Remover</button>}</div>
+    <div className="team-photo-actions"><label className="secondary-action"><Camera size={14}/>{busy==="photo"?"Enviando...":photo?"Trocar foto":"Escolher foto"}<input type="file" accept="image/*" hidden disabled={!!busy} onChange={pick}/></label>{photo&&<button type="button" className="secondary-action" disabled={!!busy} onClick={adjust}><Move size={14}/>Ajustar</button>}{photo&&<button type="button" className="secondary-action" disabled={!!busy} onClick={()=>setPhoto("")}><Trash2 size={14}/>Remover</button>}</div>
    </div>
   </div>
   <div className="quick-sale-form"><label className="wide">Nome<input value={name} onChange={e=>setName(e.target.value)} required minLength={2} maxLength={80}/></label><label className="wide">WhatsApp<PhoneInput value={whatsapp} onChange={setWhatsapp}/></label></div>
   {error&&<div className="form-alert error">{error}</div>}
   <button className="primary checkout-confirm" disabled={!!busy}><Check size={16}/>{busy==="save"?"Salvando...":"Salvar perfil"}</button>
+  {crop&&<ImageCropper file={crop} shape="circle" output={800} title="Ajustar foto do profissional" onCancel={()=>setCrop(null)} onDone={cropped}/>}
  </form></div>;
 }
 
