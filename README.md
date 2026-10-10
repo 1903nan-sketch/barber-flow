@@ -30,7 +30,7 @@ OPENAI_WHATSAPP_MODEL=gpt-5.6-luna
 
 ## Fotos dos serviços
 
-Cada serviço pode ter uma foto, mostrada no site de agendamento. Em **Serviços**, o dono envia uma imagem (JPG, PNG ou WebP, até 5 MB) ou clica em **Criar com IA**, que gera a foto a partir do nome do serviço. A rota é `/api/services/image`, e a foto fica no bucket `tenant-public-media`. Sem foto, o site mostra um quadro colorido com um ícone escolhido pelo nome.
+Cada serviço pode ter uma foto, mostrada no site de agendamento. Em **Serviços**, o dono envia uma imagem (qualquer foto do celular: o navegador reduz para no máximo 1200 px em WebP antes de enviar) ou clica em **Criar com IA**, que gera a foto a partir do nome do serviço. A rota é `/api/services/image`, e a foto fica no bucket `tenant-public-media`. Sem foto, o site mostra um quadro colorido com um ícone escolhido pelo nome.
 
 A geração usa a mesma `OPENAI_API_KEY` do WhatsApp. O modelo é opcional:
 
@@ -39,3 +39,14 @@ OPENAI_IMAGE_MODEL=gpt-image-1-mini
 ```
 
 Cada empresa pode gerar até 20 fotos com IA por dia. Enviar foto própria não tem esse limite.
+
+Se o modelo principal não estiver liberado para a conta da OpenAI (por exemplo, organização ainda não verificada), a rota tenta o `dall-e-3`. Quando a OpenAI recusa, a mensagem na tela diz o motivo (chave inválida, sem créditos, verificação pendente).
+
+## Tema escuro
+
+O painel tem modo escuro (chave na tela inicial) e o site de agendamento tem a própria chave no topo. Cada um guarda a escolha no navegador (`rupcontrol_theme` e `rupcontrol_booking_theme`), e um script no `<head>` aplica o tema antes de pintar a página. As cores escuras ficam em `app/theme-dark.css`.
+
+## Devedores e comissões
+
+- **Devedores** lista quem tem vendas em “Conta do cliente” (status `open`), com cobrança pelo WhatsApp e baixa por forma de pagamento (`settle_sale`). A venda rápida, o novo agendamento, a agenda e o aviso de novo agendamento mostram quando o cliente tem conta em aberto.
+- **Comissões → Editar %** grava a % de serviços e de produtos de cada profissional em `commission_rules` (`save_commission_rules`). Sem regra, vale a % do cadastro do serviço/produto.

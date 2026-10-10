@@ -2,7 +2,7 @@
 import {notify} from "../../../lib/notify";
 
 import {useCallback,useEffect,useMemo,useState} from "react";
-import {Bot,CheckCircle2,ExternalLink,MessageCircle,RefreshCw,ShieldCheck,Smartphone,Unplug,UserRound} from "lucide-react";
+import {Bot,ExternalLink,MessageCircle,QrCode,RefreshCw,ShieldCheck,Smartphone,Unplug,UserRound} from "lucide-react";
 import {supabase} from "../../../lib/supabase";
 import {bookingUrl} from "../../../lib/site";
 import ModuleShell from "../_components/ModuleShell";
@@ -77,59 +77,51 @@ function WhatsAppContent({workspace}){
     }catch(e){setError(e.message||"Não foi possível desconectar.")}finally{setBusy(false)}
   }
 
-  return <div style={{display:"grid",gap:18,maxWidth:980}}>
-    <section className="box">
-      <div className="box-head">
+  const connected=status==="connected",tone=connected?"on":status==="error"||!configured?"bad":status==="loading"?"":"wait";
+  return <div className="wa">
+    <section className={"wa-hero "+tone}>
+      <div className="wa-hero-main">
+        <span className="wa-hero-icon"><MessageCircle size={26}/></span>
         <div>
-          <h2>WhatsApp da empresa</h2>
-          <p>Conecte o próprio número da empresa por QR Code. O agente de IA usa a agenda real do RupControl.</p>
+          <span className="wa-status"><i/>{status==="loading"?"Consultando...":labels[status]||status}</span>
+          <h2>{connected?"WhatsApp conectado":"Conecte o WhatsApp da empresa"}</h2>
+          <p>{connected?(phone?`Número +${phone} atendendo clientes com a agenda do RupControl.`:"O robô já está respondendo com a agenda do RupControl."):"Use o próprio número da empresa. O robô responde, mostra horários livres e agenda sozinho."}</p>
         </div>
-        <span style={{display:"inline-flex",alignItems:"center",gap:7,fontSize:12,fontWeight:800,padding:"8px 11px",border:"1px solid var(--line)",borderRadius:999}}>
-          {status==="connected"?<CheckCircle2 size={16}/>:<MessageCircle size={16}/>}
-          {status==="loading"?"Consultando...":labels[status]||status}
-        </span>
       </div>
-
-      {!configured&&<div className="form-alert error" style={{marginBottom:16}}>
-        A Evolution API ainda precisa ser configurada no servidor do RupControl. Adicione EVOLUTION_API_URL, EVOLUTION_API_KEY e EVOLUTION_WEBHOOK_SECRET na Vercel.
-      </div>}
-      {configured&&status==="connected"&&!webhookSynced&&<div className="form-alert error" style={{marginBottom:16}}>
-        O WhatsApp está conectado, mas o recebimento de mensagens ainda não foi confirmado pela Evolution.{webhookError?" "+webhookError:""} Clique em <b>Atualizar status</b> para tentar sincronizar novamente.
-      </div>}
-
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:12}}>
-        <div className="appointment"><span className="quick-icon green"><Smartphone size={18}/></span><div className="appointment-main"><b>Número conectado</b><p>{phone?("+"+phone):status==="connected"?"WhatsApp conectado":"Nenhum número conectado"}</p></div></div>
-        <div className="appointment"><span className="quick-icon purple"><Bot size={18}/></span><div className="appointment-main"><b>Agente de IA</b><p>{aiConfigured?"OpenAI ativa · entende linguagem natural e consulta a agenda real.":"Aguardando OPENAI_API_KEY no servidor."}</p></div></div>
-        <div className="appointment"><span className="quick-icon blue"><UserRound size={18}/></span><div className="appointment-main"><b>Atendimento humano</b><p>“Atendente”, “cancelar” ou “remarcar” pausa a automação.</p></div></div>
-      </div>
-
-      {qrSrc&&status!=="connected"&&<div style={{marginTop:20,display:"grid",placeItems:"center",gap:12,padding:22,border:"1px solid var(--line)",borderRadius:16}}>
-        <strong>Escaneie este QR Code no WhatsApp</strong>
-        <img src={qrSrc} alt="QR Code para conectar WhatsApp" width="260" height="260" style={{width:260,maxWidth:"100%",height:"auto",background:"#fff",padding:10,borderRadius:14}}/>
-        <p style={{maxWidth:520,textAlign:"center",fontSize:12,color:"var(--muted)",lineHeight:1.6}}>No celular da empresa: WhatsApp → Aparelhos conectados → Conectar aparelho. O status será atualizado automaticamente.</p>
-      </div>}
-
-      {error&&<div className="form-alert error" style={{marginTop:16}}>{error}</div>}
-
-      <div style={{marginTop:18,display:"flex",flexWrap:"wrap",gap:10}}>
-        {status!=="connected"&&<button className="primary" type="button" onClick={connect} disabled={busy||!configured}><MessageCircle size={16}/>{busy?"Conectando...":qr?"Gerar novo QR Code":"Conectar WhatsApp"}</button>}
-        <button className="secondary-action" type="button" onClick={load} disabled={busy}><RefreshCw size={16}/>Atualizar status</button>
-        {status==="connected"&&<button className="secondary-action" type="button" onClick={disconnect} disabled={busy}><Unplug size={16}/>Desconectar</button>}
-        {tenant.slug&&<a className="secondary-action" href={bookingUrl(location.origin,tenant.slug)} target="_blank" rel="noreferrer"><ExternalLink size={16}/>Abrir agenda pública</a>}
+      <div className="wa-actions">
+        {!connected&&<button className="primary" type="button" onClick={connect} disabled={busy||!configured}><QrCode size={17}/>{busy?"Gerando QR Code...":qr?"Gerar novo QR Code":"Conectar WhatsApp"}</button>}
+        <button className="secondary-action" type="button" onClick={load} disabled={busy}><RefreshCw size={16}/>Atualizar</button>
+        {connected&&<button className="secondary-action" type="button" onClick={disconnect} disabled={busy}><Unplug size={16}/>Desconectar</button>}
       </div>
     </section>
 
-    <section className="box">
-      <div className="box-head"><div><h2>Como o atendimento funciona</h2><p>O WhatsApp e o site continuam usando a mesma agenda do RupControl.</p></div></div>
-      <div style={{display:"grid",gap:12}}>
-        <div className="appointment"><span className="quick-icon green">1</span><div className="appointment-main"><b>Cliente fala normalmente</b><p>Ex.: “Quero marcar sexta depois das 18h com qualquer profissional”.</p></div></div>
-        <div className="appointment"><span className="quick-icon purple">2</span><div className="appointment-main"><b>IA usa ferramentas do RupControl</b><p>Serviços, profissionais, unidades e horários são consultados no Supabase; a IA não inventa disponibilidade.</p></div></div>
-        <div className="appointment"><span className="quick-icon blue">3</span><div className="appointment-main"><b>Confirmação antes de gravar</b><p>O agente mostra o resumo e só cria o horário depois de uma confirmação explícita do cliente e nova validação da vaga.</p></div></div>
+    {!configured&&<div className="form-alert error">A conexão de WhatsApp ainda não foi liberada no servidor do RupControl. Fale com o suporte Ruptix para ativar.</div>}
+    {configured&&connected&&!webhookSynced&&<div className="form-alert error">O WhatsApp está conectado, mas o recebimento de mensagens ainda não foi confirmado.{webhookError?" "+webhookError:""} Toque em <b>Atualizar</b> para sincronizar de novo.</div>}
+    {error&&<div className="form-alert error">{error}</div>}
+
+    {qrSrc&&!connected&&<section className="box wa-qr">
+      <div className="wa-qr-code"><img src={qrSrc} alt="QR Code para conectar o WhatsApp" width="240" height="240"/></div>
+      <div className="wa-qr-steps">
+        <h3>Escaneie com o celular da empresa</h3>
+        <ol><li><b>1</b>Abra o <strong>WhatsApp</strong> no celular da empresa.</li><li><b>2</b>Toque em <strong>⋮ Mais opções</strong> (ou Configurações no iPhone) e depois em <strong>Aparelhos conectados</strong>.</li><li><b>3</b>Toque em <strong>Conectar aparelho</strong> e aponte a câmera para este QR Code.</li></ol>
+        <small>A tela atualiza sozinha quando conectar. O QR Code expira em cerca de 1 minuto. Se expirar, gere um novo.</small>
       </div>
-      <div style={{marginTop:18,padding:16,border:"1px solid var(--line)",borderRadius:12}}>
-        <strong style={{fontSize:12,display:"flex",alignItems:"center",gap:7}}><ShieldCheck size={17}/> Integração não oficial</strong>
-        <p style={{fontSize:11,color:"var(--muted)",lineHeight:1.6}}>Esta conexão utiliza Evolution API/WhatsApp Web. Evite disparos em massa e automações de spam. O RupControl usa esta integração para atendimento receptivo e agendamento.</p>
-      </div>
+    </section>}
+
+    <section className="wa-cards">
+      <div className="wa-card"><span className="quick-icon green"><Smartphone size={18}/></span><div><b>Número</b><p>{phone?"+"+phone:connected?"Conectado":"Nenhum número conectado"}</p></div></div>
+      <div className="wa-card"><span className="quick-icon purple"><Bot size={18}/></span><div><b>Agente de IA</b><p>{aiConfigured?"Ativo: entende o cliente e consulta a agenda real.":"Desligado no servidor (falta a chave da OpenAI)."}</p></div></div>
+      <div className="wa-card"><span className="quick-icon blue"><UserRound size={18}/></span><div><b>Atendimento humano</b><p>Se o cliente pedir “atendente”, o robô pausa e você assume.</p></div></div>
+    </section>
+
+    <section className="box wa-how">
+      <div className="box-head"><div><h2>Como funciona</h2><p>WhatsApp e site usam a mesma agenda do RupControl.</p></div>{tenant.slug&&<a className="secondary-action" href={bookingUrl(location.origin,tenant.slug)} target="_blank" rel="noreferrer"><ExternalLink size={15}/>Ver site</a>}</div>
+      <ol className="wa-steps">
+        <li><b>1</b><div><strong>Cliente escreve normalmente</strong><p>Ex.: “Quero marcar sexta depois das 18h”.</p></div></li>
+        <li><b>2</b><div><strong>O robô consulta a agenda</strong><p>Serviços, profissionais e horários livres de verdade, sem inventar.</p></div></li>
+        <li><b>3</b><div><strong>Confirma antes de marcar</strong><p>Mostra o resumo e só agenda depois do “sim” do cliente.</p></div></li>
+      </ol>
+      <p className="wa-note"><ShieldCheck size={15}/>Conexão pelo WhatsApp Web. Evite disparos em massa: o RupControl usa a conexão só para atendimento e agendamento.</p>
     </section>
   </div>
 }

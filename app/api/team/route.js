@@ -112,6 +112,21 @@ export async function PATCH(request){
   if(!target)return NextResponse.json({error:"Usuário não informado."},{status:400});
   const {data:member}=await admin.from("memberships").select("user_id,name,role,active").eq("tenant_id",tenant).eq("user_id",target).maybeSingle();
   if(!member)return NextResponse.json({error:"Perfil não encontrado."},{status:404});
+
+  // Edição do perfil: nome, WhatsApp e foto (a foto aparece no site de agendamento).
+  if(body.profile){
+   const name=String(body.name??member.name).trim().slice(0,80);
+   if(name.length<2)return NextResponse.json({error:"Informe o nome do profissional."},{status:400});
+   const whatsapp=String(body.whatsapp||"").replace(/[^0-9]/g,"").slice(0,13);
+   const photo=String(body.photo_url??"");
+   if(photo&&!(/^https:\/\//.test(photo)&&photo.includes("/storage/v1/object/public/tenant-public-media/"+tenant+"/")))return NextResponse.json({error:"Foto inválida. Envie a imagem novamente."},{status:400});
+   const {error:mErr}=await admin.from("memberships").update({name,whatsapp:whatsapp||null}).eq("tenant_id",tenant).eq("user_id",target);
+   if(mErr)throw mErr;
+   const {error:bErr}=await admin.from("barbers").update({name,photo_url:photo}).eq("tenant_id",tenant).eq("user_id",target);
+   if(bErr)throw bErr;
+   return NextResponse.json({ok:true});
+  }
+
   const enabled=Boolean(body.is_provider);
   if(enabled&&String(plan.name||"").toLowerCase()==="starter")return NextResponse.json({error:"O plano Starter não inclui agenda nem profissionais agendáveis."},{status:409});
   if(enabled){
