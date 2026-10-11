@@ -415,3 +415,11 @@ html:not(#rx) .rx.ruptix-site .rp-plan-grid li.rp-missing svg{color:#b4232a!impo
 .rx-hv-chip-b{left:-8%;bottom:7%;animation:rx-in .9s cubic-bezier(.2,.8,.2,1) 1.5s both,rx-float 7s ease-in-out 2.4s infinite}
 @media(max-width:1000px){.rx-hero-visual{display:none}}
 @media(prefers-reduced-motion:reduce){.rx-hv-main,.rx-hv-chip,.rx-hv-body li,.rx-hv-bars i,.rx-aurora i,.rx-grid{animation:none!important}}
+
+/* Para quem é o RupControl */
+.rx-segments{list-style:none;margin:20px 0 4px;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.rx-segments li{padding:8px 14px;border-radius:999px;font-size:13px;font-weight:650;color:var(--rx-violet);background:rgba(255,255,255,.62);border:1px solid rgba(31,94,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 6px 16px rgba(31,94,255,.08);-webkit-backdrop-filter:var(--rx-blur);backdrop-filter:var(--rx-blur)}
+.rx-segments li:last-child{color:var(--rx-muted);border-style:dashed}
+.rx-segments-sm{margin:16px 0 0;max-width:460px}
+.rx-segments-sm li{padding:6px 11px;font-size:12px}
+.rx-line-head h3{max-width:560px;line-height:1.05}

@@ -31,6 +31,7 @@ async function getActiveUsers(){
 
 const words=(text,start=0)=>text.split(" ").map((w,i)=><span className="rx-word" style={{"--i":start+i}} key={i}>{w}&nbsp;</span>);
 const rcFeatures=[["Agenda por profissional",CalendarDays],["Site de agendamento",Globe2],["Caixa rápido e PIX",WalletCards],["Clientes e conta do cliente",Users],["Comissões da equipe",Percent],["Estoque",Package],["Financeiro e relatórios",BarChart3],["Robô do WhatsApp",Bot]];
+const segments=["Salões de beleza","Barbearias","Lash designers","Sobrancelhas","Manicure e pedicure","Estética","Maquiagem","E muito mais"];
 const capabilities=["SISTEMAS INTERNOS","SAAS","AUTOMAÇÕES","PORTAIS","INTEGRAÇÕES","APLICATIVOS WEB","PAGAMENTOS","WHATSAPP","PAINÉIS DE GESTÃO","APIs"];
 
 export default async function HomePage(){
@@ -43,7 +44,7 @@ export default async function HomePage(){
   <div className="rx-aurora" aria-hidden="true"><i/><i/><i/><i/></div>
   <div className="rx-grid" aria-hidden="true"/>
 
-  <a className="rx-announce" href={SIGNUP_URL}><b>14 DIAS GRÁTIS</b><span>Teste o RupControl, o sistema de gestão da Ruptix para todo tipo de negócio</span><ArrowUpRight/></a>
+  <a className="rx-announce" href={SIGNUP_URL}><b>14 DIAS GRÁTIS</b><span>Teste o RupControl, o sistema de gestão da Ruptix para salões, barbearias, lash e muito mais</span><ArrowUpRight/></a>
 
   <nav className="rx-nav">
    <Link href="/" className="rx-logo" aria-label="Ruptix — início">RUPTIX<sup>®</sup></Link>
@@ -96,9 +97,10 @@ export default async function HomePage(){
     <small>Sem cartão de crédito e sem cobrança no cadastro. O pagamento só começa depois do teste, se você quiser continuar.</small>
    </div>
    <div className="rx-rc-copy" data-reveal style={{"--d":".1s"}}>
-    <span className="rx-kicker">PRODUTO RUPTIX · PARA TODO TIPO DE NEGÓCIO</span>
+    <span className="rx-kicker">PRODUTO RUPTIX · SALÕES, BARBEARIAS, LASH E MAIS</span>
     <h2>A gestão completa do seu negócio, grátis por 14 dias.</h2>
-    <p>Seja qual for o seu ramo, o RupControl reúne em um só painel tudo o que você usa no dia a dia para atender clientes: agenda de cada profissional, página própria para os clientes agendarem, caixa rápido com PIX, clientes, comissões, estoque e financeiro. O robô do WhatsApp confirma e lembra os horários sozinho.</p>
+    <p>Feito para salões de beleza, barbearias, estúdios de lash e sobrancelha, manicure, estética e todo negócio que atende com hora marcada. O RupControl reúne em um só painel tudo o que você usa no dia a dia para atender clientes: agenda de cada profissional, página própria para os clientes agendarem, caixa rápido com PIX, clientes, comissões, estoque e financeiro. O robô do WhatsApp confirma e lembra os horários sozinho.</p>
+    <ul className="rx-segments" aria-label="Para quem é">{segments.map(x=><li key={x}>{x}</li>)}</ul>
     <ul className="rx-rc-features">{rcFeatures.map(([t,Icon])=><li key={t}><Icon/>{t}</li>)}</ul>
     <p className="rx-rc-note">Site de agendamento e robô do WhatsApp nos planos Pro.</p>
     <div className="rx-actions"><a className="rx-btn rx-btn-primary" href={SIGNUP_URL}>Criar conta grátis <ArrowUpRight/></a><Link className="rx-btn rx-btn-glass" href="/produtos/rupcontrol">Ver planos e recursos</Link></div>
@@ -138,14 +140,15 @@ export default async function HomePage(){
     <h2>Tecnologia<br/>que já opera.</h2>
     <p>Além de projetos sob medida, a Ruptix cria produtos próprios para segmentos específicos. São sistemas reais, construídos a partir de operações reais.</p>
    </div>
-   <div className="rx-line-head" data-reveal><span>LINHA 01</span><h3>Gestão.</h3><p>Sistemas prontos para organizar agenda, atendimento, vendas e financeiro de qualquer negócio.</p></div>
+   <div className="rx-line-head" data-reveal><span>LINHA 01</span><h3>Gestão de barbearias, salões e lash.</h3><p>Sistemas prontos para organizar agenda, atendimento, vendas e financeiro de salões, barbearias, estúdios de lash e outros negócios com hora marcada.</p></div>
    <div className="rx-cards">
     <Link href="/produtos/rupcontrol" className="rx-glass rx-product rx-product-wide" data-reveal>
      <div className="rx-product-head"><span className="rx-live"><i/> 14 DIAS GRÁTIS</span><span>01</span></div>
      <div className="rx-product-icon"><CalendarCheck/></div>
-     <span className="rx-product-tag">PARA TODO TIPO DE NEGÓCIO</span>
+     <span className="rx-product-tag">SALÕES · BARBEARIAS · LASH · ESTÉTICA</span>
      <h3>Rup<br/>Control.</h3>
-     <p>Gestão completa para qualquer negócio que atende clientes: agenda, site de agendamento, caixa, equipe e financeiro. Teste grátis por 14 dias.</p>
+     <p>Gestão completa para salões, barbearias, estúdios de lash e todo negócio que atende com hora marcada: agenda, site de agendamento, caixa, equipe e financeiro. Teste grátis por 14 dias.</p>
+     <ul className="rx-segments rx-segments-sm" aria-label="Para quem é">{segments.map(x=><li key={x}>{x}</li>)}</ul>
      <ul className="rx-product-points">{["Agenda e site de agendamento","Caixa, vendas e PIX","Equipe e comissões","Financeiro e relatórios","Lembretes no WhatsApp"].map(x=><li key={x}><Check/>{x}</li>)}</ul>
      <b>Conhecer e testar grátis <ArrowUpRight/></b>
     </Link>
