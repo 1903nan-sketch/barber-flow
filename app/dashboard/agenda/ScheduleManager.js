@@ -4,6 +4,7 @@ import {useEffect,useMemo,useState} from "react";
 import {Copy,Plus,Trash2} from "lucide-react";
 import {supabase} from "../../../lib/supabase";
 import {IosSwitch} from "../../_components/ThemeSwitch";
+import {DateTimePicker,TimePicker} from "../../_components/Pickers";
 const days=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
 const ORDER=[1,2,3,4,5,6,0];
 const time=n=>`${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`;
@@ -36,9 +37,9 @@ function WeekEditor({windows,setWindows,units}){
   <div className="sch-day-name"><IosSwitch checked={open} onChange={on=>toggleDay(d,on)} label={(open?"Fechar ":"Abrir ")+days[d]}/><strong>{days[d]}</strong></div>
   {open?<div className="sch-periods">
    {list.map(w=>{const bad=w.end_min<=w.start_min;return <div className={"sch-period"+(bad?" bad":"")} key={w.i}>
-    <input type="time" step="300" value={time(w.start_min)} onChange={e=>change(w.i,'start_min',minutes(e.target.value))} aria-label={`Início em ${days[d]}`}/>
+    <TimePicker value={time(w.start_min)} onChange={v=>change(w.i,'start_min',minutes(v))} ariaLabel={`Início em ${days[d]}`}/>
     <span>às</span>
-    <input type="time" step="300" value={time(w.end_min)} onChange={e=>change(w.i,'end_min',minutes(e.target.value))} aria-label={`Fim em ${days[d]}`}/>
+    <TimePicker value={time(w.end_min)} onChange={v=>change(w.i,'end_min',minutes(v))} ariaLabel={`Fim em ${days[d]}`}/>
     {units.length>1&&<select value={w.unit_id} onChange={e=>change(w.i,'unit_id',e.target.value)} aria-label="Unidade">{units.map(u=><option key={u.id} value={u.id}>{u.name}</option>)}</select>}
     <button type="button" className="sch-icon" onClick={()=>setWindows(v=>v.filter((_,j)=>j!==w.i))} aria-label="Remover intervalo" title="Remover intervalo"><Trash2 size={15}/></button>
    </div>})}
@@ -51,6 +52,7 @@ function WeekEditor({windows,setWindows,units}){
  </div>})}</div>;
 }
 
+const localToday=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 export default function ScheduleManager({workspace,mode}) {
  const t=workspace.tenant.id;
  const [barbers,setBarbers]=useState([]),[units,setUnits]=useState([]),[barber,setBarber]=useState(''),[windows,setWindows]=useState([]),[blocks,setBlocks]=useState([]),[busy,setBusy]=useState(false),[loading,setLoading]=useState(true),[error,setError]=useState(''),[message,setMessage]=useState(''),[preview,setPreview]=useState(null);
@@ -77,7 +79,7 @@ export default function ScheduleManager({workspace,mode}) {
    <WeekEditor windows={windows} setWindows={setWindows} units={units}/>
    <div className="sch-save"><button className="primary" type="button" disabled={busy} onClick={save}>{busy?'Salvando...':'Salvar horários'}</button></div>
   </>:<>
-   <form onSubmit={block} className="sch-block-form"><div className="form-grid"><label>Unidade<select name="unit" required>{units.map(u=><option key={u.id} value={u.id}>{u.name}</option>)}</select></label><label>Tipo<select name="kind"><option value="block">Bloqueio</option><option value="day_off">Folga</option><option value="vacation">Férias</option></select></label><label>Início<input name="start" type="datetime-local" required/></label><label>Fim<input name="end" type="datetime-local" required/></label><label className="wide">Motivo (opcional)<input name="reason" maxLength={500}/></label></div><p className="form-hint">Para bloquear um dia inteiro, informe 00:00 do dia até 00:00 do dia seguinte.</p><button className="primary" disabled={busy}>Verificar clientes afetados</button></form>
+   <form onSubmit={block} className="sch-block-form"><div className="form-grid"><label>Unidade<select name="unit" required>{units.map(u=><option key={u.id} value={u.id}>{u.name}</option>)}</select></label><label>Tipo<select name="kind"><option value="block">Bloqueio</option><option value="day_off">Folga</option><option value="vacation">Férias</option></select></label><label>Início<DateTimePicker name="start" required min={localToday()} ariaLabel="Início"/></label><label>Fim<DateTimePicker name="end" required min={localToday()} ariaLabel="Fim"/></label><label className="wide">Motivo (opcional)<input name="reason" maxLength={500}/></label></div><p className="form-hint">Para bloquear um dia inteiro, informe 00:00 do dia até 00:00 do dia seguinte.</p><button className="primary" disabled={busy}>Verificar clientes afetados</button></form>
    {preview&&<div className="block-confirm"><h3>{preview.affected.length?'Existem clientes agendados neste período.':'Nenhum cliente agendado neste período.'}</h3>{preview.affected.map(a=><p key={a.id}><strong>{a.client}</strong> · {a.service} · {new Date(a.starts_at).toLocaleString('pt-BR')} · {a.unit}</p>)}<p>Ao confirmar, os atendimentos acima serão cancelados pela empresa, mantendo o histórico.</p><div className="sch-save"><button className="primary" disabled={busy} onClick={()=>requestBlock({...preview.args,confirmed_ids:preview.affected.map(a=>a.id)})}>Confirmar bloqueio</button><button className="secondary-action" disabled={busy} onClick={()=>setPreview(null)}>Voltar</button></div></div>}
    <h3 className="sch-sub">Bloqueios registrados</h3>{blocks.length?<div className="sch-blocks">{blocks.map(b=><div key={b.id}><strong>{b.reason||({block:'Bloqueio',day_off:'Folga',vacation:'Férias'})[b.kind]}</strong><small>{new Date(b.starts_at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})} até {new Date(b.ends_at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</small></div>)}</div>:<p className="empty">Nenhum bloqueio futuro.</p>}
   </>}

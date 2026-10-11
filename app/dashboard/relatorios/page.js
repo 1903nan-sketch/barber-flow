@@ -3,6 +3,7 @@ import {useEffect,useMemo,useState} from "react";
 import {FileDown,Filter,Printer,RotateCcw} from "lucide-react";
 import {supabase} from "../../../lib/supabase";
 import ModuleShell from "../_components/ModuleShell";
+import {DatePicker} from "../../_components/Pickers";
 const money=v=>(Number(v||0)/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const qtyFmt=v=>Number(v||0).toLocaleString("pt-BR",{maximumFractionDigits:2});
 const labels={pix:"PIX",cash:"Dinheiro",credit:"Crédito",debit:"Débito",account:"Conta do cliente",transfer:"Transferência"};
@@ -112,7 +113,7 @@ function Reports({workspace}){
   <section className="box rep-head">
    <div className="rep-title"><div><h2>Relatório de vendas</h2><p>{periodText}{chosen.length?" · "+chosen.join(" · "):""}</p></div><div className="report-actions"><button type="button" onClick={()=>window.print()}><Printer size={16}/>Imprimir / PDF</button><button type="button" onClick={exportCsv} disabled={!rows.length}><FileDown size={16}/>Exportar CSV</button></div></div>
    <div className="rep-period"><div className="fin-presets" role="group" aria-label="Período">{PRESETS.map(([k,l])=><button type="button" key={k} className={preset===k?"active":""} onClick={()=>setPreset(k)}>{l}</button>)}</div>
-    {preset==="custom"&&<div className="rep-dates"><label>De<input type="date" value={from} max={to} onChange={e=>setFrom(e.target.value)}/></label><label>Até<input type="date" value={to} min={from} onChange={e=>setTo(e.target.value)}/></label></div>}
+    {preset==="custom"&&<div className="rep-dates"><label>De<DatePicker value={from} max={to} onChange={setFrom} required ariaLabel="Data inicial"/></label><label>Até<DatePicker value={to} min={from} onChange={setTo} required ariaLabel="Data final"/></label></div>}
     <button type="button" className={"secondary-action rep-toggle"+(showFilters?" on":"")} onClick={()=>setShowFilters(x=>!x)} aria-expanded={showFilters}><Filter size={15}/>Filtros{active?` (${active})`:""}</button></div>
    <div className={"rep-filters"+(showFilters?" open":"")}>
     <label>Profissional<select value={f.barber} onChange={e=>set("barber",e.target.value)}><option value="">Todos</option>{data.barbers.map(b=><option key={b.id} value={b.id}>{b.name}{b.active?"":" (inativo)"}</option>)}</select></label>

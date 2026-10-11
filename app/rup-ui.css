@@ -144,7 +144,8 @@
 .dashboard-shell .sch-closed{color:var(--c-muted);font-size:13px;font-weight:600}
 .dashboard-shell .sch-periods{display:grid;gap:8px;min-width:0}
 .dashboard-shell .sch-period{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.dashboard-shell .sch-period input[type=time]{width:118px!important;min-height:42px;border-radius:11px;padding:0 10px!important;font-size:15px!important;font-weight:650;font-variant-numeric:tabular-nums}
+.dashboard-shell .sch-period .tp{width:118px;flex:0 0 auto}
+.dashboard-shell .sch-period .tp .pk-input{width:100%!important;min-height:42px;border-radius:11px;padding:0 30px 0 12px!important;font-size:15px!important;font-weight:650;font-variant-numeric:tabular-nums}
 .dashboard-shell .sch-period select{min-height:42px;border-radius:11px;max-width:180px}
 .dashboard-shell .sch-period>span{color:var(--c-muted);font-size:13px;font-weight:600}
 .dashboard-shell .sch-period.bad input{border-color:#e5484d!important;box-shadow:0 0 0 3px rgba(229,72,77,.14)!important}
@@ -167,7 +168,7 @@
  .dashboard-shell .sch-barber{width:100%}
  .dashboard-shell .sch-day{grid-template-columns:1fr;gap:10px;padding:12px}
  .dashboard-shell .sch-day:not(.open){grid-template-columns:1fr auto}
- .dashboard-shell .sch-period input[type=time]{flex:1 1 0;width:auto!important;min-width:0}
+ .dashboard-shell .sch-period .tp{flex:1 1 0;width:auto;min-width:0}
  .dashboard-shell .sch-period select{flex:1 1 100%;max-width:none}
  .dashboard-shell .sch-save .primary{width:100%;justify-content:center}
 }
@@ -584,3 +585,110 @@ html[data-theme=dark] .dashboard-shell .na-avatar.any{background:rgba(255,255,25
 html[data-theme=dark] .dashboard-shell .na-pro.on .na-avatar{box-shadow:0 0 0 2px #f5f5f7,0 0 0 4px #141416}
 html[data-theme=dark] .dashboard-shell .na-confirm{background:rgba(30,31,35,.88);border-color:rgba(255,255,255,.1);box-shadow:0 12px 30px rgba(0,0,0,.4)}
 html[data-theme=dark] .dashboard-shell .na-confirm b,html[data-theme=dark] .dashboard-shell .na-sec h3,html[data-theme=dark] .dashboard-shell .na-date-title{color:#f1f1f3!important}
+
+/* Calendário e relógio próprios (no lugar dos seletores nativos de data/hora) */
+.pk{position:relative;display:block;min-width:0}
+.pk-datetime{position:relative;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:8px;min-width:0}
+.pk .pk-input{width:100%!important;cursor:pointer;caret-color:transparent;padding-right:38px!important;text-overflow:ellipsis}
+.pk .pk-input:disabled{cursor:default}
+.pk .pk-input::placeholder{font-weight:500}
+.pk-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);display:grid;place-items:center;pointer-events:none;opacity:.55}
+:is(.pk,.pk-datetime) .pk-proxy{position:absolute!important;left:0!important;bottom:0!important;width:100%!important;height:1px!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;opacity:0!important;pointer-events:none!important;box-shadow:none!important}
+.pk-panel{position:fixed;z-index:2000;padding:10px;border-radius:16px;background:rgba(255,255,255,.97);backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(20,20,24,.1);box-shadow:0 18px 50px rgba(15,23,42,.18),0 2px 6px rgba(15,23,42,.06);color:#141416;text-align:left;animation:pk-in .18s cubic-bezier(.2,.8,.3,1);transform-origin:top left}
+.pk-panel.up{transform-origin:bottom left;animation-name:pk-in-up}
+@keyframes pk-in{from{opacity:0;transform:translateY(-6px) scale(.97)}}
+@keyframes pk-in-up{from{opacity:0;transform:translateY(6px) scale(.97)}}
+@media (prefers-reduced-motion:reduce){.pk-panel{animation:none}}
+.pk-panel button{font:inherit;border:0;background:none;color:inherit;cursor:pointer;margin:0;padding:0;box-shadow:none;min-height:0;letter-spacing:0;text-transform:none;transition:background .12s,color .12s}
+.pk-panel button:disabled{cursor:default}
+.pk-panel button:focus-visible{outline:2px solid #2f6fd8;outline-offset:-2px}
+.dp-panel{width:min(300px,calc(100vw - 16px))}
+.dp-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 6px}
+.pk-panel .dp-title{display:inline-flex;align-items:center;gap:4px;padding:6px 8px;border-radius:9px;font-size:15px;font-weight:750}
+.pk-panel .dp-title svg{opacity:.6;transition:rotate .2s}
+.pk-panel .dp-title svg.up{rotate:180deg}
+.dp-nav{display:flex;gap:2px}
+.pk-panel .dp-nav button{width:34px;height:34px;display:grid;place-items:center;border-radius:10px}
+.pk-panel .dp-nav button:disabled{opacity:.28}
+.pk-panel :is(.dp-title,.dp-nav button,.dp-day,.dp-months button,.tp-col button):hover:not(:disabled):not(.on){background:rgba(120,120,128,.12)}
+.dp-week,.dp-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}
+.dp-week span{text-align:center;font-size:11px;font-weight:700;color:#8e8e93;padding:4px 0 6px}
+.pk-panel .dp-day{height:38px;border-radius:11px;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.pk-panel .dp-day.out{color:#aeaeb2}
+.pk-panel .dp-day.today{color:#e5484d;font-weight:800}
+.pk-panel :is(.dp-day,.dp-months button,.tp-col button).on{background:#141416;color:#fff;font-weight:750}
+.pk-panel :is(.dp-day,.dp-months button):disabled{opacity:.28}
+.dp-months{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:2px 0}
+.pk-panel .dp-months button{height:46px;border-radius:12px;font-size:14px;font-weight:650;font-variant-numeric:tabular-nums}
+.dp-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid rgba(20,20,24,.08)}
+.pk-panel .dp-foot button{padding:7px 12px;border-radius:9px;font-size:13.5px;font-weight:700;color:#2f6fd8}
+.pk-panel .dp-foot button:hover:not(:disabled){background:rgba(47,111,216,.1)}
+.pk-panel .dp-foot button:disabled{opacity:.35}
+.tp-panel{width:184px}
+.tp-heads,.tp-cols{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tp-heads small{text-align:center;font-size:11px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:.05em;padding:2px 0 6px}
+.tp-col{position:relative;max-height:236px;overflow-y:auto;overscroll-behavior:contain;display:grid;gap:2px;align-content:start;scrollbar-width:thin;padding-right:2px}
+.pk-panel .tp-col button{height:36px;border-radius:10px;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+html[data-theme=dark] .pk-panel{background:rgba(31,32,36,.97);border-color:rgba(255,255,255,.1);color:#f1f1f3;box-shadow:0 18px 50px rgba(0,0,0,.55),0 0 0 .5px rgba(255,255,255,.04)}
+html[data-theme=dark] .pk-panel :is(.dp-title,.dp-nav button,.dp-day,.dp-months button,.tp-col button):hover:not(:disabled):not(.on){background:rgba(120,120,128,.26)}
+html[data-theme=dark] .pk-panel .dp-day.out{color:#636366}
+html[data-theme=dark] .pk-panel .dp-day.today{color:#ff6b6f}
+html[data-theme=dark] .pk-panel :is(.dp-day,.dp-months button,.tp-col button).on{background:#f5f5f7;color:#141416}
+html[data-theme=dark] .pk-panel .dp-foot{border-color:rgba(255,255,255,.08)}
+html[data-theme=dark] .pk-panel .dp-foot button{color:#6ea8ff}
+html[data-theme=dark] .pk-panel .dp-foot button:hover:not(:disabled){background:rgba(110,168,255,.12)}
+html[data-theme=dark] :is(.dp-week span,.tp-heads small){color:#8e8e93}
+.dashboard-shell .sch-period .tp .pk-icon{right:10px}
+.admin-due{width:150px;flex:0 0 auto}
+
+/* Agenda em tempo real: um dia por vez, data em destaque e faixa da semana */
+.dashboard-shell .ag-date{display:grid;gap:12px;margin:4px 0 16px;padding:14px;border-radius:18px;background:rgba(255,255,255,.55);border:1px solid rgba(20,20,24,.08)}
+.dashboard-shell .ag-date-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dashboard-shell .ag-date-title{flex:1 1 220px;min-width:0;text-align:center}
+.dashboard-shell .ag-date-title small{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#e5484d}
+.dashboard-shell .ag-date-title h3{margin:2px 0 2px;font-size:26px;line-height:1.15;font-weight:800;letter-spacing:-.02em;color:inherit}
+.dashboard-shell .ag-date-title p{margin:0;font-size:13px;color:#6e6e73}
+.dashboard-shell .content .ag-date .ag-nav{width:42px;height:42px;min-height:0;padding:0!important;display:grid;place-items:center;border-radius:12px!important;flex:0 0 auto}
+.dashboard-shell .ag-date-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.dashboard-shell .content .ag-date .ag-today{min-height:42px;padding:0 14px!important;border-radius:12px!important;font-size:13px!important}
+.dashboard-shell .ag-pick{width:168px}
+.dashboard-shell .ag-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.dashboard-shell .content .ag-date .ag-wday{display:grid!important;justify-items:center;gap:1px;padding:8px 2px!important;min-height:0;border-radius:14px!important;background:rgba(255,255,255,.7)!important;border:1px solid rgba(20,20,24,.1)!important;color:#141416!important;font-weight:600!important}
+.dashboard-shell .ag-wday small{font-size:11px;font-weight:650;text-transform:capitalize;opacity:.7}
+.dashboard-shell .ag-wday b{font-size:20px;line-height:1.15;font-weight:800}
+.dashboard-shell .ag-wday i{font-style:normal;font-size:11px;font-weight:700;min-width:20px;padding:1px 6px;border-radius:999px;background:rgba(52,199,89,.16);color:#1f8f3a}
+.dashboard-shell .ag-wday.today small{color:#e5484d;opacity:1}
+.dashboard-shell .content .ag-date .ag-wday.on{background:#141416!important;border-color:#141416!important;color:#fff!important}
+.dashboard-shell .ag-wday.on i{background:rgba(255,255,255,.18);color:#fff}
+.dashboard-shell .ag-wday.on small{color:inherit}
+.dashboard-shell .agenda-time-block>strong{font-size:24px!important}
+.dashboard-shell .agenda-time-block>small{font-size:11px!important;text-transform:none!important}
+@media (max-width:640px){
+ .dashboard-shell .ag-date{padding:12px 10px}
+ .dashboard-shell .ag-date-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px}
+ .dashboard-shell .ag-date-actions{grid-column:1/-1;justify-content:center}
+ .dashboard-shell .ag-date-title h3{font-size:22px}
+ .dashboard-shell .ag-pick{flex:1 1 auto;width:auto;max-width:220px}
+ .dashboard-shell .ag-week{gap:4px}
+ .dashboard-shell .ag-wday b{font-size:17px}
+}
+html[data-theme=dark] .dashboard-shell .ag-date{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08)}
+html[data-theme=dark] .dashboard-shell .ag-date-title h3{color:#f5f5f7!important}
+html[data-theme=dark] .dashboard-shell .ag-date-title small{color:#ff6b6f!important}
+html[data-theme=dark] .dashboard-shell .ag-date-title p{color:#a2a3ab!important}
+html[data-theme=dark] .dashboard-shell .content .ag-date .ag-wday{background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.12)!important;color:#f1f1f3!important}
+html[data-theme=dark] .dashboard-shell .content .ag-date .ag-wday.on{background:#f5f5f7!important;border-color:#f5f5f7!important;color:#141416!important}
+html[data-theme=dark] .dashboard-shell .ag-wday.on :is(b,small){color:#141416!important}
+html[data-theme=dark] .dashboard-shell .ag-wday:not(.on) b{color:#f1f1f3!important}
+html[data-theme=dark] .dashboard-shell .ag-wday i{background:rgba(52,199,89,.2);color:#7ee29a}
+html[data-theme=dark] .dashboard-shell .ag-wday.on i{background:rgba(0,0,0,.08);color:#1f8f3a}
+html[data-theme=dark] .dashboard-shell .ag-wday.today:not(.on) small{color:#ff6b6f!important}
+.wk-head h2{font-size:18px!important}
+.wk-head p{font-size:12.5px!important}
+.wk-noshow{color:#e5484d;font-weight:700}
+html[data-theme=dark] .wk-noshow{color:#ff6b6f}
+.dashboard-shell .ag-wday i.zero{background:transparent!important;color:inherit!important;opacity:.35}
+.dashboard-shell .agenda-time-block>small{white-space:nowrap}
+@media (max-width:640px){.dashboard-shell .agenda-time-block>strong{font-size:21px!important}.dashboard-shell .agenda-time-block>small{font-size:10.5px!important}}
+html[data-theme=dark] .dashboard-shell .content .ag-date :is(.ag-nav,.ag-today){background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.14)!important;color:#f1f1f3!important}
+html[data-theme=dark] .dashboard-shell .content .ag-date :is(.ag-nav,.ag-today):hover{background:rgba(255,255,255,.1)!important}

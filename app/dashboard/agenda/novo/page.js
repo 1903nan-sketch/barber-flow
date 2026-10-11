@@ -8,6 +8,7 @@ import {useClientDebts} from "../../../../lib/client-debts";
 import {validPhone} from "../../../../lib/phone";
 import ModuleShell from "../../_components/ModuleShell";
 import ClientPicker from "../../_components/ClientPicker";
+import {DatePicker} from "../../../_components/Pickers";
 
 const DAYS=14;
 const money=c=>(Number(c||0)/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
@@ -133,7 +134,7 @@ function NewAppointment({workspace}){
   </section>
 
   <section className="na-sec">
-   <div className="na-sec-head"><h3>Dia e horário</h3><label className="na-jump"><span>Outra data</span><input type="date" min={today} max={addDays(today,180)} value={date} onChange={e=>jump(e.target.value)}/></label></div>
+   <div className="na-sec-head"><h3>Dia e horário</h3><label className="na-jump"><span>Outra data</span><DatePicker min={today} max={addDays(today,180)} value={date} onChange={jump} required ariaLabel="Outra data"/></label></div>
    {!service||!pros.length?<p className="na-empty">Os dias e horários livres aparecem aqui assim que escolher o serviço.</p>:<>
     <div className="na-days-wrap">
      <button type="button" className="na-nav" aria-label="Dias anteriores" disabled={stripStart<=today} onClick={()=>moveStrip(-7)}><ChevronLeft size={16}/></button>
