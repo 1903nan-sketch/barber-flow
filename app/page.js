@@ -2,7 +2,7 @@ import Link from "next/link";
 import {headers} from "next/headers";
 import {redirect} from "next/navigation";
 import {createClient} from "@supabase/supabase-js";
-import {ArrowUpRight,BarChart3,Bot,CalendarCheck,CalendarDays,Check,Code2,Cpu,GitBranch,Globe2,Mail,Package,Percent,ShieldCheck,Sparkles,Users,WalletCards,Workflow,Zap} from "lucide-react";
+import {ArrowUpRight,BarChart3,Bot,CalendarCheck,CalendarDays,Check,Cloud,Code2,GitBranch,Globe2,Mail,Package,Percent,ShieldCheck,Sparkles,Users,WalletCards,Workflow,Zap} from "lucide-react";
 import RuptixFx from "./_components/RuptixFx";
 import {APP_HOSTS,SIGNUP_URL} from "../lib/site";
 import "./ruptix-home.css";
@@ -68,7 +68,7 @@ export default async function HomePage(){
      <a className="rx-btn rx-btn-primary" href={mail("Quero um software personalizado")}>Quero um software personalizado <ArrowUpRight/></a>
      <a className="rx-btn rx-btn-glass" href="#rupcontrol">RupControl: 14 dias grátis</a>
     </div>
-    <div className="rx-trust" data-reveal style={{"--d":".8s"}}><span><ShieldCheck/>Código próprio</span><span><Zap/>Entrega contínua</span><span><Cpu/>Nuvem e IA</span></div>
+    <div className="rx-trust" data-reveal style={{"--d":".8s"}}><span><ShieldCheck/>Código próprio</span><span><Zap/>Entrega contínua</span><span><Cloud/>Na nuvem</span></div>
    </div>
    <div className="rx-hero-visual" aria-hidden="true">
     <div className="rx-glass rx-hv-main">
@@ -81,7 +81,7 @@ export default async function HomePage(){
      </div>
     </div>
     <div className="rx-glass rx-hv-chip rx-hv-chip-a"><Workflow/> Fluxo automatizado</div>
-    <div className="rx-glass rx-hv-chip rx-hv-chip-b"><Sparkles/> IA integrada</div>
+    <div className="rx-glass rx-hv-chip rx-hv-chip-b"><ShieldCheck/> Dados protegidos</div>
    </div>
   </section>
 
@@ -158,7 +158,7 @@ export default async function HomePage(){
   <section className="rx-section rx-manifesto" id="sobre">
    <span className="rx-kicker" data-reveal>03 / RUPTIX</span>
    <p data-reveal>Da ideia à operação.<br/>Criamos tecnologia para <strong>resolver o problema da sua empresa.</strong></p>
-   <div className="rx-pills" data-reveal style={{"--d":".15s"}}><b>Estratégia</b><b>Design</b><b>Desenvolvimento</b><b>Automação</b><b>Inteligência artificial</b></div>
+   <div className="rx-pills" data-reveal style={{"--d":".15s"}}><b>Estratégia</b><b>Design</b><b>Desenvolvimento</b><b>Automação</b><b>Integrações</b></div>
   </section>
 
   <section className="rx-end" id="contato">
