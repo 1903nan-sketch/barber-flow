@@ -15,7 +15,7 @@ import {themeBootScript} from "../lib/theme";
 
 export const metadata={
  title:"Ruptix | RupControl",
- description:"RupControl by Ruptix — gestão completa para todo tipo de negócio: agenda, clientes, vendas, equipe e presença digital.",
+ description:"RupControl by Ruptix — gestão completa para salões, barbearias, estúdios de lash e todo negócio com hora marcada: agenda, clientes, vendas, equipe e presença digital.",
  applicationName:"Ruptix",
  manifest:"/manifest.webmanifest",
  icons:{
