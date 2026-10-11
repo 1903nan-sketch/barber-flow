@@ -11,7 +11,7 @@ export const metadata={
  title:"Ruptix | Software sob medida",
  description:"A Ruptix desenvolve softwares personalizados, automações e produtos digitais. Fale com a gente: rup@3ruptix.com."
 };
-export const viewport={themeColor:"#eef1f8"};
+export const viewport={themeColor:"#f3f7ff"};
 
 const EMAIL="rup@3ruptix.com";
 const mail=subject=>`mailto:${EMAIL}?subject=${encodeURIComponent(subject)}`;
@@ -68,6 +68,19 @@ export default async function HomePage(){
      <a className="rx-btn rx-btn-glass" href="#rupcontrol">RupControl: 14 dias grátis</a>
     </div>
     <div className="rx-trust" data-reveal style={{"--d":".8s"}}><span><ShieldCheck/>Código próprio</span><span><Zap/>Entrega contínua</span><span><Cpu/>Nuvem e IA</span></div>
+   </div>
+   <div className="rx-hero-visual" aria-hidden="true">
+    <div className="rx-glass rx-hv-main">
+     <div className="rx-hv-top"><i/><i/><i/><span>seu-sistema.app</span></div>
+     <div className="rx-hv-body">
+      <small>SISTEMA SOB MEDIDA</small>
+      <b>Sua operação em um só lugar</b>
+      <ul>{[["Agenda e atendimento",CalendarCheck],["Pagamentos e PIX",WalletCards],["Automações no WhatsApp",Bot],["Relatórios em tempo real",BarChart3]].map(([t,Icon],i)=><li key={t} style={{"--k":i}}><span><Icon/></span>{t}<Check className="rx-hv-ok"/></li>)}</ul>
+      <div className="rx-hv-bars">{[38,62,48,80,66,92,74].map((h,i)=><i key={i} style={{"--h":h+"%","--k":i}}/>)}</div>
+     </div>
+    </div>
+    <div className="rx-glass rx-hv-chip rx-hv-chip-a"><Workflow/> Fluxo automatizado</div>
+    <div className="rx-glass rx-hv-chip rx-hv-chip-b"><Sparkles/> IA integrada</div>
    </div>
   </section>
 
