@@ -31,23 +31,57 @@ function imagePrompt(service,tenantName){
  ].filter(Boolean).join(" ");
 }
 
-async function generateImage(service,tenantName){
- const key=process.env.OPENAI_API_KEY;
- if(!key)throw Object.assign(new Error("A geração de fotos com IA ainda não foi ativada."),{status:503});
+// Mensagem clara para o dono da empresa conforme o erro da OpenAI.
+function openAiError(status,message){
+ const m=String(message||"");
+ if(status===401)return "A chave da OpenAI configurada no servidor é inválida. Gere uma nova em platform.openai.com e atualize OPENAI_API_KEY na Vercel.";
+ if(status===429)return /quota|billing|credit/i.test(m)?"A conta da OpenAI está sem créditos. Adicione saldo em platform.openai.com → Billing e tente de novo.":"A OpenAI está recebendo muitos pedidos agora. Aguarde um minuto e tente de novo.";
+ if(/verif/i.test(m))return "A OpenAI exige verificar a organização para criar imagens. Faça a verificação em platform.openai.com → Settings → Organization e tente de novo.";
+ if(/safety|moderation|content policy|rejected/i.test(m))return "A OpenAI recusou criar esta foto pelo nome do serviço. Envie uma foto sua ou mude a descrição do serviço.";
+ return "Não foi possível criar a foto agora"+(m?` (OpenAI: ${m.slice(0,140)})`:"")+". Tente de novo ou envie uma imagem.";
+}
+
+async function requestImage(key,model,prompt,timeout){
+ const gpt=model.startsWith("gpt-image");
  const res=await fetch("https://api.openai.com/v1/images/generations",{
   method:"POST",
   headers:{Authorization:"Bearer "+key,"Content-Type":"application/json"},
-  body:JSON.stringify({model:IMAGE_MODEL,prompt:imagePrompt(service,tenantName),n:1,size:"1024x1024",quality:"medium",output_format:"webp",output_compression:82}),
-  signal:AbortSignal.timeout(55000)
+  body:JSON.stringify(gpt
+   ?{model,prompt,n:1,size:"1024x1024",quality:"medium",output_format:"webp",output_compression:82}
+   :{model,prompt,n:1,size:"1024x1024",quality:"standard",response_format:"b64_json"}),
+  signal:AbortSignal.timeout(timeout)
  });
  const body=await res.json().catch(()=>null);
- if(!res.ok){
-  console.error("service image generation",res.status,body?.error?.message);
-  throw Object.assign(new Error("Não foi possível gerar a foto agora. Tente de novo ou envie uma imagem."),{status:502});
+ return {res,body,type:gpt?"image/webp":"image/png"};
+}
+
+async function generateImage(service,tenantName){
+ const key=process.env.OPENAI_API_KEY;
+ if(!key)throw Object.assign(new Error("A criação de fotos com IA ainda não foi ativada: falta a chave OPENAI_API_KEY na Vercel. Enquanto isso, envie uma foto sua."),{status:503});
+ const prompt=imagePrompt(service,tenantName),started=Date.now();
+ // Se o modelo principal não estiver liberado para a conta (ex.: organização
+ // não verificada), tenta o DALL·E 3 antes de desistir.
+ const models=[...new Set([IMAGE_MODEL,"dall-e-3"])];
+ let last=null;
+ for(const model of models){
+  const left=55000-(Date.now()-started);
+  if(left<20000)break;
+  let out;
+  try{out=await requestImage(key,model,prompt,left)}catch(err){
+   console.error("service image generation",model,err?.name||err);
+   throw Object.assign(new Error("A criação da foto demorou demais. Tente de novo ou envie uma imagem."),{status:504});
+  }
+  const {res,body,type}=out;
+  if(res.ok){
+   const b64=body?.data?.[0]?.b64_json;
+   if(!b64)throw Object.assign(new Error("A IA não devolveu a imagem. Tente de novo."),{status:502});
+   return {bytes:Buffer.from(b64,"base64"),type};
+  }
+  console.error("service image generation",model,res.status,body?.error?.message);
+  last={status:res.status,message:body?.error?.message};
+  if(![400,403,404].includes(res.status))break;
  }
- const b64=body?.data?.[0]?.b64_json;
- if(!b64)throw Object.assign(new Error("A IA não devolveu a imagem. Tente de novo."),{status:502});
- return {bytes:Buffer.from(b64,"base64"),type:"image/webp"};
+ throw Object.assign(new Error(openAiError(last?.status,last?.message)),{status:502});
 }
 
 export async function POST(request){

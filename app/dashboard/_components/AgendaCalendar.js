@@ -103,8 +103,10 @@ export default function AgendaCalendar({tenantId,barbers,money}){
 
  const events=useMemo(()=>rows.filter(x=>barber==="all"||x.barber_id===barber).map(x=>{const s=new Date(x.starts_at),e=x.ends_at?new Date(x.ends_at):null;return {...x,start:s,end:e&&e>s?e:new Date(s.getTime()+30*60000)}}),[rows,barber]);
  // Total do topo: só o que está no período mostrado (no mês, só os dias do próprio mês).
+ // Faltas não entram na conta nem no valor previsto; aparecem à parte.
  const inMonth=events.filter(e=>e.start>=start&&e.start<end&&(view!=="month"||e.start.getMonth()===anchor.getMonth()));
- const total=inMonth.reduce((s,x)=>s+Number(x.price_cents||0),0);
+ const active=inMonth.filter(e=>e.status!=="no_show"),noShows=inMonth.length-active.length;
+ const total=active.reduce((s,x)=>s+Number(x.price_cents||0),0);
  const barberName=id=>barbers.find(b=>b.id===id)?.name;
  function chooseView(v){setView(v);try{localStorage.setItem(VIEW_KEY,v)}catch{}}
  function move(n){setAnchor(a=>view==="day"?addDays(a,n):view==="week"?addDays(a,7*n):new Date(a.getFullYear(),a.getMonth()+n,1))}
@@ -112,7 +114,7 @@ export default function AgendaCalendar({tenantId,barbers,money}){
 
  return <section className="box week-calendar">
   <div className="wk-head">
-   <div><h2>{titleOf(view,anchor,[start,end])}</h2><p>{inMonth.length} {inMonth.length===1?"horário":"horários"} · {money(total)} previstos</p></div>
+   <div><h2>{titleOf(view,anchor,[start,end])}</h2><p>{active.length} {active.length===1?"horário":"horários"} · {money(total)} previstos{noShows>0&&<> · <span className="wk-noshow">{noShows} {noShows===1?"falta":"faltas"}</span></>}</p></div>
    <div className="seg" role="tablist" aria-label="Visão da agenda" style={{"--i":viewIndex}}>
     {VIEWS.map(([v,label])=><button type="button" role="tab" key={v} aria-selected={view===v} className={view===v?"on":""} onClick={()=>chooseView(v)}>{label}</button>)}
    </div>

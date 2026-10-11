@@ -1,9 +1,12 @@
 "use client";
 import {useEffect,useMemo,useRef,useState} from "react";
 import {useParams} from "next/navigation";
-import {ArrowLeft,ArrowRight,CalendarDays,Check,ChevronLeft,ChevronRight,Clock,Instagram,MapPin,MessageCircle,ShieldCheck,Store} from "lucide-react";
+import {ArrowLeft,ArrowRight,CalendarDays,Check,ChevronLeft,ChevronRight,Clock,Instagram,MapPin,MessageCircle,Moon,ShieldCheck,Store} from "lucide-react";
 import {supabase} from "../../../lib/supabase";
 import ServiceArt from "../../_components/ServiceArt";
+import PhoneInput from "../../_components/PhoneInput";
+import {useTheme,IosSwitch} from "../../_components/ThemeSwitch";
+import {validPhone} from "../../../lib/phone";
 
 const contactNumber=v=>{const n=String(v||"").replace(/\D/g,"");return n.length===10||n.length===11?"55"+n:n};
 const money=v=>(Number(v||0)/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
@@ -24,7 +27,7 @@ const STEPS=["Serviço","Profissional","Horário","Confirmação"];
 const doesAll=(links,barberId,ids)=>ids.every(sid=>(links||[]).some(x=>x.barber_id===barberId&&x.service_id===sid));
 
 function Avatar({barber,selected}){
- return <span className="bk-avatar">{barber.photo_url?<img src={barber.photo_url} alt=""/>:initials(barber.name)}{selected&&<i><Check/></i>}</span>;
+ return <span className="bk-avatar">{barber.photo_url?<img src={barber.photo_url} alt="" loading="lazy"/>:initials(barber.name)}{selected&&<i><Check/></i>}</span>;
 }
 
 function Calendar({month,setMonth,selected,onSelect,availability}){
@@ -53,6 +56,7 @@ export default function PublicBooking(){
  const [sending,setSending]=useState(false),[done,setDone]=useState(null);
  const [instagram,setInstagram]=useState({items:[],username:""});
  const cardRef=useRef(null),timeRef=useRef(null);
+ const [dark,setDark]=useTheme("booking");
 
  useEffect(()=>{fetch("/api/instagram/feed?slug="+encodeURIComponent(slug)).then(r=>r.json()).then(x=>setInstagram(x)).catch(()=>{})},[slug]);
  useEffect(()=>{
@@ -103,6 +107,7 @@ export default function PublicBooking(){
 
  async function book(e){
   e.preventDefault();if(sending)return;
+  if(!validPhone(form.phone))return setError("Informe o WhatsApp completo, com DDD (ex.: 11 91234-5678).");
   setSending(true);setError("");
   const {data:confirmation,error}=await supabase.rpc("public_book_multi",{p_slug:slug,p_unit:form.unit,p_barber:form.barber,p_services:form.services,p_starts_at:form.slot,p_name:form.name,p_phone:form.phone,p_email:form.email});
   setSending(false);
@@ -115,9 +120,11 @@ export default function PublicBooking(){
  if(data?.state!=="open")return <main className="bk-state"><div><Store/><h1>{data?.name||"Agenda indisponível"}</h1><p>{data?.state==="plan_unavailable"?"Este estabelecimento usa o plano Starter, que não inclui site de agendamento on-line.":"O agendamento on-line está temporariamente indisponível."}</p></div></main>;
 
  const t=data.tenant,contact=contactNumber(t.whatsapp||t.phone),insta=instagramHandle(instagram.username||t.instagram);
- const header=<header className="bk-top"><div className="bk-brand">{t.logo_url?<img src={t.logo_url} alt=""/>:<span>{initials(t.name)}</span>}<div><strong>{t.name}</strong><small>AGENDAMENTO ONLINE</small></div></div>{contact&&<a className="bk-top-wa" href={`https://wa.me/${contact}`} target="_blank" rel="noreferrer"><MessageCircle/>WhatsApp</a>}</header>;
- // Fundo: a capa da empresa (Configurações) ou a paisagem padrão.
- const background=<div className={"bk-bg"+(t.cover_url?" custom":"")} aria-hidden="true"><img src={t.cover_url||"/booking-landscape.webp"} alt="" fetchPriority="high"/></div>;
+ const header=<header className="bk-top"><div className="bk-brand">{t.logo_url?<img src={t.logo_url} alt=""/>:<span>{initials(t.name)}</span>}<div><strong>{t.name}</strong><small>AGENDAMENTO ONLINE</small></div></div><div className="bk-top-actions">{contact&&<a className="bk-top-wa" href={`https://wa.me/${contact}`} target="_blank" rel="noreferrer" aria-label="WhatsApp"><MessageCircle/><span>WhatsApp</span></a>}<span className="bk-theme" title="Modo escuro"><Moon/><IosSwitch checked={dark} onChange={setDark} label="Modo escuro"/></span></div></header>;
+ // Fundo neutro com manchas suaves atrás do vidro fosco.
+ const background=<div className="bk-bg" aria-hidden="true"><i/><i/><i/></div>;
+ // Capa e logo da empresa (Configurações → Logo e capa).
+ const hero=<section className={"bk-hero"+(t.cover_url?" has-cover":"")}>{t.cover_url&&<div className="bk-cover"><img src={t.cover_url} alt="" fetchPriority="high"/></div>}<div className="bk-hero-body"><span className="bk-hero-logo">{t.logo_url?<img src={t.logo_url} alt=""/>:initials(t.name)}</span><div className="bk-hero-text"><h1>{t.name}</h1>{t.description&&<p>{t.description}</p>}<div className="bk-hero-tags">{t.address&&<a href={"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.address)} target="_blank" rel="noreferrer"><MapPin/>{t.address}</a>}{insta&&<a href={`https://www.instagram.com/${insta}`} target="_blank" rel="noreferrer"><Instagram/>@{insta}</a>}</div></div></div></section>;
  const footer=<footer className="bk-foot">Agendamento por <b>RupControl</b></footer>;
 
  if(done){
@@ -152,6 +159,7 @@ export default function PublicBooking(){
   {background}
   {header}
   <div className="bk-wrap">
+   {hero}
    <section className="bk-card" ref={cardRef}>
     <div className="bk-head">{view==="confirm"&&<button type="button" className="bk-back" aria-label="Voltar" onClick={()=>show("pick")}><ArrowLeft/></button>}<h1>{view==="confirm"?"Confirmar agendamento":"Novo agendamento"}</h1></div>
     <ol className="bk-steps">{STEPS.map((label,i)=><li key={label} className={i===current?"current":i<current?"done":""}><span>{i<current?<Check/>:i+1}</span>{label}</li>)}</ol>
@@ -199,7 +207,7 @@ export default function PublicBooking(){
       <div className="bk-sec-head"><h2>Seus dados</h2></div>
       <div className="bk-fields">
        <label>Nome<input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} required minLength="2" autoComplete="name" placeholder="Seu nome"/></label>
-       <label>WhatsApp<input value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} required type="tel" inputMode="tel" autoComplete="tel" placeholder="(11) 99999-9999"/></label>
+       <label>WhatsApp<PhoneInput value={form.phone} onChange={v=>setForm(f=>({...f,phone:v}))} required/></label>
        <label>E-mail (opcional)<input value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} type="email" autoComplete="email" placeholder="voce@email.com"/></label>
       </div>
      </section>
@@ -216,8 +224,7 @@ export default function PublicBooking(){
      <small>Total</small><strong>{money(totalPrice)} · {totalDuration} min</strong>
     </section>}
     <section className="bk-card bk-info">
-     <h3>{t.name}</h3>
-     {t.description&&<p>{t.description}</p>}
+     <h3>Informações</h3>
      {t.public_info&&<p>{t.public_info}</p>}
      {t.address&&<a href={"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.address)} target="_blank" rel="noreferrer"><MapPin/>{t.address}</a>}
      {contact&&<a href={`https://wa.me/${contact}`} target="_blank" rel="noreferrer"><MessageCircle/>Falar pelo WhatsApp</a>}

@@ -8,6 +8,7 @@ import {
   ChevronRight,
   CircleDollarSign,
   ClipboardList,
+  HandCoins,
   LayoutDashboard,
   LogOut,
   Briefcase,
@@ -29,6 +30,7 @@ const items = [
   { label: "Visão geral", href: "/dashboard", icon: LayoutDashboard },
   { label: "Agenda", href: "/dashboard/agenda", icon: CalendarDays },
   { label: "Clientes", href: "/dashboard/clientes", icon: Users },
+  { label: "Devedores", href: "/dashboard/devedores", icon: HandCoins },
   { label: "Equipe", href: "/dashboard/barbeiros", icon: UserRound },
   { label: "Serviços", href: "/dashboard/servicos", icon: Briefcase },
   { label: "Financeiro", href: "/dashboard/financeiro", icon: CircleDollarSign, permission: "finance" },
@@ -40,7 +42,7 @@ const items = [
   { label: "Comissões", href: "/dashboard/comissoes", icon: Percent, permission: "finance" },
   { label: "Mensalidade", href: "/dashboard/mensalidade", icon: CreditCard, ownerOnly: true },
   { label: "WhatsApp", href: "/dashboard/whatsapp", icon: MessageCircle, ownerOnly: true },
-  { label: "Site, Instagram e WhatsApp", href: "/dashboard/configuracoes", icon: Settings, ownerOnly: true },
+  { label: "Configurações", href: "/dashboard/configuracoes", icon: Settings, ownerOnly: true },
 ];
 
 const roleLabel={owner:"Proprietário",manager:"Gerente",reception:"Recepção",attendant:"Atendente",barber:"Profissional"};
@@ -63,7 +65,7 @@ export default function Sidebar({ workspace, collapsed=false, onToggle }) {
   useEffect(()=>{try{if(!sessionStorage.getItem("barbertix_sidebar_intro")){sessionStorage.setItem("barbertix_sidebar_intro","1");setIntro(true)}}catch{}},[]);
   useEffect(()=>{if(!workspaceOpen)return;const close=e=>{if(e.type==="keydown"?e.key==="Escape":!switcherRef.current?.contains(e.target))setWorkspaceOpen(false)};document.addEventListener("mousedown",close);document.addEventListener("keydown",close);return()=>{document.removeEventListener("mousedown",close);document.removeEventListener("keydown",close)}},[workspaceOpen]);
   const starter=String(workspace?.tenant?.plans?.name||"").toLowerCase()==="starter";
-  const starterRoutes=new Set(["/dashboard","/dashboard/clientes","/dashboard/barbeiros","/dashboard/servicos","/dashboard/financeiro","/dashboard/estoque","/dashboard/comandas","/dashboard/vendas","/dashboard/caixa","/dashboard/relatorios","/dashboard/comissoes","/dashboard/mensalidade"]);
+  const starterRoutes=new Set(["/dashboard","/dashboard/clientes","/dashboard/devedores","/dashboard/barbeiros","/dashboard/servicos","/dashboard/financeiro","/dashboard/estoque","/dashboard/comandas","/dashboard/vendas","/dashboard/caixa","/dashboard/relatorios","/dashboard/comissoes","/dashboard/mensalidade"]);
   async function openStaffSwitcher(){
     const opening=!workspaceOpen;setWorkspaceOpen(opening);setSelectedStaff(null);setSwitchPassword("");setSwitchError("");
     if(!opening||staffLoading||staff.length||!workspace?.tenant?.id)return;

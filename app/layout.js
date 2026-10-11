@@ -8,7 +8,10 @@ import "./corporate-glass.css";
 import "./legal.css";
 import "./finance.css";
 import "./dashboard-home.css";
+import "./rup-ui.css";
+import "./theme-dark.css";
 import GlobalNotice from "./_components/GlobalNotice";
+import {themeBootScript} from "../lib/theme";
 
 export const metadata={
  title:"Ruptix | RupControl",
@@ -25,5 +28,5 @@ export const metadata={
 export const viewport={themeColor:"#dadadd"};
 
 export default function RootLayout({children}){
- return <html lang="pt-BR"><body>{children}<GlobalNotice/></body></html>
+ return <html lang="pt-BR" suppressHydrationWarning><head><script dangerouslySetInnerHTML={{__html:themeBootScript}}/></head><body>{children}<GlobalNotice/></body></html>
 }
