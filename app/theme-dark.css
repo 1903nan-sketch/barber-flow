@@ -1,0 +1,242 @@
+/* Modo escuro do painel (chave na tela inicial). Ativado por <html data-theme="dark">.
+   Fica por último para vencer as camadas claras antigas. */
+html[data-theme=dark]{color-scheme:dark;background:#0e0f11}
+html[data-theme=dark] body{background:#0e0f11}
+html[data-theme=dark] :is(.center-state,.bt-loading){background:linear-gradient(135deg,#17181b,#0c0d0f)!important;color:#a1a1a8!important}
+
+html[data-theme=dark] .dashboard-shell{
+ --c-bg:#0e0f11;--c-panel:rgba(34,35,40,.72);--c-panel-strong:rgba(30,31,36,.96);
+ --c-line:rgba(255,255,255,.08);--c-line-strong:rgba(255,255,255,.14);
+ --c-text:#f1f1f3;--c-muted:#a2a3ab;--c-ink:#f1f1f3;--c-accent:#ff5a52;--c-accent-soft:rgba(255,90,82,.16);
+ --c-shadow:0 1px 2px rgba(0,0,0,.3),0 12px 32px rgba(0,0,0,.35);--c-shadow-hover:0 2px 6px rgba(0,0,0,.35),0 18px 44px rgba(0,0,0,.45);
+ --text:#f1f1f3!important;--muted:#a2a3ab!important;--line:rgba(255,255,255,.1)!important;--surface:#1c1d21!important;--bg:#0e0f11!important;
+ background:
+  radial-gradient(900px 620px at 78% 12%,rgba(80,82,96,.28),transparent 62%),
+  radial-gradient(760px 560px at 10% 95%,rgba(70,40,44,.32),transparent 60%),
+  linear-gradient(135deg,#141518,#0b0c0e)!important;
+ background-attachment:fixed!important;color:var(--c-text)!important;
+}
+
+/* Textos */
+html[data-theme=dark] .dashboard-shell :is(h1,h2,h3,h4,strong,b,label,legend,th,td,dt,dd){color:var(--c-text)!important}
+html[data-theme=dark] .dashboard-shell :is(p,small,.topbar-copy,.empty,.form-hint,figcaption){color:var(--c-muted)!important}
+html[data-theme=dark] .dashboard-shell .content{color:var(--c-text)!important}
+html[data-theme=dark] .dashboard-shell svg{color:inherit}
+
+/* Menu lateral */
+html[data-theme=dark] .dashboard-shell .sidebar{background:linear-gradient(180deg,rgba(32,33,38,.86),rgba(22,23,27,.8))!important;border:1px solid rgba(255,255,255,.07)!important;color:var(--c-text)!important}
+html[data-theme=dark] .dashboard-shell .sidebar nav a{color:#c9c9ce!important}
+html[data-theme=dark] .dashboard-shell .sidebar nav a svg{color:#8e8e96!important}
+html[data-theme=dark] .dashboard-shell .sidebar nav a:hover{background:rgba(255,255,255,.06)!important;color:#fff!important}
+html[data-theme=dark] .dashboard-shell .sidebar nav a.active{background:rgba(255,255,255,.1)!important;color:#fff!important;box-shadow:inset 3px 0 0 var(--c-accent)!important}
+html[data-theme=dark] .dashboard-shell .sidebar nav a.active svg{color:var(--c-accent)!important}
+html[data-theme=dark] .dashboard-shell :is(.workspace-card,.profile-card,.upgrade-card){background:rgba(255,255,255,.05)!important;border:1px solid var(--c-line)!important;color:var(--c-text)!important}
+html[data-theme=dark] .dashboard-shell .sidebar-toggle{background:rgba(255,255,255,.08)!important;color:#d6d6db!important;border-color:var(--c-line)!important}
+html[data-theme=dark] .dashboard-shell .brand{background:linear-gradient(90deg,#f1f1f3 0%,#f1f1f3 40%,#ff7a72 50%,#f1f1f3 60%,#f1f1f3 100%)!important;background-size:250% 100%!important;-webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important}
+html[data-theme=dark] .dashboard-shell .workspace-menu{background:#1d1e22!important;border-color:var(--c-line-strong)!important}
+html[data-theme=dark] .dashboard-shell .workspace-menu :is(button,input){color:var(--c-text)!important}
+html[data-theme=dark] .dashboard-shell .sidebar.collapsed .profile-card:hover{background:rgba(255,255,255,.06)!important}
+
+/* Painéis */
+html[data-theme=dark] .dashboard-shell :is(.box,.stat,.metric-card,.inventory-card,.social-card,.monthly-card,.agenda-panel,.premium-panel,.pix-box,.network-box,.upload-box,.dash-welcome,.report-cards>*,.finance-cards>*,.fin-kpi,.today-earnings,.week-calendar,.report-filter,.report-filters,.fin-toolbar,.site-status){
+ background:var(--c-panel)!important;border:1px solid rgba(255,255,255,.07)!important;box-shadow:var(--c-shadow)!important;color:var(--c-text)!important}
+html[data-theme=dark] .dashboard-shell :is(.box,.stat):hover{border-color:rgba(255,255,255,.16)!important}
+html[data-theme=dark] .dashboard-shell .topbar{border-color:var(--c-line)!important}
+
+/* Listas e linhas */
+html[data-theme=dark] .dashboard-shell :is(.data-list>article,.appointment,.ranking-list>div,.debt-row,.client-payment-history>div,.quick-actions a,.fin-session,.fin-bar,.commission-card,.inventory-history>article){background:rgba(255,255,255,.035)!important;border-color:var(--c-line)!important;color:var(--c-text)!important}
+html[data-theme=dark] .dashboard-shell :is(.data-list>article:hover,.quick-actions a:hover){background:rgba(255,255,255,.06)!important}
+html[data-theme=dark] .dashboard-shell :is(.pill,.agenda-count,.fin-pill){background:rgba(255,255,255,.08)!important;color:#d8d8dd!important;border-color:var(--c-line)!important}
+html[data-theme=dark] .dashboard-shell .pill.confirmed{background:rgba(52,199,89,.16)!important;color:#6ee28c!important}
+
+/* Campos */
+html[data-theme=dark] :is(.dashboard-shell .content,.checkout-modal,.quick-sale-modal,.inventory-modal,.reschedule-modal,.client-edit-modal,.client-account-modal,.workspace-menu) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea){
+ background:rgba(255,255,255,.06)!important;color:var(--c-text,#f1f1f3)!important;-webkit-text-fill-color:var(--c-text,#f1f1f3)!important;border:1px solid rgba(255,255,255,.14)!important}
+html[data-theme=dark] :is(.dashboard-shell,.checkout-backdrop) select option{background:#1d1e22;color:#f1f1f3}
+html[data-theme=dark] .dashboard-shell .content :is(input,select,textarea):focus{border-color:rgba(255,255,255,.4)!important;box-shadow:0 0 0 4px rgba(255,255,255,.07)!important}
+html[data-theme=dark] :is(.dashboard-shell,.checkout-backdrop) :is(input,textarea)::placeholder{color:#7d7e86!important;-webkit-text-fill-color:#7d7e86!important}
+html[data-theme=dark] .dashboard-shell .search-field{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.14)!important;color:#a2a3ab!important}
+html[data-theme=dark] .dashboard-shell .content .search-field input{background:transparent!important;border:0!important}
+html[data-theme=dark] :is(.dashboard-shell,.checkout-backdrop) input[type=date]::-webkit-calendar-picker-indicator,html[data-theme=dark] :is(.dashboard-shell,.checkout-backdrop) input[type=time]::-webkit-calendar-picker-indicator,html[data-theme=dark] :is(.dashboard-shell,.checkout-backdrop) input[type=datetime-local]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.7)}
+
+/* Botões */
+html[data-theme=dark] .dashboard-shell :is(.primary,button.primary,a.primary),html[data-theme=dark] .checkout-backdrop .primary{background:#f1f1f3!important;color:#111214!important;border:1px solid #f1f1f3!important;box-shadow:0 8px 22px rgba(0,0,0,.4)!important}
+html[data-theme=dark] .dashboard-shell .primary *,html[data-theme=dark] .checkout-backdrop .primary *{color:#111214!important}
+html[data-theme=dark] .dashboard-shell .primary:not(:disabled):hover,html[data-theme=dark] .checkout-backdrop .primary:not(:disabled):hover{background:#fff!important}
+html[data-theme=dark] .dashboard-shell :is(.primary,button):disabled{opacity:.5}
+html[data-theme=dark] :is(.dashboard-shell,.checkout-backdrop) :is(.secondary-action,.content button:not([class]),.client-edit,.agenda-action.secondary){background:rgba(255,255,255,.07)!important;color:var(--c-text,#f1f1f3)!important;border:1px solid rgba(255,255,255,.14)!important}
+html[data-theme=dark] .dashboard-shell .sell-hero{background:radial-gradient(circle at 92% 10%,rgba(255,90,82,.18),transparent 34%),linear-gradient(120deg,#1d1e22,#2a1416)!important;border-color:rgba(255,255,255,.08)!important}
+html[data-theme=dark] .dashboard-shell .sell-hero>button{background:#f1f1f3!important}
+html[data-theme=dark] .dashboard-shell .sell-hero>button *{color:#111214!important}
+
+/* Segmentados, abas e filtros */
+html[data-theme=dark] .dashboard-shell .content :is(.fin-presets,.fin-chips>div){background:rgba(255,255,255,.05)!important;border-color:var(--c-line)!important}
+html[data-theme=dark] .dashboard-shell .content :is(.fin-presets,.fin-chips) button:not(.active){color:#c2c3c9!important;background:transparent!important}
+html[data-theme=dark] .dashboard-shell .content :is(.fin-presets,.fin-chips) button.active{background:#f1f1f3!important;color:#111214!important}
+html[data-theme=dark] .dashboard-shell .content :is(.fin-tabs button,.agenda-subnav button){background:rgba(255,255,255,.05)!important;border-color:var(--c-line)!important;color:#c2c3c9!important}
+html[data-theme=dark] .dashboard-shell .content :is(.fin-tabs button.active,.agenda-subnav button.active){background:#f1f1f3!important;color:#111214!important;border-color:#f1f1f3!important}
+html[data-theme=dark] .dashboard-shell .content .agenda-subnav button.active *{color:#111214!important}
+html[data-theme=dark] .dashboard-shell .content .fin-bar-track{background:rgba(255,255,255,.08)!important}
+html[data-theme=dark] .dashboard-shell .content .fin-bar-track i{background:linear-gradient(90deg,#8a8b93,#f1f1f3)!important}
+html[data-theme=dark] .dashboard-shell .content .fin-session-grid :is(div,.hl){background:rgba(255,255,255,.05)!important;border-color:var(--c-line)!important}
+
+/* Tabelas */
+html[data-theme=dark] .dashboard-shell :is(table,thead,tbody,tr){background:transparent!important;border-color:var(--c-line)!important}
+html[data-theme=dark] .dashboard-shell :is(th,td){border-color:var(--c-line)!important}
+html[data-theme=dark] .dashboard-shell th{color:#a2a3ab!important;background:rgba(255,255,255,.03)!important}
+html[data-theme=dark] .dashboard-shell :is(.fin-table-wrap,.sales-report-table-wrap){background:rgba(255,255,255,.02)!important;border-color:var(--c-line)!important}
+@media(max-width:900px){html[data-theme=dark] .dashboard-shell .rt-cards tr{background:rgba(255,255,255,.04)!important}}
+
+/* Modais */
+html[data-theme=dark] :is(.checkout-modal,.quick-sale-modal,.inventory-modal,.reschedule-modal,.client-edit-modal,.client-account-modal){background:rgba(28,29,33,.97)!important;border:1px solid rgba(255,255,255,.08)!important;color:#f1f1f3!important;box-shadow:0 30px 80px rgba(0,0,0,.6)!important}
+html[data-theme=dark] .checkout-backdrop{background:rgba(0,0,0,.55)!important}
+html[data-theme=dark] .checkout-backdrop :is(h1,h2,h3,strong,b,label,td,th){color:#f1f1f3!important}
+html[data-theme=dark] .checkout-backdrop :is(p,small,.eyebrow){color:#a2a3ab!important}
+html[data-theme=dark] .checkout-backdrop .eyebrow{color:#ff7a72!important}
+html[data-theme=dark] .checkout-close{background:rgba(255,255,255,.08)!important;color:#f1f1f3!important;border-color:rgba(255,255,255,.12)!important}
+html[data-theme=dark] .payment-methods button{background:rgba(255,255,255,.06)!important;color:#e6e6ea!important;border:1px solid rgba(255,255,255,.14)!important}
+html[data-theme=dark] .payment-methods button.active{background:#f1f1f3!important;color:#111214!important;border-color:#f1f1f3!important}
+html[data-theme=dark] :is(.sale-cart,.sale-cart>div,.sale-total,.client-results,.service-results,.account-warning,.reschedule-current,.reschedule-slots-wrap,.appointment-edit-summary,.client-account-summary>div,.service-photo-edit,.cash-expected,.pix-hidden-code){background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.1)!important;color:#f1f1f3!important}
+html[data-theme=dark] :is(.client-results,.service-results) button{background:transparent!important;color:#f1f1f3!important;border-color:rgba(255,255,255,.08)!important}
+html[data-theme=dark] :is(.client-results,.service-results) button:hover{background:rgba(255,255,255,.06)!important}
+html[data-theme=dark] .reschedule-slots button{background:rgba(255,255,255,.06)!important;color:#f1f1f3!important;border-color:rgba(255,255,255,.12)!important}
+html[data-theme=dark] .reschedule-slots button.selected{background:#f1f1f3!important;color:#111214!important}
+html[data-theme=dark] .qty button,html[data-theme=dark] .remove-item,html[data-theme=dark] .debt-pay button{background:rgba(255,255,255,.08)!important;color:#f1f1f3!important;border-color:rgba(255,255,255,.12)!important}
+
+/* Alertas */
+html[data-theme=dark] :is(.dashboard-shell .content,.checkout-backdrop) .form-alert.success{background:rgba(52,199,89,.12)!important;color:#7ee09a!important;border-color:rgba(52,199,89,.28)!important}
+html[data-theme=dark] :is(.dashboard-shell .content,.checkout-backdrop) .form-alert.success *{color:#7ee09a!important}
+html[data-theme=dark] :is(.dashboard-shell .content,.checkout-backdrop) .form-alert.error{background:rgba(255,69,58,.12)!important;color:#ff8a80!important;border-color:rgba(255,69,58,.3)!important}
+html[data-theme=dark] :is(.dashboard-shell .content,.checkout-backdrop) .form-alert.error *{color:#ff8a80!important}
+html[data-theme=dark] :is(.dashboard-shell .content,.checkout-backdrop) .form-alert:not(.success):not(.error){background:rgba(255,255,255,.06)!important;color:#f1f1f3!important;border-color:rgba(255,255,255,.12)!important}
+
+/* Chave iPhone no escuro */
+html[data-theme=dark] .ios-switch{background:#39393d!important}
+html[data-theme=dark] .ios-switch.on{background:#30d158!important}
+html[data-theme=dark] .dashboard-shell .home-toggles .theme-switch{border-color:rgba(255,255,255,.08)}
+
+/* Tela inicial: ganhos do dia, agenda semanal/mensal e ícones */
+html[data-theme=dark] .dashboard-shell :is(.te-methods div,.te-side div){background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.08)!important}
+html[data-theme=dark] .dashboard-shell .te-methods :is(span,svg),html[data-theme=dark] .dashboard-shell .te-side :is(span,svg){color:#a2a3ab!important}
+html[data-theme=dark] .dashboard-shell .te-label{color:#4cd07a!important}
+html[data-theme=dark] .dashboard-shell :is(.wk-btn,.wk-actions select,.booking-bell){background:rgba(255,255,255,.07)!important;color:#f1f1f3!important;border-color:rgba(255,255,255,.14)!important}
+html[data-theme=dark] .dashboard-shell .booking-bell:not(.on){color:#a2a3ab!important}
+html[data-theme=dark] .dashboard-shell .wk-new{background:#f1f1f3!important;color:#111214!important}
+html[data-theme=dark] .dashboard-shell .wk-new *{color:#111214!important}
+html[data-theme=dark] .dashboard-shell :is(.wk-scroll,.mo-grid){background:rgba(255,255,255,.02)!important;border-color:rgba(255,255,255,.08)!important}
+html[data-theme=dark] .dashboard-shell :is(.wk-corner,.wk-day-head,.wk-hours,.mo-week){background:#1b1c20!important;border-color:rgba(255,255,255,.08)!important}
+html[data-theme=dark] .dashboard-shell .wk-day-head span,html[data-theme=dark] .dashboard-shell .wk-hours span{color:#8e8f97!important}
+html[data-theme=dark] .dashboard-shell .wk-day-head.today b,html[data-theme=dark] .dashboard-shell .mo-day.today>b{color:#fff!important}
+html[data-theme=dark] .dashboard-shell .wk-col{border-color:rgba(255,255,255,.07);background:repeating-linear-gradient(180deg,transparent 0,transparent calc(var(--wk-hour) - 1px),rgba(255,255,255,.06) calc(var(--wk-hour) - 1px),rgba(255,255,255,.06) var(--wk-hour))}
+html[data-theme=dark] .dashboard-shell .wk-col.today{background-color:rgba(255,90,82,.07)}
+html[data-theme=dark] .dashboard-shell .wk-event :is(strong,b,small,span,em){color:inherit!important}
+html[data-theme=dark] .dashboard-shell .wk-yellow{background:rgba(255,204,0,.15);border-color:rgba(255,204,0,.45);color:#ffd95e}
+html[data-theme=dark] .dashboard-shell .wk-green{background:rgba(52,199,89,.15);border-color:rgba(52,199,89,.45);color:#7ee09a}
+html[data-theme=dark] .dashboard-shell .wk-blue{background:rgba(10,132,255,.17);border-color:rgba(10,132,255,.5);color:#8ec2ff}
+html[data-theme=dark] .dashboard-shell .wk-gray{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#d0d1d6}
+html[data-theme=dark] .dashboard-shell .wk-red{background:rgba(255,69,58,.15);border-color:rgba(255,69,58,.45);color:#ff8a80}
+html[data-theme=dark] .dashboard-shell .wk-legend :is(span,i){border-color:rgba(255,255,255,.3)}
+html[data-theme=dark] .dashboard-shell .mo-day{border-color:rgba(255,255,255,.07)!important;background:transparent!important}
+html[data-theme=dark] .dashboard-shell .mo-day:hover{background:rgba(255,255,255,.04)!important}
+html[data-theme=dark] .dashboard-shell .mo-day.out>b{color:#55575f!important}
+html[data-theme=dark] .dashboard-shell .mo-chip:not(:is(.wk-yellow,.wk-green,.wk-blue,.wk-gray,.wk-red)){color:#d0d1d6!important}
+html[data-theme=dark] .booking-toast{background:rgba(30,31,36,.95)!important;border-color:rgba(255,255,255,.1)!important}
+html[data-theme=dark] .booking-toast :is(strong,b){color:#f1f1f3!important}
+html[data-theme=dark] .booking-toast small{color:#a2a3ab!important}
+html[data-theme=dark] .dashboard-shell :is(.dash-date span,.stat>span,.fin-mini span,.monthly-due span,.sales-report-footer){color:#a2a3ab!important}
+html[data-theme=dark] .dashboard-shell .fin-bar-head span{color:#e3e3e8!important}
+html[data-theme=dark] .dashboard-shell :is(.stat-icon,.service-icon,.quick-icon,.client-avatar){background:rgba(255,255,255,.08)!important;color:#d6d7dc!important}
+html[data-theme=dark] .dashboard-shell :is(.stat-icon,.quick-icon).purple{color:#c4a8ff!important;background:rgba(175,130,255,.14)!important}
+html[data-theme=dark] .dashboard-shell :is(.stat-icon,.quick-icon).green{color:#6ee28c!important;background:rgba(52,199,89,.14)!important}
+html[data-theme=dark] .dashboard-shell :is(.stat-icon,.quick-icon).blue{color:#8ec2ff!important;background:rgba(10,132,255,.16)!important}
+html[data-theme=dark] .dashboard-shell :is(.stat-icon,.quick-icon).orange{color:#ffb340!important;background:rgba(255,159,10,.15)!important}
+html[data-theme=dark] .dashboard-shell .service-icon{color:#8ec2ff!important}
+html[data-theme=dark] .dashboard-shell .service-icon.cash-out{color:#ff8a80!important;background:rgba(255,69,58,.14)!important}
+html[data-theme=dark] .dashboard-shell .service-icon.cash-in{color:#6ee28c!important;background:rgba(52,199,89,.14)!important}
+html[data-theme=dark] .dashboard-shell .ruptix-hero-brand strong{color:#d6d7dc!important}
+
+/* Agenda */
+html[data-theme=dark] .dashboard-shell .agenda-time-block{background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.1)!important}
+html[data-theme=dark] .dashboard-shell .agenda-time-block>span{color:#8ec2ff!important}
+html[data-theme=dark] .dashboard-shell .agenda-time-block>small{color:#a2a3ab!important}
+html[data-theme=dark] .dashboard-shell .agenda-meta-grid>span{background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.1)!important;color:#c9cad0!important}
+html[data-theme=dark] .dashboard-shell .agenda-meta-grid .agenda-price{color:#f1f1f3!important}
+html[data-theme=dark] .dashboard-shell .agenda-status{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.14)!important;color:#d0d1d6!important}
+html[data-theme=dark] .dashboard-shell .agenda-status.scheduled,html[data-theme=dark] .dashboard-shell .agenda-status.in_service{background:rgba(10,132,255,.16)!important;color:#8ec2ff!important;border-color:rgba(10,132,255,.3)!important}
+html[data-theme=dark] .dashboard-shell .agenda-status.present{background:rgba(52,199,89,.15)!important;color:#6ee28c!important;border-color:rgba(52,199,89,.3)!important}
+html[data-theme=dark] .dashboard-shell :is(.agenda-status.cancelled,.agenda-status.no_show){background:rgba(255,69,58,.15)!important;color:#ff8a80!important;border-color:rgba(255,69,58,.3)!important}
+html[data-theme=dark] .dashboard-shell .agenda-card-actions .agenda-action.danger{background:rgba(255,69,58,.12)!important;border-color:rgba(255,69,58,.3)!important;color:#ff8a80!important}
+html[data-theme=dark] .dashboard-shell .agenda-card-actions .agenda-action.warning{background:rgba(255,159,10,.12)!important;border-color:rgba(255,159,10,.3)!important;color:#ffb340!important}
+html[data-theme=dark] .dashboard-shell .agenda-card-actions .agenda-action.success{background:rgba(52,199,89,.12)!important;border-color:rgba(52,199,89,.3)!important;color:#6ee28c!important}
+html[data-theme=dark] .dashboard-shell .agenda-card-actions .agenda-action.secondary{color:#e3e3e8!important}
+html[data-theme=dark] .dashboard-shell .agenda-card-actions .agenda-action :is(svg){color:inherit!important}
+html[data-theme=dark] .dashboard-shell .agenda-done{background:rgba(255,255,255,.06)!important;color:#c9cad0!important;border-color:rgba(255,255,255,.1)!important}
+
+/* Diversos */
+html[data-theme=dark] .dashboard-shell .client-debt{background:rgba(255,159,10,.16)!important;color:#ffb340!important}
+html[data-theme=dark] .dashboard-shell .commission-head{background:transparent!important}
+html[data-theme=dark] .dashboard-shell .commission-head:hover{background:rgba(255,255,255,.04)!important}
+html[data-theme=dark] .dashboard-shell .commission-total strong{color:#4cd07a!important}
+html[data-theme=dark] .dashboard-shell .sales-report-summary>div{background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.1)!important}
+html[data-theme=dark] .dashboard-shell .sales-report-summary small{color:#a2a3ab!important}
+html[data-theme=dark] .dashboard-shell .sales-report-summary strong{color:#f1f1f3!important}
+html[data-theme=dark] .dashboard-shell .sales-report-head span{color:#8ec2ff!important}
+html[data-theme=dark] .dashboard-shell :is(.cfg-brand,.cfg-net,.sch-week,.sch-blocks>div,.wa-steps li,.rates-chip){background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.1)!important}
+html[data-theme=dark] .dashboard-shell .cfg-cover:not(.has){background:linear-gradient(135deg,#25262b,#1a1b1f)}
+html[data-theme=dark] .dashboard-shell .cfg-cover-empty{color:#8e8f97}
+html[data-theme=dark] .dashboard-shell .cfg-logo{border-color:#1e1f23;background:#f1f1f3;color:#111}
+html[data-theme=dark] .dashboard-shell .cfg-logo span{color:#111!important}
+html[data-theme=dark] .dashboard-shell .cfg-logo i{border-color:#1e1f23}
+html[data-theme=dark] .dashboard-shell :is(.cfg-site-main a,.sch-link){color:#6ea8ff!important}
+html[data-theme=dark] .dashboard-shell .wa-qr-code{background:#fff}
+html[data-theme=dark] .dashboard-shell .wa-hero{border-color:rgba(255,255,255,.07)}
+html[data-theme=dark] .dashboard-shell .wa-card{border-color:rgba(255,255,255,.07)}
+html[data-theme=dark] .dashboard-shell .wa-hero.wait .wa-status{color:#ffb340}
+html[data-theme=dark] .dashboard-shell .wa-hero.on .wa-status{color:#4cd07a}
+html[data-theme=dark] .dashboard-shell .cfg-card{border-color:rgba(255,255,255,.07)}
+html[data-theme=dark] .dashboard-shell .cfg-net-title em{background:rgba(52,199,89,.15);color:#6ee28c!important}
+html[data-theme=dark] .dashboard-shell .cfg-net-title em svg{color:#6ee28c}
+html[data-theme=dark] .dashboard-shell .cfg-site-dot.on{background:rgba(52,199,89,.15);color:#4cd07a}
+html[data-theme=dark] .dashboard-shell .debt-age.warn{background:rgba(255,159,10,.15);color:#ffb340!important}
+html[data-theme=dark] .dashboard-shell .debt-age.late{background:rgba(255,69,58,.15);color:#ff8a80!important}
+html[data-theme=dark] .dashboard-shell .team-avatar{background:linear-gradient(135deg,#e5534b,#b71c1c)}
+html[data-theme=dark] :is(.dashboard-shell,.checkout-backdrop) input:is([type=checkbox],[type=radio]){accent-color:#30d158;color-scheme:dark}
+html[data-theme=dark] .dashboard-shell fieldset.permissions label{background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.1)!important}
+html[data-theme=dark] .dashboard-shell .fin-mini .link{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.12)!important}
+html[data-theme=dark] .dashboard-shell .pill.open,html[data-theme=dark] .dashboard-shell .fin-pill.open{color:#8ec2ff!important}
+html[data-theme=dark] .dashboard-shell .fin-pill.up{color:#6ee28c!important}
+html[data-theme=dark] .dashboard-shell .fin-pill.down{color:#ff8a80!important}
+html[data-theme=dark] .dashboard-shell .fin-kpi.down strong,html[data-theme=dark] .dashboard-shell td.neg{color:#ff8a80!important}
+html[data-theme=dark] .dashboard-shell .fin-kpi.up strong,html[data-theme=dark] .dashboard-shell td.pos{color:#6ee28c!important}
+html[data-theme=dark] :is(.sale-total span,.payment-title,.quick-client-phone small){color:#a2a3ab!important}
+html[data-theme=dark] .quick-client-phone small b{color:#f1f1f3!important}
+html[data-theme=dark] .client-search-wrap{background:transparent!important}
+html[data-theme=dark] :is(.dashboard-shell .content,.checkout-modal) .search-field :is(input:not([type=checkbox]):not([type=radio]):not([type=range])){background:transparent!important;border:0!important;box-shadow:none!important}
+html[data-theme=dark] .dashboard-shell .ranking-list span{color:#c9cad0!important}
+html[data-theme=dark] .dashboard-shell .ranking-list span small{color:#8e8f97!important}
+html[data-theme=dark] .dashboard-shell .monthly-plan{background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.08)!important}
+html[data-theme=dark] .dashboard-shell :is(.monthly-payment,.monthly-pix){background:transparent!important}
+
+/* Segunda revisão: barras de abas, textos secundários e modais */
+html[data-theme=dark] .dashboard-shell .content .agenda-subnav{background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.08)!important;box-shadow:none!important}
+html[data-theme=dark] .dashboard-shell .content .agenda-subnav button:not(.active){background:transparent!important;border-color:transparent!important;color:#c2c3c9!important}
+html[data-theme=dark] .dashboard-shell .content .agenda-subnav button:not(.active) *{color:#c2c3c9!important}
+html[data-theme=dark] .dashboard-shell .content .agenda-subnav button:not(.active):hover{background:rgba(255,255,255,.06)!important}
+html[data-theme=dark] .dashboard-shell .agenda-kicker{color:#6ea8ff!important}
+html[data-theme=dark] .dashboard-shell .wk-day-head.today b,html[data-theme=dark] .dashboard-shell .mo-day.today>b{background:#d93a32!important}
+html[data-theme=dark] .dashboard-shell :is(.fin-period,.fin-kpi span,.fin-session header span,.fin-session footer,.fin-session footer span,.fin-session li span,.inventory-history article span,.inventory-history small){color:#a8a9b0!important}
+html[data-theme=dark] .dashboard-shell .fin-session header b{color:#f1f1f3!important}
+html[data-theme=dark] .dashboard-shell .fin-session li{background:rgba(255,255,255,.04)!important}
+html[data-theme=dark] :is(.client-account-summary,.client-account-summary>div){background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.1)!important}
+html[data-theme=dark] .client-account-summary span{color:#a2a3ab!important}
+html[data-theme=dark] .client-account-summary strong{color:#f1f1f3!important}
+html[data-theme=dark] .client-account-summary svg{color:#8ec2ff!important}
+html[data-theme=dark] .appointment-edit-summary span{background:rgba(255,255,255,.07)!important;color:#d6d7dc!important}
+html[data-theme=dark] :is(.reschedule-empty,.reschedule-loading,.reschedule-hint,.reschedule-slots-head small){color:#a8a9b0!important}
+html[data-theme=dark] .dashboard-shell input:is([type=checkbox],[type=radio]){background-color:transparent!important}
+html[data-theme=dark] .dashboard-shell .inventory-low{color:#ffb340!important}
+html[data-theme=dark] .dashboard-shell .empty-state svg{color:#7c7d85!important}
+html[data-theme=dark] .dashboard-shell .staff-photo-upload{background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.1)!important}
+html[data-theme=dark] .dashboard-shell .staff-photo-upload :is(strong,b){color:#f1f1f3!important}
+html[data-theme=dark] .dashboard-shell .staff-photo-upload p{color:#a2a3ab!important}
+html[data-theme=dark] .dashboard-shell .staff-photo-preview{background:rgba(255,255,255,.08)!important;color:#c9cad0!important}

@@ -56,19 +56,24 @@ export default function BookingBell({workspace}){
    const fresh=data.filter(x=>x.status!=="cancelled"&&x.created_by!==userId);
    if(!fresh.length)return;
    const ids=k=>[...new Set(fresh.map(x=>x[k]).filter(Boolean))];
-   const [c,s]=await Promise.all([
-    ids("client_id").length?supabase.from("clients").select("id,name").in("id",ids("client_id")):{data:[]},
-    ids("service_id").length?supabase.from("services").select("id,name").in("id",ids("service_id")):{data:[]}
+   const clientIds=ids("client_id");
+   const [c,s,d1,d2]=await Promise.all([
+    clientIds.length?supabase.from("clients").select("id,name").in("id",clientIds):{data:[]},
+    ids("service_id").length?supabase.from("services").select("id,name").in("id",ids("service_id")):{data:[]},
+    // Cliente com conta em aberto: o aviso já mostra quanto ele deve.
+    clientIds.length?supabase.from("appointment_payments").select("client_id,amount_cents").eq("tenant_id",tenantId).eq("status","open").in("client_id",clientIds):{data:[]},
+    clientIds.length?supabase.from("quick_sales").select("client_id,amount_cents").eq("tenant_id",tenantId).eq("status","open").in("client_id",clientIds):{data:[]}
    ]);
    if(!alive)return;
-   const items=fresh.map(x=>({id:x.id,client:c.data?.find(y=>y.id===x.client_id)?.name||"Cliente",service:s.data?.find(y=>y.id===x.service_id)?.name||"Atendimento",when:when(x.starts_at)}));
+   const owes={};for(const x of [...(d1.data||[]),...(d2.data||[])])owes[x.client_id]=(owes[x.client_id]||0)+Number(x.amount_cents||0);
+   const items=fresh.map(x=>({id:x.id,client:c.data?.find(y=>y.id===x.client_id)?.name||"Cliente",service:s.data?.find(y=>y.id===x.service_id)?.name||"Atendimento",when:when(x.starts_at),debt:owes[x.client_id]||0}));
    setToasts(t=>[...items,...t].slice(0,3));
    window.dispatchEvent(new CustomEvent("rupcontrol:new-booking"));
    let on=true;try{on=localStorage.getItem(SOUND_KEY)!=="0"}catch{}
    if(on){
     chime();
     if(document.hidden&&"Notification" in window&&Notification.permission==="granted"){
-     for(const x of items)new Notification("Novo agendamento",{body:`${x.client} · ${x.service} · ${x.when}`,tag:"booking-"+x.id});
+     for(const x of items)new Notification("Novo agendamento",{body:`${x.client} · ${x.service} · ${x.when}${x.debt?" · cliente com conta em aberto":""}`,tag:"booking-"+x.id});
     }
    }
   }
@@ -90,7 +95,7 @@ export default function BookingBell({workspace}){
   {toasts.length>0&&<div className="booking-toasts" role="status" aria-live="polite">
    {toasts.map(x=><div key={x.id} className="booking-toast">
     <span className="booking-toast-icon"><CalendarCheck size={18}/></span>
-    <div><strong>Novo agendamento</strong><small>{x.client} · {x.service}</small><small>{x.when}</small><a href="/dashboard/agenda">Ver na agenda</a></div>
+    <div><strong>Novo agendamento</strong><small>{x.client} · {x.service}</small><small>{x.when}</small>{x.debt>0&&<span className="debt-badge">Deve {(x.debt/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</span>}<a href="/dashboard/agenda">Ver na agenda</a></div>
     <button type="button" aria-label="Fechar" onClick={()=>setToasts(v=>v.filter(y=>y.id!==x.id))}><X size={15}/></button>
    </div>)}
   </div>}
